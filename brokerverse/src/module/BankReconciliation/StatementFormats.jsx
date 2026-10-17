@@ -146,7 +146,7 @@ const StatementFormats = () => {
                 <div className="br-preview-summary"><span>{t("bankReconciliation.lines")}: <b>{test.result.lineCount}</b></span><span>{t("bankReconciliation.skippedRows")}: <b>{test.result.skippedRows}</b></span>
                   <span>{t("bankReconciliation.errors")}: <b>{test.result.errors.length}</b></span></div>
                 {test.result.errors.length > 0 && <div className="br-notice br-notice-bad">{test.result.errors.slice(0, 6).map((e) => <div key={e.row}>{t("bankReconciliation.row")} {e.row}: {e.message}</div>)}</div>}
-                <DataTable value={test.result.lines} size="small" scrollable scrollHeight="320px" dataKey="lineNo">
+                <DataTable value={test.result.lines} size="small" scrollable dataKey="lineNo">
                   <Column header={t("bankReconciliation.date")} body={(l) => date(l.date)} />
                   <Column field="description" header={t("bankReconciliation.description")} />
                   <Column field="reference" header={t("bankReconciliation.reference")} />

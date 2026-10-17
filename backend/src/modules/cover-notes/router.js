@@ -1,5 +1,5 @@
 /**
- * Cover notes (Operations > Cover Notes): issue from an accepted quotation or a placement slip, print, e-mail to the
+ * Cover notes (Policy Servicing > Cover Notes): issue from an accepted quotation or a placement slip, print, e-mail to the
  * client, cancel; the policy is linked and the cover note superseded when the policy is issued. read:policies to view,
  * write:policies to issue, send and cancel.
  */
@@ -21,7 +21,7 @@ import { coverNotePdf } from './print.js';
 const { router, define } = moduleRouter('Cover Notes', '/cover-notes');
 const read = [requireAuth, requirePermission('read:policies')];
 const write = [requireAuth, requirePermission('write:policies')];
-const S = 'Operations > Cover Notes';
+const S = 'Policy Servicing > Cover Notes';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const example = { id: 'cvn_1', coverNoteNumber: 'CVN-2026-00001', source: 'quote', quoteNumber: 'QT-2026-00012', insuredName: 'Maria Santos', insurerName: 'Malayan Insurance Co., Inc.',
   coverFrom: '2026-10-04', coverTo: '2026-11-03', validityDays: 30, status: 'active', daysLeft: 30, policyNumber: null };

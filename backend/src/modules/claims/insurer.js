@@ -135,14 +135,17 @@ const alert = (userId, title, message, claimId) => notify({ userId, type: 'alert
  * Job claim-service-levels (end of the working day): alert the handler (and the manager of the handler) once of
  *   - a claim registered and not submitted to the insurer by the end of its day (FNOL service level, CLAIM-08)
  *   - an authorisation code not received claims.authorisation_days working days after the submission (M15 CLM-AUTH)
+ *   - a submitted claim without the insurer's acknowledgement or advice at the end of the claims.insurer_ack_days-th
+ *     working day after the submission (claims.insurer_ack_alert; M15 CLM-INS-ACK)
  *   - a communication whose follow-up date has passed
  */
-export async function serviceLevels() {
-  const now = await today();
+export async function serviceLevels({ on = null } = {}) {
+  // on: the run date (YYYY-MM-DD), the business date by default
+  const now = on || await today();
   const cal = await workingCalendar(addDays(now, -30), now);
   if (!cal.isWorking(now)) return { skipped: `${now} is not a working day` };
   const open = await openStatuses();
-  const out = { fnol: 0, authorisation: 0, followUps: 0 };
+  const out = { fnol: 0, authorisation: 0, insurerAck: 0, followUps: 0 };
   const recipients = async (handler) => {
     if (!handler) return [];
     const m = await one("SELECT m.id FROM users u JOIN users m ON m.id = u.reporting_to WHERE u.id = $1 AND m.status = 'active'", [handler]);
@@ -165,6 +168,22 @@ export async function serviceLevels() {
       for (const u of await recipients(c.handler_user_id)) await alert(u, `Authorisation code overdue: claim ${c.claim_number}`, `No authorisation code from the insurer ${days} working days after the submission on ${await shownDate(submitted)}; follow up the insurer`, c.id);
       await query('UPDATE claims SET authorisation_alerted_at = now() WHERE id = $1', [c.id]);
       out.authorisation += 1;
+    }
+  }
+  // the insurer's acknowledgement of a submitted claim (CLAIM-08, M15 CLM-INS-ACK): no advice recorded by the end of the
+  // claims.insurer_ack_days-th working day after the submission (0: the end of the submission day)
+  if (await getSetting('claims.insurer_ack_alert', true)) {
+    const ackDays = Math.max(0, Number(await getSetting('claims.insurer_ack_days', 0)) || 0);
+    const unanswered = await many(`SELECT id, claim_number, handler_user_id, submitted_to_insurer_at FROM claims WHERE status = ANY($1) AND submitted_to_insurer_at IS NOT NULL
+      AND insurer_advice_at IS NULL AND COALESCE(insurer_claim_number, '') = '' AND insurer_ack_alerted_at IS NULL`, [open]);
+    for (const c of unanswered) {
+      const submitted = await businessDate(c.submitted_to_insurer_at);
+      if (submitted > now || cal.between(submitted, now) < ackDays) continue;
+      for (const u of await recipients(c.handler_user_id)) {
+        await alert(u, `Insurer has not responded: claim ${c.claim_number}`, `No acknowledgement or advice from the insurer on claim ${c.claim_number} submitted on ${await shownDate(submitted)}; follow up the insurer`, c.id);
+      }
+      await query('UPDATE claims SET insurer_ack_alerted_at = now() WHERE id = $1', [c.id]);
+      out.insurerAck += 1;
     }
   }
   const late = await many(`SELECT k.id, k.follow_up_date, k.party, c.id AS claim_id, c.claim_number, c.handler_user_id, u.id AS author FROM claim_communications k

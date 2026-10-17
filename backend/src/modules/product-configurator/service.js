@@ -5,7 +5,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { chargesFor } from '../premium-charges/service.js';
 import { baseCurrency } from '../../lib/currency.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
 import { isoDate, lastMonths, params, round2, toNumber } from '../masters/helpers.js';
@@ -29,6 +29,8 @@ export const templateOut = (r) => ({
   effectiveDate: r.effective_date, expiryDate: r.expiry_date, baseRate: r.base_rate, minPremium: r.min_premium, maxPremium: r.max_premium,
   commissionRate: r.commission_rate, configuration: r.config || {}, features: r.features || {}, insurers: r.insurers || [], tags: r.tags || [],
   productId: r.product_id, parentId: r.parent_id, retiredAt: r.retired_at, retiredReason: r.retired_reason,
+  submittedBy: r.submitted_by || null, submittedAt: r.submitted_at || null, decidedBy: r.decided_by || null, decidedAt: r.decided_at || null,
+  decision: r.decision || null, decisionNote: r.decision_note || null,
   createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
   _count: r.counts || { coverages: 0, ratingFactors: 0, underwritingRules: 0 },
 });
@@ -180,6 +182,8 @@ export async function createTemplate(body, user) {
   const b = { ...body };
   if (!b.templateCode) b.templateCode = await nextDocumentNumber('product_template');
   const vals = await templateValues(b, false);
+  // under review a new template starts as a draft: it goes in force only through submit and approve
+  if (await approvalRequired() && [ACTIVE, PENDING].includes(vals.status)) vals.status = 'Draft';
   if (await one('SELECT 1 FROM product_templates WHERE lower(template_code) = lower($1)', [vals.template_code])) throw conflict(`Template code ${vals.template_code} already exists`);
   const cols = Object.keys(vals);
   const p = params();
@@ -191,6 +195,7 @@ export async function createTemplate(body, user) {
 export async function updateTemplate(id, body, user) {
   const before = templateOut(await getTemplateRow({ id }));
   const vals = await templateValues(body, true);
+  await assertTemplateChange(before, vals);
   if (vals.template_code && vals.template_code.toLowerCase() !== String(before.templateCode || '').toLowerCase()
     && await one('SELECT 1 FROM product_templates WHERE lower(template_code) = lower($1) AND id <> $2', [vals.template_code, Number(id)])) {
     throw conflict(`Template code ${vals.template_code} already exists`);
@@ -209,9 +214,86 @@ export async function setTemplateLifecycle(id, action, reason, user) {
     await query('UPDATE product_templates SET status = \'Retired\', retired_at = now(), retired_reason = $2, updated_by = $3, updated_at = now() WHERE id = $1', [Number(id), reason || null, user.username]);
   } else {
     if (before.status === 'Active') throw badRequest('Template is already active');
+    if (await approvalRequired()) throw badRequest('Product templates go in force only when approved: submit the template for approval');
     if (before.expiryDate && before.expiryDate < (await today())) throw badRequest('Template has expired; extend the expiry date before reactivating');
     await query('UPDATE product_templates SET status = \'Active\', retired_at = NULL, retired_reason = NULL, updated_by = $2, updated_at = now() WHERE id = $1', [Number(id), user.username]);
   }
+  return { before, after: templateOut(await getTemplateRow({ id })) };
+}
+
+// ---------------- review (maker-checker, product.approval_required) ----------------
+
+const ACTIVE = 'Active';
+const PENDING = 'Pending Approval';
+const on = (v) => v === true || v === 'true';
+/** Whether templates go in force only through submit and approve (product.approval_required, on by default). */
+export const approvalRequired = async () => on(await getSetting('product.approval_required', true));
+/** Whether a template in force is changed only through a new version (product.lock_active_templates). */
+export const lockActive = async () => on(await getSetting('product.lock_active_templates', false));
+
+/**
+ * Whether a change of a template is allowed by the review: nothing changes while it waits for approval; under review it
+ * goes in force only through approval; with product.lock_active_templates a template in force is only taken out of use
+ * (status Inactive or Retired), any other change being made on a new version.
+ */
+async function assertTemplateChange(before, vals) {
+  if (before.status === PENDING) throw conflict('The template is waiting for approval: withdraw it before changing it');
+  const status = vals.status;
+  if (await approvalRequired() && status !== undefined && status !== before.status && [ACTIVE, PENDING].includes(status)) {
+    throw badRequest(status === ACTIVE ? 'Product templates go in force only when approved: submit the template for approval' : 'Use Submit for approval');
+  }
+  if (before.status === ACTIVE && await lockActive()) {
+    const others = Object.keys(vals).filter((c) => c !== 'status');
+    if (others.length || (status !== undefined && ![ACTIVE, 'Inactive', 'Retired'].includes(status))) {
+      throw conflict('The template is in force: create a new version to change it (product.lock_active_templates)');
+    }
+  }
+}
+
+/** A component of a template waiting for approval, or of one in force under the lock, is not changed. */
+async function assertComponentChange(templateId) {
+  if (!templateId) return;
+  const t = await one('SELECT status FROM product_templates WHERE id = $1', [templateId]);
+  if (t?.status === PENDING) throw conflict('The template is waiting for approval: withdraw it before changing its components');
+  if (t?.status === ACTIVE && await lockActive()) throw conflict('The template is in force: create a new version to change its components (product.lock_active_templates)');
+}
+
+/** Submit a draft (or an inactive or retired template to be put back in force) for approval. */
+export async function submitTemplate(id, note, user) {
+  const before = templateOut(await getTemplateRow({ id }));
+  if (before.status === PENDING) throw conflict('The template is already waiting for approval');
+  if (before.status === ACTIVE) throw badRequest('The template is already in force');
+  if (before.expiryDate && before.expiryDate < (await today())) throw badRequest('Template has expired; extend the expiry date before submitting it');
+  await query(`UPDATE product_templates SET status = $2, submitted_by = $3, submitted_at = now(), decided_by = NULL, decided_at = NULL, decision = NULL,
+    decision_note = $4, updated_at = now() WHERE id = $1`, [before.id, PENDING, user.username, note ? String(note).trim().slice(0, 1000) : null]);
+  return { before, after: templateOut(await getTemplateRow({ id })) };
+}
+
+/** Withdraw a submission (its submitter, or any holder of write:products when the submitter has left): back to Draft. */
+export async function withdrawTemplate(id, user) {
+  const before = templateOut(await getTemplateRow({ id }));
+  if (before.status !== PENDING) throw conflict('Only a template waiting for approval can be withdrawn');
+  await query('UPDATE product_templates SET status = \'Draft\', submitted_by = NULL, submitted_at = NULL, decision_note = NULL, updated_by = $2, updated_at = now() WHERE id = $1',
+    [before.id, user.username]);
+  return { before, after: templateOut(await getTemplateRow({ id })) };
+}
+
+/**
+ * Approve (in force) or return (back to Draft, a note required) a template waiting for approval. Nobody decides a
+ * template he or she created, last changed or submitted.
+ */
+export async function decideTemplate(id, decision, note, user) {
+  if (!['approve', 'return'].includes(decision)) throw badRequest('decision must be approve or return');
+  const row = await getTemplateRow({ id });
+  const before = templateOut(row);
+  if (before.status !== PENDING) throw conflict('Only a template waiting for approval can be decided');
+  const mine = [row.created_by, row.updated_by, row.submitted_by].filter(Boolean).map((u) => String(u).toLowerCase());
+  if (mine.includes(String(user.username).toLowerCase())) throw forbidden('You cannot decide a product template you created, changed or submitted; another approver decides it');
+  const text = String(note ?? '').trim();
+  if (decision === 'return' && !text) throw badRequest('Validation failed', [{ path: 'note', message: 'Say why the template is returned' }]);
+  await query(`UPDATE product_templates SET status = $2, decided_by = $3, decided_at = now(), decision = $4, decision_note = $5,
+    retired_at = CASE WHEN $2 = 'Active' THEN NULL ELSE retired_at END, retired_reason = CASE WHEN $2 = 'Active' THEN NULL ELSE retired_reason END, updated_at = now()
+    WHERE id = $1`, [before.id, decision === 'approve' ? ACTIVE : 'Draft', user.username, decision === 'approve' ? 'approved' : 'returned', text ? text.slice(0, 1000) : null]);
   return { before, after: templateOut(await getTemplateRow({ id })) };
 }
 
@@ -465,6 +547,7 @@ export async function createComponent(kind, body, user) {
   const data = componentValues(kind, body, false);
   await kindChecks(kind, data);
   const templateId = await resolveTemplateId(body, def);
+  await assertComponentChange(templateId);
   const r = await one(`INSERT INTO product_components(template_id, kind, code, name, data, status, sort_order, created_by, updated_by)
                        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8) RETURNING id`,
   [templateId, kind, data[def.code] ?? null, data[def.name] ?? null, JSON.stringify(data), body.status || 'Active', Number(body.sortOrder) || 100, user.username]).catch(dupGuard(def));
@@ -475,7 +558,8 @@ export async function updateComponent(kind, id, body, user) {
   const def = KINDS[kind];
   const before = await getComponent(kind, id);
   const data = componentValues(kind, body, true);
-  const row = await one('SELECT data FROM product_components WHERE id = $1', [Number(id)]);
+  const row = await one('SELECT data, template_id FROM product_components WHERE id = $1', [Number(id)]);
+  await assertComponentChange(row.template_id);
   const merged = { ...row.data, ...data };
   for (const f of def.required) if (merged[f] === undefined || merged[f] === null || String(merged[f]).trim() === '') throw badRequest('Validation failed', [{ path: f, message: `${f} is required` }]);
   await kindChecks(kind, merged);
@@ -486,6 +570,7 @@ export async function updateComponent(kind, id, body, user) {
 
 export async function deleteComponent(kind, id, user) {
   const before = await getComponent(kind, id);
+  await assertComponentChange((await one('SELECT template_id FROM product_components WHERE id = $1', [Number(id)]))?.template_id);
   await query('UPDATE product_components SET status = \'Deleted\', updated_by = $2, updated_at = now() WHERE id = $1', [Number(id), user.username]);
   return before;
 }
@@ -543,7 +628,7 @@ export async function dashboard() {
   const a = await analytics();
   return {
     summary: {
-      totalTemplates: byStatus.reduce((s, x) => s + x.n, 0), active: count('Active'), draft: count('Draft'), inactive: count('Inactive'), retired: count('Retired'),
+      totalTemplates: byStatus.reduce((s, x) => s + x.n, 0), active: count('Active'), draft: count('Draft'), pendingApproval: count(PENDING), inactive: count('Inactive'), retired: count('Retired'),
       components: Object.fromEntries(comps.map((c) => [c.kind, c.n])),
     },
     byCategory: Object.fromEntries(byCategory.map((c) => [c.category, c.n])),

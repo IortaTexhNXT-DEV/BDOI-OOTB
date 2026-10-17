@@ -36,7 +36,7 @@ import ReceiptBatches from "./ReceiptBatches";
 import { printPdf } from "../../../components/Print";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
-import { hasPermission } from "../../../utils/canOpen";
+import { canOpen, hasPermission } from "../../../utils/canOpen";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
 const CONVERTED = "Converted";
@@ -134,73 +134,6 @@ const PolicyReceipts = () => {
       code: client.customerCode,
       clientId: client.clientId,
     }));
-  };
-
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("accounts.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </>
-      );
-    },
-  };
-
-  const headerStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-  const headerStyle1 = {
-    width: "10%",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-  const headerStyle2 = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-  const headerStyle3 = {
-    width: "8%",
-
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: "none",
-    textalign: "center",
   };
 
   const home = { label: t("sidebar.Accounts") };
@@ -573,6 +506,13 @@ const PolicyReceipts = () => {
   const [batchesOpen, setBatchesOpen] = useState(false);
   const headerActions = (
     <>
+      {canOpen("/agent/payments") && (
+        <div className="filter_bulk_button_container">
+          <Button type="button" className="bulk_button_container" outlined onClick={() => navigate("/agent/payments")}>
+            <span className="addtext">{t("accounts.receipts.paymentsToVerify")}</span>
+          </Button>
+        </div>
+      )}
       <div className="filter_bulk_button_container">
         <Button type="button" className="bulk_button_container" outlined onClick={handleModal}>
           <span className="addtext">{t("accounts.receipts.bulkPrint")}</span>
@@ -731,14 +671,6 @@ const PolicyReceipts = () => {
                   ? convertedFilteredReceipts
                   : safeReceiptsList
               }
-              tableStyle={{
-                minWidth: "50rem",
-                color: "var(--text-color)",
-                maxHeight: "50vh",
-                overflowy: "auto",
-              }}
-              scrollable={true}
-              scrollHeight="40vh"
               rowClassName={(row) => (recorded && row.receiptNumber === recorded.receiptNumber ? "receipt-row--recorded" : "")}
               paginator
               lazy
@@ -747,8 +679,6 @@ const PolicyReceipts = () => {
               first={first}
               onPage={onPageChange}
               rowsPerPageOptions={[20, 50, 100]}
-              currentPageReportTemplate="{first} - {last} of {totalRecords}"
-              paginatorTemplate={template2}
               className="datatable_container"
               loading={loading}
             >
@@ -756,34 +686,29 @@ const PolicyReceipts = () => {
                 sortable
                 field="receiptNumber"
                 header={t("accounts.receipts.receiptNumber")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 field="transactionCode"
                 header={t("accounts.transactionCode")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 sortable
                 field="transactionNumber"
                 header={t("accounts.transactionNumber")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 sortable
                 field="policyNumber"
                 header={t("accounts.receipts.policyNumber")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 sortable
                 field="name"
                 header={t("common.name")}
-                headerStyle={headerStyle1}
                 className="fieldvalue_container receipts_name_cell"
                 body={(rowData) => rowData.name}
               ></Column>
@@ -791,27 +716,23 @@ const PolicyReceipts = () => {
                 sortable
                 field="customerCode"
                 header={t("accounts.receipts.searchCustomerCode")}
-                headerStyle={headerStyle2}
                 className="fieldvalue_container"
               ></Column>
               <Column body={(row) => formatAppDate(row.date)}
                 sortable
                 field="date"
                 header={t("common.date")}
-                headerStyle={headerStyle1}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 field="amount"
                 header={t("accounts.receipts.amount")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => formatCurrency(rowData.amount ?? 0)}
               ></Column>
               <Column
                 field="totalPaid"
                 header={t("accounts.paid")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   const paymentsList = rowData.receiptsList || [];
@@ -857,7 +778,6 @@ const PolicyReceipts = () => {
               <Column
                 field="totalUnpaid"
                 header={t("accounts.unpaid")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   // Calculate total unpaid from receiptsList
@@ -872,7 +792,6 @@ const PolicyReceipts = () => {
               <Column
                 field="receiptStatus"
                 header={t("common.status")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   const status = rowData.receiptStatus || "Draft";
@@ -888,7 +807,6 @@ const PolicyReceipts = () => {
               <Column
                 field="paymentCount"
                 header={t("accounts.receipts.payments")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   const count = rowData.receiptsList?.length || 0;

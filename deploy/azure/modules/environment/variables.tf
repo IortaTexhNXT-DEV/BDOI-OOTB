@@ -156,6 +156,41 @@ variable "uploads_backup" {
   default     = false
 }
 
+# ------------------------------------------------------------------------------------- long-term backup (NFR-11)
+variable "db_archive_export" {
+  description = "Monthly full export of the database to an immutable archive-tier storage container, kept db_archive_retention_years (NFR-11)."
+  type        = bool
+  default     = false
+}
+
+variable "db_archive_retention_years" {
+  description = "Years each database export is kept, unchangeable (time-based immutability) and then deleted (NFR-11: at least 10)."
+  type        = number
+  default     = 10
+  validation {
+    condition     = var.db_archive_retention_years >= 10
+    error_message = "NFR-11: database backups are retained for at least 10 years."
+  }
+}
+
+variable "db_archive_lock_immutability" {
+  description = "Lock the immutability policy of the archive container. Irreversible: once locked the retention can only be extended. Lock after TISPH accepts the set-up."
+  type        = bool
+  default     = false
+}
+
+variable "db_archive_schedule" {
+  description = "Cron (UTC) of the export job. Default: 18:00 UTC on the 1st of each month (02:00 Manila on the 2nd)."
+  type        = string
+  default     = "0 18 1 * *"
+}
+
+variable "db_archive_image" {
+  description = "Image of the export job: PostgreSQL client tools of the server's major version (pg_dump) on Alpine."
+  type        = string
+  default     = "docker.io/library/postgres:16-alpine"
+}
+
 # ---------------------------------------------------------------------------------------------------- integrations
 variable "smtp_enabled" {
   description = "Pass SMTP_URL (Key Vault secret smtp-url, created by an operator) to the API. Off: e-mails stay in the outbox."

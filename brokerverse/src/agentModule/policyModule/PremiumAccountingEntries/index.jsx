@@ -318,8 +318,6 @@ const PremiumAccountingEntries = () => {
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate={t("accounting.pageReportTemplate")}
           emptyMessage={t("accounting.noEntriesFound")}
           className="transactions-table"
           scrollable

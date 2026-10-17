@@ -38,6 +38,8 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Vehicle Model master upload | Master > Generals > Insurance Management > Vehicle (choose Vehicle models in the Upload dialog) | `POST /api/masters/vehicle-model/upload` | `Vehicle_Model_Upload_Template.xlsx` |
 | Vehicle Variant master upload | Master > Generals > Insurance Management > Vehicle (choose Vehicle variants in the Upload dialog) | `POST /api/masters/vehicle-variant/upload` | `Vehicle_Variant_Upload_Template.xlsx` |
 | Vehicle master upload | Master > Generals > Insurance Management > Vehicle | `POST /api/masters/vehicle/upload` | `Vehicle_Upload_Template.xlsx` |
+| Scheme Document Checklist master upload | Master > Insurance Management > Scheme Document Checklist | `POST /api/masters/scheme-document-checklist/upload` | `Scheme_Document_Checklist_Upload_Template.xlsx` |
+| Motor Issuance Checklist master upload | Master > Insurance Management > Motor Issuance Checklist | `POST /api/masters/motor-issuance-checklist/upload` | `Motor_Issuance_Checklist_Upload_Template.xlsx` |
 | Country master upload | Master > Generals > Location > Country | `POST /api/masters/country/upload` | `Country_Upload_Template.xlsx` |
 | Region master upload | No Upload button: Master > Generals > Location > Province (regions are shown with their provinces; no Region screen of its own) | `POST /api/masters/region/upload` | `Region_Upload_Template.xlsx` |
 | Province master upload | Master > Generals > Location > Province | `POST /api/masters/state/upload` | `Province_Upload_Template.xlsx` |
@@ -86,11 +88,11 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Sales Activity Outcome master upload | No Upload button: Master > Organization > Sales Activity Outcomes | `POST /api/masters/sales-activity-outcome/upload` | `Sales_Activity_Outcome_Upload_Template.xlsx` |
 | Lead Source master upload | No Upload button: Master > Insurance Management > Lead Sources | `POST /api/masters/lead-source/upload` | `Lead_Source_Upload_Template.xlsx` |
 | Reason Code master upload | No Upload button: Master > Insurance Management > Reason Codes | `POST /api/masters/reason-code/upload` | `Reason_Code_Upload_Template.xlsx` |
-| Leads upload | Operations > Sales & Marketing > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
-| TFS accounts upload | Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts | `POST /api/leads/tfs-import` | `TFS_Accounts_Upload_Template.xlsx` |
-| Talkbot call results | Operations > Renewals > Talkbot Calls > Upload results | `POST /api/talkbot/lists/:id/results` | `Talkbot_Call_Results_Template.xlsx` |
-| Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
-| Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |
+| Leads upload | Sales & Placement > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
+| TFS accounts upload | Sales & Placement > Prospects > Bulk Upload > TFS accounts | `POST /api/leads/tfs-import` | `TFS_Accounts_Upload_Template.xlsx` |
+| Talkbot call results | Policy Servicing > Renewals > Talkbot Calls > Upload results | `POST /api/talkbot/lists/:id/results` | `Talkbot_Call_Results_Template.xlsx` |
+| Quotations upload | Sales & Placement > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
+| Policies upload | Policy Servicing > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |
 | Official receipts upload | Accounts > Receipts > Bulk upload | `POST /api/receipts/bulk-upload` | `Receipts_Upload_Template.xlsx` |
 | Bank payments upload | Accounts > Receipts > Bulk Upload > Bank payments (matched by reference) | `POST /api/receipts/bank-payments` | `Bank_Payments_Upload_Template.xlsx` |
 | Payments made directly to the insurer | Accounts > Receipts > Bulk Upload > Payments made to the insurer | `POST /api/receipts/insurer-direct` | `Insurer_Direct_Payments_Template.xlsx` |
@@ -99,9 +101,17 @@ with the API collection exported by `npm run export:api`). The table is written 
 | GL opening balances (go-live trial balance) | Accounts > Period End > Period Management > Import opening balances | `POST /api/period-end/opening-balances/import` | `Opening_Balances_Upload_Template.xlsx` |
 | Open premium receivables (go-live open items) | Accounts > Collections > Import open items | `POST /api/receipts/opening-items/import` | `Open_Items_Upload_Template.xlsx` |
 | Remittance reconciliation: bank transactions | Accounts > Remittance > Reconciliation > Import | The screen reads the CSV in the browser and sends POST /api/remittance/reconciliation/bank-transactions | `Remittance_Bank_Transactions_Template.xlsx`, `Remittance_Bank_Transactions_Template.csv` |
+| Endorsement commission calculated by the insurer (TIS-BRD-COMM-07) | Policy Servicing > Policy > Endorsement > Upload insurer commission | `POST /api/endorsements/insurer-commission/upload` | `Endorsement_Insurer_Commission_Template.xlsx`, `Endorsement_Insurer_Commission_Template.csv` |
 | Users (named users and their roles) | No Upload button: Server script backend/scripts/provision-users.js, run by the System Administrator (single users: Master > Generals > User Management > User) | node scripts/provision-users.js /secure/path/users.csv | `Users_Provisioning_Template.xlsx`, `Users_Provisioning_Template.csv` |
-| Dealer vehicle sales (brand-new vehicle programme) | Operations > Sales & Marketing > Dealer Programmes > Dealer Sales Upload | `POST /api/motor-programmes/:id/sales/upload` | `Dealer_Sales_Upload_Template.xlsx` |
-| Fleet vehicles (schedule of a fleet policy) | Operations > Fleet Schedules > Schedule > Upload Vehicles | `POST /api/fleet/:id/vehicles/upload` | `Fleet_Vehicles_Upload_Template.xlsx` |
+| Dealer vehicle sales (brand-new vehicle programme) | Sales & Placement > Dealer Programmes > Dealer Sales Upload | `POST /api/motor-programmes/:id/sales/upload` | `Dealer_Sales_Upload_Template.xlsx` |
+| Scheme vehicle lines (make and model range of a scheme) | Sales & Placement > Scheme Master > Upload vehicle lines | `POST /api/schemes/lines/upload` | `Scheme_Vehicle_Lines_Upload_Template.xlsx` |
+| TFSPH loan bookings (Scheme 1 and 2 applications) | Sales & Placement > Scheme Issuance > Upload loan bookings | `POST /api/scheme-issuance/bookings/upload` | `Scheme_Loan_Bookings_Upload_Template.xlsx` |
+| Sales targets (commission target of an agent or a sales unit per month) | Master > Finance > Sales Targets > Upload | `POST /api/incentive/sales-targets/upload` | `Sales_Targets_Upload_Template.xlsx` |
+| TFS account status (loan status of the financed accounts) | Policy Servicing > Renewals > Lock-in Review > Upload loan status | `POST /api/lock-in/uploads` | `TFS_Loan_Status_Upload_Template.xlsx` |
+| TFS daily parcel list (Parcel / Courier certificates) | Policy Servicing > Marine Open Covers > Open Cover > Certificates > Upload Parcels | `POST /api/marine/open-covers/:id/parcels/upload` | `Parcel_List_Upload_Template.xlsx` |
+| Credit Life members (monthly batch of the financing bank) | Policy Servicing > Credit Life > Batch > Upload Members | `POST /api/credit-life/batches/:id/upload` | `Credit_Life_Members_Upload_Template.xlsx` |
+| Cargo shipment list (Marine Cargo inland declarations) | Policy Servicing > Marine Open Covers > Open Cover > Certificates > Upload Shipments | `POST /api/marine/open-covers/:id/shipments/upload` | `Cargo_Shipments_Upload_Template.xlsx` |
+| Fleet vehicles (schedule of a fleet policy) | Policy Servicing > Fleet Schedules > Schedule > Upload Vehicles | `POST /api/fleet/:id/vehicles/upload` | `Fleet_Vehicles_Upload_Template.xlsx` |
 | Bank statement (Generic (Date, Description, Reference, Debit, Credit, Balance)) | Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement (format GENERIC) | `POST /api/bank-reconciliation/statements/import` | `Bank_Statement_Generic_Upload_Template.xlsx` |
 | Insurer statement (Generic statement of account) | Accounts > Insurer Reconciliation > Insurer Statements > Import statement (format GENERIC) | `POST /api/insurer-reconciliation/statements/import` | `Insurer_Statement_Generic_Upload_Template.xlsx` |
 | Remittance bulk processing (configuration BFM-001) | Accounts > Remittance > Bulk Processing > Upload / Validate, then Process | `POST /api/remittance/bulk/upload` | `Remittance_Bulk_Upload_Template.xlsx` |

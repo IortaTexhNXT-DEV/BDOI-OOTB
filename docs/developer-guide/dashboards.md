@@ -142,6 +142,40 @@ import { ChartCard, DashboardToolbar, LISTS, ThemedChart, changeOf, drillDown, t
   the same rules (`backend/src/lib/dates.js calendarPeriod`, `dashboard/service.js comparisonRange`).
 * Persona dashboards: `personas.js` maps each role to its default dashboard; `/dashboard` opens it and My Work links to it.
 
+### Load states (every dashboard, KPI row and chart)
+
+Every async view has exactly four states. Load with `useStableLoad` (`hooks/useStableLoad.js`), which gives
+`status` = `loading` | `loaded` | `empty` | `error`, and render them with `ViewState` (`components/LoadState/ViewState.jsx`):
+
+```jsx
+const view = useStableLoad(useCallback(() => dashboardService.getExecutive(period, compare, origin), [period, compare, origin]), { enabled: ready });
+<DashboardToolbar ... onRefresh={view.reload} loading={view.loading || view.refreshing} />
+<ViewState state={view} skeleton={<StatCards items={kpis} loading />}>
+  <StatCards items={kpis} refreshing={view.refreshing} />
+</ViewState>
+<ChartCard title="Premium by month" state={view} height={280}>
+  <ThemedChart type="bar" data={data} emptyText={<OriginEmpty inline cutoverDate={goLive} onOrigin={setOrigin} />} />
+</ChartCard>
+```
+
+* **loading**: a skeleton of the final size, on the first load only. A request still running after 10 s is given up
+  (`timeoutMs`) and becomes an error. Never key a skeleton on "no data yet" (`!data`): a request that failed or
+  answered nothing would leave the skeleton for ever.
+* **loaded**: the content. A refresh keeps it on screen under a light veil (KPI cards, charts and tables alike); it is
+  never blanked.
+* **empty**: one line naming why there is nothing and the next step (a link), inside the chart area for a chart
+  (`ThemedChart emptyText`), never a grey block. On "Issued since go-live" with nothing issued since, `OriginEmpty`
+  says so and offers All business.
+* **error**: the reason with Retry. A refresh that fails keeps the figures and shows a toast.
+* The refresh spinner is `loading || refreshing` of every load of the view: it stops when all have settled, success
+  or error. Separate requests load separately, so one failing never leaves the others on their skeleton.
+* KPI figures: a real zero is `0`, `₱0` or `0%`; `null` means "does not apply" and shows "–" with `naReason` as its
+  tooltip (a ratio over nothing, e.g. retention before any renewal closed).
+* Loaders are `useCallback` over their inputs (dates as strings, not Date objects or half-picked ranges), so a
+  re-render or React StrictMode never reads the figures twice and an older answer never overwrites a newer one.
+* The origin view the dashboards open on is `dashboard.default_origin`: `auto` (delivered) opens on Issued since
+  go-live once a policy was issued after the cutover date and on All business until then; `issued` and `all` fix it.
+
 ## 4. Numbers and dates
 
 * Amounts: `formatValue("currency", v, { compact: true })` (₱850, ₱12.9K, ₱1.2M) on cards and axes; in full

@@ -60,7 +60,7 @@ describe("Sharing Schemes", () => {
     expect(await screen.findByText("DLR-STD")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Actions for scheme DLR-STD" }));
     fireEvent.click(await screen.findByRole("menuitem", { name: "Suspend" }));
-    expect(await screen.findByText("Suspend sharing scheme")).toBeInTheDocument();
+    expect(await screen.findByText("Suspend Sharing Scheme")).toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Remark" }), { target: { value: "Terms under review" } });
     fireEvent.click(screen.getByRole("button", { name: "Suspend" }));
     await waitFor(() => expect(CommissionService.schemeAction).toHaveBeenCalledWith(1, "suspend", { note: "Terms under review" }));

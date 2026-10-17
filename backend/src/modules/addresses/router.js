@@ -11,7 +11,7 @@ import { ok } from '../../lib/respond.js';
  * Reads only reference data, so any signed-in user may call them.
  */
 const { router, define } = moduleRouter('Addresses', '/addresses');
-const SCREEN = 'Operations > Sales & Marketing > Prospects > Create Lead (address fields)';
+const SCREEN = 'Sales & Placement > Prospects > Create Lead (address fields)';
 
 /** Accept a numeric id, a code, a PSGC code or a name for the parent record. */
 const parentMatch = (alias, { code = true } = {}) => `(${alias}.id::text = $1 OR ${alias}.psgc_code = $1${code ? ` OR lower(${alias}.code) = lower($1)` : ''} OR lower(${alias}.name) = lower($1))`;

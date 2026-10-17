@@ -37,6 +37,23 @@ export async function adjustmentDeadline(period, graceDays) {
   return nthWorkingDay(addDays(end, 1).slice(0, 7), window);
 }
 
+/**
+ * The closing calendar of a regular period (TIS-BRD-GL-04, MOM-S4-CLOSE-26-29), for Period Management: the operations
+ * cut-off (accounting.operations_cutoff_day of the month; premium bookings from that day go to the next period), the
+ * finance close date and the last day of the finance adjustment window. Null for a date a setting switches off.
+ */
+export async function closingCalendar(period) {
+  const end = iso(period.end_date);
+  const cutoff = Number(await getSetting('accounting.operations_cutoff_day', null)) || 0;
+  const cutoffDate = cutoff ? `${end.slice(0, 7)}-${String(cutoff).padStart(2, '0')}` : null;
+  const window = Number(await getSetting('accounting.adjustment_window_working_days', null)) || 0;
+  return {
+    operationsCutoff: cutoffDate && cutoffDate <= end ? cutoffDate : null,
+    financeClose: Number(await getSetting('accounting.finance_close_day', null)) ? await financeCloseDate(period) : null,
+    adjustmentWindowEnd: window ? await nthWorkingDay(addDays(end, 1).slice(0, 7), window) : null,
+  };
+}
+
 async function notify(db, { title, message, period }) {
   const exists = (await db.query('SELECT 1 FROM notifications WHERE entity = \'accounting_period\' AND entity_id = $1 AND title = $2', [period, title])).rows[0];
   if (exists) return 0;

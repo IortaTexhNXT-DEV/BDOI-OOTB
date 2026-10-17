@@ -56,7 +56,7 @@ describe("Claim communications", () => {
   it("needs a message before logging", async () => {
     claimHandlingService.communications.mockResolvedValue([]);
     wrap(<ClaimCommunications claimId="clm_1" canEdit notify={jest.fn()} />);
-    fireEvent.click(await screen.findByRole("button", { name: "Log communication" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Log activity" }));
     const dialog = await screen.findByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Save" }));
     expect(await within(dialog).findByText("Enter the message.")).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe("Claim communications", () => {
     claimHandlingService.communications.mockResolvedValue([]);
     wrap(<ClaimCommunications claimId="clm_1" notify={jest.fn()} />);
     await screen.findByText("No communications logged.");
-    expect(screen.queryByRole("button", { name: "Log communication" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Log activity" })).toBeNull();
   });
 });
 
@@ -79,7 +79,7 @@ describe("Insurer advice", () => {
       claim={{ id: "clm_1", insuranceCompanyClaimNumber: "MAL-CL-88120", insurerHandler: "Liza Tan", insurerAdvice: "approved", insurerAdviceLabel: "Approved", authorisationCode: "AUTH-5521" }} />);
     expect(screen.getByText("MAL-CL-88120")).toBeInTheDocument();
     expect(screen.getByText("AUTH-5521")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Record insurer advice" }));
+    fireEvent.click(screen.getByRole("button", { name: "Record Insurer Advice" }));
     fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Save advice" }));
     await waitFor(() => expect(claimHandlingService.recordAdvice).toHaveBeenCalledWith("clm_1", expect.objectContaining({ insurerClaimNumber: "MAL-CL-88120", adviceStatus: "approved" })));
     await waitFor(() => expect(onSaved).toHaveBeenCalled());

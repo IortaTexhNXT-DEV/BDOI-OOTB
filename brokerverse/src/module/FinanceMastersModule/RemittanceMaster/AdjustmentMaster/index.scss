@@ -54,7 +54,7 @@
 
       .rule-builder {
         .rule-card {
-          background: #f8f9fa;
+          background: var(--color-surface);
           border: 1px solid $color-border;
           padding: 1rem;
           margin-bottom: 1rem;

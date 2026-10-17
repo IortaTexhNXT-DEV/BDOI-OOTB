@@ -8,7 +8,8 @@ second-person approvals). The screens are the Data Migration & Go-Live workspace
 `brokerverse/src/module/GoLiveWorkspace`, service `goLiveService.js`, i18n namespace `goLive`). The administrator guide
 is `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`. In the feature catalogue (`modules/features/catalogue.js`) the workspace
 is the platform feature `go-live-workspace` (always on); the migration kit itself is the Phase 2 feature
-`legacy-migration`, enabled by the platform administrator before a migration load is uploaded (`assertKitAllowed`).
+`legacy-migration`, enabled by the platform administrator (or, as a Phase 2 feature, by the SUPERID of TISPH on
+Features & Releases) before a migration load is uploaded (`assertKitAllowed`).
 
 ## Screens
 

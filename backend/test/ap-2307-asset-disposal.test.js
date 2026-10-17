@@ -64,12 +64,31 @@ describe('BIR 2307 and the returns for supplier EWT (accounts payable)', () => {
     expect(c.lines).toEqual([expect.objectContaining({ atc: 'WC160', nature: 'Purchase of services', total: 50000, tax: 1000, [`month${idx + 1}`]: 50000 })]);
     expect(c.payee).toMatchObject({ name: 'Makati Office Services Inc.', tin: '201-555-777-00000' });
     expect(c.transactions[0].reference).toMatch(/^APV-.+\(SI-7001\)$/);
+    // GAP-FIN-24: no certificate while the payor (the primary company) has no TIN
+    const { pool: db } = await import('../src/db/pool.js');
+    const company = (await db.query(`SELECT id, data FROM master_records WHERE type_code = 'company' AND status = 'active'
+      ORDER BY (lower(COALESCE(data->>'IsPrimary', 'false')) IN ('true', 'yes', '1')) DESC, id LIMIT 1`)).rows[0];
+    expect(company).toBeTruthy();
+    await db.query('UPDATE master_records SET data = data || \'{"TIN": ""}\'::jsonb WHERE id = $1', [company.id]);
+    const blank = await maker('post', '/period-end/bir/2307/issue-all').send({ year, quarter, payeeType: 'Supplier' });
+    expect(blank.status).toBe(409);
+    expect(blank.body.message).toMatch(/no TIN/);
+    expect((await db.query('SELECT count(*)::int AS n FROM bir_2307_batches')).rows[0].n).toBe(0);
+    await db.query('UPDATE master_records SET data = $2 WHERE id = $1', [company.id, company.data]);
     const r = await maker('post', '/period-end/bir/2307/issue-all').send({ year, quarter, payeeType: 'Supplier' });
     expect(r.status).toBe(200);
     expect(r.body.data.issued).toHaveLength(2);
+    // TIS-BRD-TAX-03: the run is a batch with the EWT detail of its certificates
+    expect(r.body.data.batchNumber).toMatch(new RegExp(`^CWB-${year}Q${quarter}-\\d{3}$`));
+    const batch = (await maker('get', `/period-end/bir/2307/batches/${r.body.data.batchId}`)).body.data;
+    expect(batch).toMatchObject({ certificates: 2, totalTax: r.body.data.issued.reduce((a, x) => a + x.totalTax, 0) });
+    expect(batch.detail.find((d) => d.payeeName === 'Makati Office Services Inc.')).toMatchObject({ atc: 'WC160', income: 50000, tax: 1000, payeeTin: '201-555-777-00000' });
+    expect((await maker('get', `/period-end/bir/2307/batches?year=${year}&quarter=${quarter}`)).body.data.map((b) => b.id)).toContain(batch.id);
+    expect((await maker('get', `/period-end/bir/2307/batches/${batch.id}?format=xlsx`)).status).toBe(200);
+    expect((await maker('get', '/period-end/bir/2307/batches/CWB-NONE')).status).toBe(404);
     expect(r.body.data.issued.every((x) => /^CWT-/.test(x.certificateNumber))).toBe(true);
     const again = (await maker('post', '/period-end/bir/2307/issue-all').send({ year, quarter, payeeType: 'Supplier' })).body.data;
-    expect(again).toMatchObject({ issued: [], alreadyIssued: 2 });
+    expect(again).toMatchObject({ issued: [], alreadyIssued: 2, batchId: null });
     expect((await ctx.as('sales')('post', '/period-end/bir/2307/issue-all').send({ year, quarter, payeeType: 'Supplier' })).status).toBe(403);
   });
 

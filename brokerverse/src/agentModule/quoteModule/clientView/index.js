@@ -10,6 +10,7 @@ import StatCards from "../../../components/StatCards";
 import { PageHeader, StatusChip } from "../../../components/RecordPage";
 import OriginChip from "../../../components/OriginChip";
 import ClientTabs from "./clientViewCard";
+import ClientPrivacy from "./ClientPrivacy";
 import "./index.scss";
 
 const KYC_SEVERITY = { complete: "success", pending: "warning", incomplete: "warning", expired: "danger" };
@@ -77,6 +78,7 @@ const ClientView = () => {
           </>
         )} />
       <StatCards items={figures} />
+      {client ? <ClientPrivacy client={client} onSaved={load} /> : null}
       <ClientTabs clientId={clientId} leadId={client?.leadId || null} counts={summary?.counts} onOnboarding={() => navigate(`/agent/client-onboarding/${clientId}`)} />
     </div>
   );

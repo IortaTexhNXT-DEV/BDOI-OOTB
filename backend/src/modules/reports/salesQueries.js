@@ -9,6 +9,7 @@
  *                       commission and the incentive results (tier, payout) of the month.
  *   renewalNotice       Renewal Notice Listing: the policies expiring within 90 days of the To date (the as-of date),
  *                       in 30/60/90 day buckets, with the fields of the renewal calling template.
+ *   lockInExpiry        Lock-in / Scheme 2 Expiry (RPT-SLS-05): lock-in and Scheme 2 accounts within the review window.
  *
  * Business category of a policy (aprOperation): Cancelled when the policy is cancelled; the category written on the
  * policy or its quotation (aprCategory, e.g. ROPA for a repossessed unit) when there is one; OEM when the vehicle brand
@@ -110,6 +111,44 @@ const renewalNotice = `SELECT x.*, CASE WHEN x."daysToExpiry" <= 30 THEN '30 day
     AND p.expiry_date BETWEEN $2::date AND $2::date + 90
 ) x`;
 
+/**
+ * Lock-in / Scheme 2 Expiry (TIS-BRD-RPT-SLS-05, FRS SCHM-03 FR-LCK-032): the lock-in and Scheme 2 accounts expiring
+ * within a window of the as-of date ($2, the To date), with the unit, premium, TFS loan status, lock-in year, review date
+ * (expiry less $5 days, lockin.review_days_before), notice treatment ($3 blocking statuses, $4 Scheme 2 suppression),
+ * the notices of the term and the review decision. The window is the criteria (60 days by default); the Status filter
+ * is the loan status. Operations > Renewals > Lock-in Review exports the same columns with its own filters.
+ */
+const LOAN_LABEL = `CASE lk.loan_status WHEN 'current' THEN 'Current' WHEN 'past-due' THEN 'Past due' WHEN 'fraud' THEN 'Fraud' WHEN 'early-terminated' THEN 'Early terminated'
+    WHEN 'terminated' THEN 'Terminated' WHEN 'legal-dispute' THEN 'Legal dispute' WHEN 'closed' THEN 'Closed' ELSE lk.loan_status END`;
+const lockInExpiry = `SELECT $2::date AS "asOfDate", u.display_name AS coordinator, p.policy_number AS "policyNumber", ${POLICY_DIMS},
+    p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate", (p.expiry_date - $2::date) AS "daysToExpiry", c.email, c.phone AS mobile,
+    NULLIF(concat_ws(' ', ${vehicle('modelYear')}, ${BRAND}, ${vehicle('vehicleModel')}, ${vehicle('modelVariant')}), '') AS unit,
+    COALESCE(${vehicle('plateNumber')}, p.doc->>'plateNumber', p.doc->'insuranceVehicleDetails'->0->>'plateNumber') AS "plateNumber",
+    COALESCE(${vehicle('chassisNumber')}, p.doc->>'chassisNumber', p.doc->'insuranceVehicleDetails'->0->>'chassisNumber') AS "chassisNumber",
+    COALESCE(${vehicle('motorNumber')}, ${vehicle('engineNumber')}, p.doc->>'motorNumber') AS "engineNumber",
+    COALESCE(${vehicle('vehicleColor')}, p.doc->'insuranceVehicleDetails'->0->>'vehicleColor') AS color,
+    p.sum_insured AS "sumInsured", p.premium_total AS premium, lk.tfs_loan_account AS "loanAccount", ${LOAN_LABEL} AS "loanStatus", ${LOAN_LABEL} AS status,
+    COALESCE(lk.loan_status_date, lk.loan_status_at::date) AS "loanStatusDate", lk.days_past_due AS "daysPastDue",
+    CASE lk.source WHEN 'promotion' THEN 'Promotion' WHEN 'scheme1-ara' THEN 'Scheme 1 ARA' WHEN 'scheme2' THEN 'Scheme 2' ELSE lk.source END AS "lockInSource", lk.source AS _source,
+    lk.reference, CASE WHEN lk.start_date IS NOT NULL THEN (GREATEST(1, (date_part('year', age(p.inception_date, lk.start_date)))::int + 1))::text || ' of ' || COALESCE(lk.years::text, '-') END AS "lockInYear",
+    lk.end_date AS "lockInEnd", COALESCE(rv.review_date, p.expiry_date - $5::int) AS "reviewDate",
+    COALESCE(lk.loan_status, 'current') = ANY($3::text[]) AS _blocking,
+    ${NOTICE_TREATMENT} AS "noticeTreatment",
+    (SELECT count(*) FROM renewal_notices n WHERE n.renewal_id = rr.id AND n.status = 'sent')::text || ' sent / '
+      || (SELECT count(*) FROM renewal_activities a WHERE a.renewal_id = rr.id AND a.activity_type = 'Notices withheld')::text || ' skipped / '
+      || (SELECT count(*) FROM email_outbox e WHERE e.entity = 'renewal' AND e.entity_id = rr.id AND e.status = 'cancelled')::text || ' cancelled' AS notices,
+    CASE rv.status WHEN 'review-due' THEN 'Review due' WHEN 'lockin-ends' THEN 'Lock-in ends' WHEN 'on-hold' THEN 'On hold' WHEN 'pending-approval' THEN 'Pending approval'
+      WHEN 'returned' THEN 'Returned' WHEN 'renew' THEN 'Renew under lock-in' WHEN 'released' THEN 'Released' WHEN 'not-renewed' THEN 'Not for renewal' END AS "reviewStatus", rv.status AS _review_status,
+    CASE rv.decision WHEN 'renew' THEN 'Renew under lock-in' WHEN 'hold' THEN 'Hold' WHEN 'release' THEN 'Release to standard renewal' WHEN 'not-renewed' THEN 'Not for renewal' END AS decision,
+    du.display_name AS "decidedBy", rv.decided_at::date AS "decidedOn", rv.remark
+  FROM policies p ${POLICY_JOINS}
+  JOIN policy_lock_ins lk ON lk.policy_id = p.id AND lk.source <> 'loan'
+  LEFT JOIN LATERAL (SELECT r.id FROM renewals r WHERE r.policy_id = p.id ORDER BY r.created_at DESC LIMIT 1) rr ON true
+  LEFT JOIN lock_in_reviews rv ON rv.policy_id = p.id AND rv.term_expiry = p.expiry_date
+  LEFT JOIN users du ON du.id = rv.decided_by
+  WHERE p.status IN ('active', 'issued') AND p.renewed_to IS NULL AND (lk.status = 'active' OR lk.source = 'scheme2')
+    AND p.expiry_date BETWEEN $2::date AND $2::date + 365`;
+
 export const SALES_QUERIES = {
   aprOperation: {
     sql: aprOperation, extras: [setting('reports.apr_home_brands', ['Toyota', 'Lexus'], 'text[]')],
@@ -145,9 +184,24 @@ export const SALES_QUERIES = {
     },
     summary: { conversionRate: 'round(100.0 * sum(f.policies) / NULLIF(sum(f.quotations), 0), 2)' },
   },
+  lockInExpiry: {
+    sql: lockInExpiry, filters: ['agent', 'insurer', 'product', 'status'],
+    extras: [setting('lockin.blocking_loan_statuses', ['past-due', 'fraud', 'early-terminated', 'terminated', 'legal-dispute'], 'text[]'), setting('lockin.suppress_scheme2_motor', true, 'boolean'),
+      setting('lockin.review_days_before', 60, 'int')],
+    criteria: {
+      'Lock-in / Scheme 2 expiry (60 days)': { where: 't."daysToExpiry" BETWEEN 0 AND 60' },
+      'Expiring within 30 days': { where: 't."daysToExpiry" BETWEEN 0 AND 30' },
+      'Expiring within 90 days': { where: 't."daysToExpiry" BETWEEN 0 AND 90' },
+      'Loan status blocking': { where: 't._blocking AND t."daysToExpiry" BETWEEN 0 AND 60' },
+      'Scheme 1 ARA and promotion lock-ins': { where: 't._source <> \'scheme2\' AND t."daysToExpiry" BETWEEN 0 AND 60' },
+      'Scheme 2 accounts': { where: 't._source = \'scheme2\' AND t."daysToExpiry" BETWEEN 0 AND 60' },
+      'Review pending': { where: 't._review_status IN (\'review-due\', \'on-hold\', \'returned\', \'pending-approval\')' },
+    },
+    orderBy: 'f."expiryDate", f."policyNumber"',
+  },
   renewalNotice: {
     sql: renewalNotice, filters: ['agent', 'insurer', 'branch', 'client', 'product'],
-    extras: [setting('lockin.blocking_loan_statuses', ['past-due', 'fraud', 'terminated', 'legal-dispute'], 'text[]'), setting('lockin.suppress_scheme2_motor', true, 'boolean')],
+    extras: [setting('lockin.blocking_loan_statuses', ['past-due', 'fraud', 'early-terminated', 'terminated', 'legal-dispute'], 'text[]'), setting('lockin.suppress_scheme2_motor', true, 'boolean')],
     criteria: {
       All: { groupBy: 'bucket' }, '30 Days': { where: 't.bucket = \'30 days\'' }, '60 Days': { where: 't.bucket = \'60 days\'' }, '90 Days': { where: 't.bucket = \'90 days\'' },
       'Suppressed or Held': { where: 't."noticeTreatment" <> \'Send\'' },

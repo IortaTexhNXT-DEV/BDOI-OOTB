@@ -33,15 +33,15 @@ const agreementExample = { id: 'ova_1a2b', agreementCode: 'MAL-OVR-2026', name: 
 const compExample = { id: 'ovc_1a2b', computationNumber: 'OVC-2026-00001', periodLabel: '2026-Q3', production: 1250000, rate: 2, commission: 25000, vat: 3000, receivable: 28000, status: 'draft' };
 
 define({
-  method: 'GET', path: '/agreements', summary: 'Overriding / profit / contingent commission agreements with insurers (filter status, insurerId)', screen: 'Commission > Insurer Overrides > Agreements',
+  method: 'GET', path: '/agreements', summary: 'Overriding / profit / contingent commission agreements with insurers (filter status, insurerId)', screen: 'Accounts > Commission > Insurer Override Agreements',
   middleware: read, response: { success: true, data: [agreementExample] }, handler: async (req, res) => ok(res, await svc.listAgreements(pool, req.query)),
 });
 define({
-  method: 'GET', path: '/agreements/:id', summary: 'One agreement with its tiers', screen: 'Commission > Insurer Overrides > Agreements', middleware: read,
+  method: 'GET', path: '/agreements/:id', summary: 'One agreement with its tiers', screen: 'Accounts > Commission > Insurer Override Agreements', middleware: read,
   response: { success: true, data: agreementExample }, handler: async (req, res) => ok(res, await svc.getAgreement(pool, req.params.id)),
 });
 define({
-  method: 'POST', path: '/agreements', summary: 'Create an agreement: insurer, type, basis (production, loss ratio, growth), period, lines of business, tiers', screen: 'Commission > Insurer Overrides > Agreements',
+  method: 'POST', path: '/agreements', summary: 'Create an agreement: insurer, type, basis (production, loss ratio, growth), period, lines of business, tiers', screen: 'Accounts > Commission > Insurer Override Agreements',
   middleware: [...write, validate(agreementSchema)], request: { agreementCode: 'MAL-OVR-2026', name: 'Malayan production override 2026', insurerId: 1, basis: 'production', periodType: 'quarterly', effectiveFrom: '2026-01-01',
     tiers: [{ fromValue: 0, toValue: 1000000, rate: 1 }, { fromValue: 1000000, toValue: null, rate: 2 }] },
   handler: async (req, res) => {
@@ -51,7 +51,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/agreements/:id', summary: 'Update an agreement and its tiers', screen: 'Commission > Insurer Overrides > Agreements',
+  method: 'PUT', path: '/agreements/:id', summary: 'Update an agreement and its tiers', screen: 'Accounts > Commission > Insurer Override Agreements',
   middleware: [...write, validate(agreementSchema.partial())], request: { status: 'inactive' },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.saveAgreement(db, req.params.id, req.body, req.user));
@@ -60,7 +60,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/agreements/:id/periods', summary: 'Periods of an agreement in a year with the computation of each (if any)', screen: 'Commission > Insurer Overrides > Computations',
+  method: 'GET', path: '/agreements/:id/periods', summary: 'Periods of an agreement in a year with the computation of each (if any)', screen: 'Accounts > Commission > Insurer Override Computations',
   middleware: [...read, validate(z.object({ year: z.coerce.number().int().min(2000).max(2100) }), 'query')], query: { year: 2026 },
   handler: async (req, res) => {
     const ag = await svc.getAgreement(pool, req.params.id);
@@ -69,7 +69,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/agreements/:id/preview', summary: 'Figures of an agreement for a period without saving (production, claims, loss ratio, growth, tier, commission)', screen: 'Commission > Insurer Overrides > Computations',
+  method: 'GET', path: '/agreements/:id/preview', summary: 'Figures of an agreement for a period without saving (production, claims, loss ratio, growth, tier, commission)', screen: 'Accounts > Commission > Insurer Override Computations',
   middleware: [...read, validate(z.object({ year: z.coerce.number().int(), periodLabel: z.string().max(10), claimsIncurred: z.coerce.number().min(0).optional() }), 'query')], query: { year: 2026, periodLabel: '2026-Q3' },
   handler: async (req, res) => {
     const ag = await svc.getAgreement(pool, req.params.id);
@@ -80,11 +80,11 @@ define({
 });
 
 define({
-  method: 'GET', path: '/computations', summary: 'Computations (filter status, agreementId, insurerId, year)', screen: 'Commission > Insurer Overrides > Computations', middleware: read,
+  method: 'GET', path: '/computations', summary: 'Computations (filter status, agreementId, insurerId, year)', screen: 'Accounts > Commission > Insurer Override Computations', middleware: read,
   response: { success: true, data: [compExample] }, handler: async (req, res) => ok(res, await svc.listComputations(pool, req.query)),
 });
 define({
-  method: 'GET', path: '/computations/export', summary: 'Excel of the computations of a year', screen: 'Commission > Insurer Overrides > Computations', middleware: read, query: { year: 2026 },
+  method: 'GET', path: '/computations/export', summary: 'Excel of the computations of a year', screen: 'Accounts > Commission > Insurer Override Computations', middleware: read, query: { year: 2026 },
   handler: async (req, res) => {
     const rows = await svc.listComputations(pool, req.query);
     const cols = [['computationNumber', 'Computation'], ['insurerName', 'Insurer'], ['agreementCode', 'Agreement'], ['commissionType', 'Type'], ['basis', 'Basis'], ['periodLabel', 'Period'],
@@ -97,12 +97,12 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/computations/:id', summary: 'One computation with its settlements', screen: 'Commission > Insurer Overrides > Computations', middleware: read,
+  method: 'GET', path: '/computations/:id', summary: 'One computation with its settlements', screen: 'Accounts > Commission > Insurer Override Computations', middleware: read,
   response: { success: true, data: compExample }, handler: async (req, res) => ok(res, await svc.getComputation(pool, req.params.id)),
 });
 define({
   method: 'POST', path: '/agreements/:id/compute', summary: 'Compute (or recompute a draft) the commission of an agreement for a period; claimsIncurred replaces the system figure with the insurer\'s',
-  screen: 'Commission > Insurer Overrides > Computations', middleware: [...write, validate(z.object({ year: z.coerce.number().int().min(2000).max(2100), periodLabel: z.string().max(10),
+  screen: 'Accounts > Commission > Insurer Override Computations', middleware: [...write, validate(z.object({ year: z.coerce.number().int().min(2000).max(2100), periodLabel: z.string().max(10),
     claimsIncurred: z.coerce.number().min(0).nullable().optional(), claimsNote: z.string().max(300).optional(), remarks: z.string().max(500).optional() }))],
   request: { year: 2026, periodLabel: '2026-Q3' }, response: { success: true, data: compExample },
   handler: async (req, res) => {
@@ -112,7 +112,7 @@ define({
   },
 });
 const action = (path, summary, fn, act, schema = null) => define({
-  method: 'POST', path, summary, screen: 'Commission > Insurer Overrides > Computations', middleware: [...write, ...(schema ? [validate(schema)] : [])],
+  method: 'POST', path, summary, screen: 'Accounts > Commission > Insurer Override Computations', middleware: [...write, ...(schema ? [validate(schema)] : [])],
   handler: async (req, res) => {
     const c = await withTransaction((db) => fn(db, req.params.id, req.body || {}, req.user));
     await audit(req, { entity: 'override_computation', entityId: c.computationNumber || c.computation?.computationNumber, action: act, after: { status: c.status || c.computation?.status, ...(req.body || {}) } });

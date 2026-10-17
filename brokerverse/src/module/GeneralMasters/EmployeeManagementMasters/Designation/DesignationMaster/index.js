@@ -6,7 +6,6 @@ import SvgDot from "../../../../../assets/icons/SvgDot";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from "react-redux";
@@ -96,32 +95,6 @@ const DesignationMaster = () => {
 
   const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handlEdit(rowData)} />;
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-            {t("generalMasters.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </div>
-      );
-    },
-  };
-
   return (
     <div className="grid overall__designation__master__container">
       <Toast ref={statusToast} />
@@ -181,12 +154,9 @@ const DesignationMaster = () => {
                 paginatorLeft
                 rows={20}
                 rowsPerPageOptions={[20, 50, 100]}
-                currentPageReportTemplate="{first} - {last} of {totalRecords}"
-                paginatorTemplate={template2}
                 onPage={onPageChange}
                 onPageChange={onPageChange}
                 scrollable={true}
-                scrollHeight="40vh"
               >
                 <Column
                   field="designationCode"

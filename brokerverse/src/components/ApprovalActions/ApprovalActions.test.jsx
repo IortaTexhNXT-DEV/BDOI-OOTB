@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import "../../i18n";
 import userEvent from "@testing-library/user-event";
 import ApprovalActions, { isInitiator } from "./index";
-import { codeAmount } from "../../utility/currencyConverter";
+import { codeAmount, displayAmount } from "../../utility/currencyConverter";
 
 const signIn = (user) => localStorage.setItem("user", JSON.stringify(user));
 
@@ -47,11 +47,12 @@ describe("approval actions with the server's decision", () => {
   it("offers Approve (primary) and Reject (outlined danger) with the user's limit and the item's amount", () => {
     render(<ApprovalActions decision={decide} onApprove={jest.fn()} onReject={jest.fn()} />);
     const bar = screen.getByRole("group", { name: "Decision" });
-    expect(bar).toHaveTextContent("Your limit PHP 1,000,000.00");
-    expect(bar).toHaveTextContent("This item PHP 409,141.43");
+    expect(bar).toHaveTextContent("Your limit ₱1,000,000.00");
+    expect(bar).toHaveTextContent("This item ₱409,141.43");
     expect(screen.getByRole("button", { name: "Approve" })).not.toHaveClass("p-button-outlined");
     expect(screen.getByRole("button", { name: "Reject" })).toHaveClass("p-button-outlined", "p-button-danger");
-    expect(codeAmount(-1250.5)).toBe("PHP -1,250.50");
+    expect(codeAmount(-1250.5)).toBe("-PHP 1,250.50");
+    expect(displayAmount(-1250.5)).toBe("-₱1,250.50");
   });
 
   it("is used from the keyboard: Tab reaches Reject then Approve, Enter and Space press them", () => {
@@ -69,10 +70,10 @@ describe("approval actions with the server's decision", () => {
   });
 
   it("shows the reason and who can decide instead of the buttons, never a disabled decision button", () => {
-    render(<ApprovalActions decision={{ canDecide: false, blockedCode: "ABOVE_LIMIT", blockedReason: "PHP 409,141.43 is above your approval limit of PHP 250,000.00.",
+    render(<ApprovalActions decision={{ canDecide: false, blockedCode: "ABOVE_LIMIT", blockedReason: "₱409,141.43 is above your approval limit of ₱250,000.00.",
       eligibleApprovers: [{ id: "usr_9", name: "J. Cruz" }] }} onApprove={jest.fn()} onReject={jest.fn()} />);
     expect(screen.queryByRole("button")).toBeNull();
-    expect(screen.getByRole("note")).toHaveTextContent("PHP 409,141.43 is above your approval limit of PHP 250,000.00.");
+    expect(screen.getByRole("note")).toHaveTextContent("₱409,141.43 is above your approval limit of ₱250,000.00.");
     expect(screen.getByRole("note")).toHaveTextContent("Can decide: J. Cruz");
   });
 

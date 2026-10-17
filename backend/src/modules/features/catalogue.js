@@ -4,11 +4,15 @@
  *
  * Tiers:
  *   PHASE_1   core TISPH scope (BRD v2.2, FRS); always on, never switched off from the tenant
- *   PHASE_2   built and delivered off; switched on by the iorta TechNXT platform administrator ("Enable Phase 2")
+ *   PHASE_2   built and delivered off; switched on by the iorta TechNXT platform administrator ("Enable Phase 2") or by
+ *             the enablers of the tenant (SUPERID by default; tenant.js, features.tenant_enable_roles)
  *   FUTURE    available in the platform but outside the BRD and FRS; off until enabled for a later release
  *   PLATFORM  supporting functions (users, configuration, audit, jobs); always on
  *
  * A feature: { key, name, description, module, tier, requirements, dependsOn, decision?, controls }.
+ * decision: { id, question, options, decided? } - a classification TISPH has to confirm (FT-Dnn of the feature
+ * catalogue document); `decided` = { answer (one of the options), by, on (YYYY-MM-DD), note } once TISPH answered.
+ * A decision without `decided` is shown "Decision pending" on Features & Releases.
  * controls:
  *   menus        side-menu entries, as the names of the menu from the top-level group down ("Accounts > Payables > AP Ageing")
  *   routes       other front-end addresses of the feature (wizard steps, public pages), matched as prefixes
@@ -130,8 +134,9 @@ export const FEATURES = Object.freeze([
     key: 'sales-dashboard', name: 'Sales dashboard', module: 'Dashboard', tier: P2,
     description: 'Conversion, figures by sales person, premium and policies by product and the monthly trend; agent performance on the executive dashboard',
     requirements: ['TIS-BRD-RPT-DSH-05', 'TIS-BRD-RPT-DSH-06', 'TIS-BRD-RPT-DSH-07', 'CR-17', 'FGA-SD-01', 'FGA-SD-02'],
-    decision: { question: 'TIS-BRD-RPT-02 (Phase 1) names the same measures as the Phase 2 dashboards DSH-05 to DSH-07. Is the Sales Dashboard the Phase 1 delivery of RPT-02 (always on) or a Phase 2 dashboard?',
-      options: ['Phase 1 (RPT-02 delivery, always on)', 'Phase 2 (enable with Phase 2)'] },
+    decision: { id: 'FT-D02', question: 'TIS-BRD-RPT-02 (Phase 1) names the same measures as the Phase 2 dashboards DSH-05 to DSH-07. Is the Sales Dashboard the Phase 1 delivery of RPT-02 (always on) or a Phase 2 dashboard?',
+      options: ['Phase 1 (RPT-02 delivery, always on)', 'Phase 2 (enable with Phase 2)'],
+      decided: { answer: 'Phase 2 (enable with Phase 2)', by: 'TISPH', on: '2026-10-11', note: 'Phase 2, enabled by the SUPERID role of TISPH or the platform administrator' } },
     menus: ['Dashboard > Sales Dashboard'], api: ['/dashboard/sales'],
     sections: ['Executive Dashboard: agent performance'], documents: ['sales-dashboard', 'tis-sales-unit-head-dashboard'],
     permissions: ['read:leads', 'read:quotations'],
@@ -150,35 +155,61 @@ export const FEATURES = Object.freeze([
   // ---------------------------------------------------------------- sales and placement
   feature({
     key: 'prospects', name: 'Prospects and lead assignment', module: 'Sales & Marketing', tier: P1,
-    description: 'Prospect capture and import, duplicate check, quick quote, assignment rules and reassignment, lead sources',
+    description: 'Prospect capture and import, duplicate check, assignment rules and reassignment, lead sources',
     requirements: ['TIS-BRD-LEAD-01', 'TIS-BRD-LEAD-02', 'TIS-BRD-LEAD-03', 'TIS-BRD-LEAD-04', 'TIS-BRD-LEAD-05', 'TIS-BRD-LEAD-06', 'TIS-BRD-LEAD-07', 'TIS-BRD-LEAD-08', 'TIS-BRD-LEAD-09'],
-    menus: ['Operations > Sales & Marketing > Prospects', 'Operations > Sales & Marketing > Quick Quote', 'Operations > Sales & Marketing > Lead Assignment',
-      'Master > Insurance Management > Lead Sources'],
+    menus: ['Sales & Placement > Prospects', 'Sales & Placement > Lead Assignment', 'Master > Insurance Management > Lead Sources'],
+  }),
+  feature({
+    key: 'quick-quote', name: 'Quick Quote', module: 'Sales & Marketing', tier: FUT,
+    description: 'Picker of the package products quoted on the spot from their tariff, opening the quotation wizard of the product or a request for quotation',
+    decision: { question: 'No BRD or FRS requirement and no TISPH role uses Quick Quote: the BRD raises a quotation per product from Quotations (QUOT-01). Is a quick quote picker wanted?',
+      options: ['Not wanted', 'Wanted in a later release'] },
+    dependsOn: ['quotations'],
+    menus: ['Sales & Placement > Quick Quote'], routes: ['/sales/quick-quote'], permissions: ['write:quotations'],
   }),
   feature({
     key: 'sales-activities', name: 'Sales activities', module: 'Sales & Marketing', tier: P1,
     description: 'Calls, meetings, e-mails and visits against prospects and clients, with their types and outcomes',
     requirements: ['TIS-BRD-LEAD-10'],
-    menus: ['Operations > Sales & Marketing > Sales Activities', 'Master > Organization > Sales Activity Types', 'Master > Organization > Sales Activity Outcomes'],
+    menus: ['Sales & Placement > Sales Activities', 'Master > Organization > Sales Activity Types', 'Master > Organization > Sales Activity Outcomes'],
   }),
   feature({
     key: 'quotations', name: 'Quotations and placement', module: 'Sales & Marketing', tier: P1,
     description: 'Motor, personal accident and credit life quotations with maker-checker, requests for quotation and placement slips to the insurer',
     requirements: ['TIS-BRD-QUOT-01', 'TIS-BRD-QUOT-02', 'TIS-BRD-QUOT-03', 'TIS-BRD-QUOT-04', 'TIS-BRD-QUOT-05', 'TIS-BRD-QUOT-06', 'TIS-BRD-QUOT-08',
       'TIS-BRD-PJRN-05', 'TIS-BRD-ISSUE-01', 'TIS-BRD-ISSUE-02', 'MOM-S2-PLACEMENT-DIRECT'],
-    menus: ['Operations > Sales & Marketing > Request for Quotation', 'Operations > Sales & Marketing > Quotations', 'Operations > Sales & Marketing > Placement Slips'],
+    menus: ['Sales & Placement > Request for Quotation', 'Sales & Placement > Quotations', 'Sales & Placement > Placement Slips',
+      'Master > Insurance Management > Motor Issuance Checklist'],
+    decision: { id: 'GAP-QUOTE-23', question: 'Which documents must be on file before a Motor policy is issued?',
+      options: ['Philippine broking practice (Motor Issuance Checklist master)', 'A list TISPH provides'],
+      decided: { answer: 'Philippine broking practice (Motor Issuance Checklist master)', by: 'TISPH', on: '2026-10-11', note: 'Delivered as the Motor Issuance Checklist master (new / used, individual / corporate, financed), enforced at booking (placement.issuance_checklist_mode, default block) with waivers by a second user (migration 0688); TISPH adjusts the records' } },
+  }),
+  feature({
+    key: 'credit-life', name: 'Credit Life batches', module: 'Operations', tier: P1,
+    description: 'Monthly Credit Life batches of the financing bank: members uploaded or encoded and checked against the Credit Life rules, one master policy per customer, certificates of cover e-mailed as password-protected PDFs, the batch forwarded to the insurer',
+    requirements: ['TIS-BRD-PJRN-01', 'TIS-BRD-PJRN-02', 'TIS-BRD-PJRN-03', 'CL-01', 'CL-02', 'CL-03', 'CL-04', 'TIS-BRD-RPT-OPS-01', 'CR-14'],
+    menus: ['Policy Servicing > Credit Life', 'Reports > Operational Reports > CLI Generated Report'], reports: ['cli-generated'],
+    permissions: ['read:credit-life', 'write:credit-life'],
   }),
   feature({
     key: 'dealer-programmes', name: 'Dealer programmes', module: 'Sales & Marketing', tier: P1,
-    description: 'Scheme 1 and 2 programmes of brand-new vehicles, dealer sales uploads and bank endorsement letters',
-    requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15'],
-    menus: ['Operations > Sales & Marketing > Dealer Programmes'],
+    description: 'Brand-new vehicle programmes with dealer sales uploads and bank endorsement letters; the Scheme Master of the Scheme 1 and 2 bundling schemes with its scheme rating; Scheme Issuance on TFS loan documents with the document checklist, waivers and the direct placement; the lock-in of scheme policies',
+    requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15', 'CR-05'],
+    menus: ['Sales & Placement > Dealer Programmes', 'Sales & Placement > Scheme Master', 'Sales & Placement > Scheme Issuance',
+      'Master > Insurance Management > Scheme Document Checklist'],
+    jobs: ['scheme-status'],
+    decision: { id: 'GAP-SALES-17', question: 'Who maintains the Scheme Master and the promotions?',
+      options: ['Operations makes, the Sales Unit Head and the General Manager approve', 'The Sales Unit Head, the General Manager and IT AppSupport'],
+      decided: { answer: 'The Sales Unit Head, the General Manager and IT AppSupport', by: 'TISPH', on: '2026-10-11', note: 'Each of them makes and approves, never their own (migration 0687); Operations and the other personas read' } },
   }),
   feature({
     key: 'promotions', name: 'Promotions and discount caps', module: 'Sales & Marketing', tier: P1,
     description: 'Promotional rates on brand-new vehicles with approval, unit quotas and lock-in years, and the discount caps per product and channel type',
     requirements: ['TIS-BRD-PROD-15'], dependsOn: ['quotations'],
-    menus: ['Operations > Sales & Marketing > Promotions', 'Master > Finance > Discount Caps'],
+    menus: ['Sales & Placement > Promotions', 'Master > Finance > Discount Caps'],
+    decision: { id: 'GAP-SALES-17', question: 'Who maintains the Scheme Master and the promotions?',
+      options: ['Operations makes, the Sales Unit Head and the General Manager approve', 'The Sales Unit Head, the General Manager and IT AppSupport'],
+      decided: { answer: 'The Sales Unit Head, the General Manager and IT AppSupport', by: 'TISPH', on: '2026-10-11', note: 'Each of them makes and approves promotions, never their own (migration 0687); the discount caps stay with Operations; the other personas read' } },
   }),
   feature({
     key: 'comparison-reports', name: 'Comparison reports', module: 'Sales & Marketing', tier: FUT,
@@ -186,7 +217,7 @@ export const FEATURES = Object.freeze([
     decision: { question: 'Placement is one insurer per client (MOM s.4) but TIS-BRD-PJRN-05 shares the PA quotation with every partner. Are comparison reports wanted, for PA only?',
       options: ['Not wanted', 'Personal Accident only', 'Every line'] },
     dependsOn: ['rfq-multi-insurer'],
-    menus: ['Operations > Sales & Marketing > Comparison Reports'], api: ['/comparison-reports'], data: ['comparison_reports'],
+    menus: ['Sales & Placement > Comparison Reports'], api: ['/comparison-reports'], data: ['comparison_reports'],
     documents: ['comparison-reports'], permissions: ['read:quotations'],
   }),
   feature({
@@ -202,7 +233,7 @@ export const FEATURES = Object.freeze([
     description: 'E-mail campaigns to consenting clients with segments, templates and the public opt-out link',
     decision: { question: 'No BRD or FRS requirement asks for marketing campaigns (NFR-17.1 covers consent and opt-out only). Are campaigns wanted?',
       options: ['Not wanted', 'Wanted in a later release'] },
-    menus: ['Operations > Sales & Marketing > Campaigns'], api: ['/campaigns'], jobs: ['campaign-dispatch'], settings: ['campaigns.conversion_window_days', 'campaigns.max_recipients'],
+    menus: ['Sales & Placement > Campaigns'], api: ['/campaigns'], jobs: ['campaign-dispatch'], settings: ['campaigns.conversion_window_days', 'campaigns.max_recipients'],
     data: ['campaigns'], documents: ['campaigns', 'tis-sales-officer-campaign'], permissions: ['read:campaigns', 'write:campaigns'],
   }),
   feature({
@@ -235,68 +266,81 @@ export const FEATURES = Object.freeze([
     key: 'clients', name: 'Clients', module: 'Operations', tier: P1,
     description: 'Single client master with KYC documents and the 360 view of proposals, policies, receipts and claims',
     requirements: ['TIS-BRD-KYC-01', 'TIS-BRD-KYC-02', 'TIS-BRD-KYC-04', 'TIS-BRD-KYC-05', 'TIS-BRD-NFR-10.2'],
-    menus: ['Operations > Clients'],
+    menus: ['Policy Servicing > Clients'],
+    decision: { id: 'GAP-POLICY-09', question: 'Who maintains the KYC of a client?', options: ['Sales (with the client record)', 'Operations'],
+      decided: { answer: 'Operations', by: 'TISPH', on: '2026-10-11', note: 'The TIS Operations personas (Associate, Officer, Unit Head) maintain the client KYC with write:client-kyc (migration 0687); the other personas keep their access' } },
   }),
   feature({
     key: 'policies', name: 'Policies, cover notes and cancellations', module: 'Operations', tier: P1,
     description: 'Policy register and lifecycle, policy payments, cover notes, endorsements and cancellations with return premium',
     requirements: ['TIS-BRD-ISSUE-03', 'TIS-BRD-ISSUE-04', 'TIS-BRD-KYC-03', 'TIS-BRD-ENDT-01', 'TIS-BRD-ENDT-02', 'TIS-BRD-ENDT-03', 'TIS-BRD-CANC-01', 'TIS-BRD-CANC-02',
       'TIS-BRD-CANC-03', 'TIS-BRD-BULK-02'],
-    menus: ['Operations > Policy', 'Operations > Payments', 'Operations > Cover Notes', 'Operations > Policy Cancellation', 'Master > Insurance Management > Endorsement Types'],
+    menus: ['Policy Servicing > Policy', 'Accounts > Payments', 'Policy Servicing > Cover Notes', 'Policy Servicing > Endorsements', 'Policy Servicing > Policy Cancellation', 'Master > Insurance Management > Endorsement Types'],
     jobs: ['policy-expiry', 'quote-expiry', 'cover-note-expiry'],
   }),
   feature({
     key: 'fleet-schedules', name: 'Fleet schedules', module: 'Operations', tier: P1,
     description: 'Fleet schedules of vehicles under one policy, with vehicles added or deleted by endorsement',
     requirements: ['TIS-BRD-ENDT-04', 'MOM-S9-GROUP-ENDT'],
-    menus: ['Operations > Fleet Schedules'],
+    menus: ['Policy Servicing > Fleet Schedules'],
   }),
   feature({
     key: 'open-covers', name: 'Parcel and courier open covers', module: 'Operations', tier: P1,
-    description: 'Open policy for parcel and courier shipments with certificates per customer and monthly declarations',
-    requirements: ['TIS-BRD-PJRN-09', 'FR-PCL-001'],
-    menus: ['Operations > Marine Open Covers'],
+    description: 'Open policy for parcel and courier shipments: covers and charge per certificate, parcel upload and certificates per customer (password-protected e-mail), daily and monthly declarations, the declaration file to the insurer, endorsements of the open policy, reversals, billing with the service fee and gross remittance; inland cargo shipments on the same declarations',
+    requirements: ['TIS-BRD-PJRN-09', 'FR-PCL-001', 'FR-PCL-002', 'FR-PCL-003', 'FR-PCL-004', 'FR-PCL-005', 'FR-PCL-010', 'FR-PCL-011', 'FR-PCL-012', 'FR-PCL-013', 'FR-PCL-014',
+      'FR-PCL-020', 'FR-PCL-021', 'FR-PCL-022', 'FR-PCL-023', 'FR-PCL-024', 'FR-PCL-030', 'FR-PCL-031', 'FR-PCL-040', 'FR-PCL-041', 'FR-PCL-042', 'FR-PCL-050', 'FR-PCL-051',
+      'FR-PCL-060', 'FR-PCL-061'],
+    menus: ['Policy Servicing > Marine Open Covers'], jobs: ['marine-daily-declaration-close', 'marine-monthly-declaration-open'],
+    permissions: ['read:marine', 'write:marine', 'write:parcel-certificates', 'approve:marine'],
   }),
   feature({
-    key: 'marine-cargo', name: 'Marine cargo open covers', module: 'Operations', tier: FUT,
-    description: 'Marine cargo as an open cover product beside parcel and courier',
-    dependsOn: ['open-covers'],
-    sections: ['Marine Open Covers: open covers on the marine cargo product (parcel and courier otherwise)'],
+    key: 'marine-cargo-inland', name: 'Marine cargo inland open covers', module: 'Operations', tier: P1,
+    description: 'Marine Cargo inland open covers (FRS PJRN-09 4.4): the land conveyance on the MARINE product, shipment uploads, daily declarations and the monthly declaration file to the insurer',
+    requirements: ['TIS-BRD-PJRN-09', 'FR-PCL-030', 'FR-PCL-031'], dependsOn: ['open-covers'],
+    settings: ['marine.inland_conveyances'],
+    sections: ['Marine Open Covers: Marine Cargo covers rated on the inland conveyances (Land) with Upload shipments'],
+  }),
+  feature({
+    key: 'marine-cargo', name: 'Marine cargo open covers (sea and air)', module: 'Operations', tier: P2,
+    description: 'Marine Cargo open covers beyond inland: the sea and air conveyances (imports and exports), enabled by SUPERID on Features & Releases',
+    requirements: ['TIS-BRD-PJRN-09'], dependsOn: ['marine-cargo-inland'],
+    settings: ['marine.conveyances'],
+    sections: ['Marine Open Covers: Marine Cargo covers rated on a conveyance other than the inland ones (Sea, Air)'],
   }),
   feature({
     key: 'claims', name: 'Claims', module: 'Operations', tier: P1,
     description: 'Motor and credit life claims from notification to settlement, document checklist, repairs and repair shops',
     requirements: ['TIS-BRD-CLAIM-01', 'TIS-BRD-CLAIM-02', 'TIS-BRD-CLAIM-03', 'TIS-BRD-CLAIM-04', 'TIS-BRD-CLAIM-05', 'TIS-BRD-CLAIM-06', 'TIS-BRD-CLAIM-07', 'TIS-BRD-CLAIM-08',
       'TIS-BRD-PJRN-08'],
-    menus: ['Operations > Claims', 'Operations > Claim Documents', 'Operations > Motor Claim Repairs', 'Master > Insurance Management > Claim Document Checklist',
+    menus: ['Policy Servicing > Claims', 'Policy Servicing > Claim Documents', 'Policy Servicing > Motor Claim Repairs', 'Master > Insurance Management > Claim Document Checklist',
       'Master > Insurance Management > Repair Shops'],
     jobs: ['claim-document-reminders'],
   }),
   feature({
     key: 'renewals', name: 'Renewals', module: 'Operations', tier: P1,
-    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management and lock-in accounts',
-    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
-    menus: ['Operations > Renewals > Renewal Policy', 'Operations > Renewals > Renewal Batch', 'Operations > Renewals > Renewal Queue', 'Operations > Renewals > Negotiations',
-      'Operations > Renewals > Lapse Management', 'Operations > Renewals > Lock-in Accounts'],
-    jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue'],
+    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management, and the 60-day Lock-in Review of lock-in and Scheme 2 accounts with the TFS loan status upload and the Lock-in / Scheme 2 expiry report',
+    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'TIS-BRD-RPT-SLS-05', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
+    menus: ['Policy Servicing > Renewals > Renewal Policy', 'Policy Servicing > Renewals > Renewal Batch', 'Policy Servicing > Renewals > Renewal Queue', 'Policy Servicing > Renewals > Negotiations',
+      'Policy Servicing > Renewals > Lapse Management', 'Policy Servicing > Renewals > Lock-in Review'],
+    jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue', 'lock-in-review'],
   }),
   feature({
     key: 'talkbot-calls', name: 'Talkbot renewal calls', module: 'Operations', tier: P1,
     description: 'Talkbot call lists of the Motor renewals, the call results upload, the Talkbot outcome and the Talkbot filter on renewal quotes',
     requirements: ['TIS-BRD-LEAD-09', 'CR-02'], dependsOn: ['renewals'],
-    menus: ['Operations > Renewals > Talkbot Calls'],
+    menus: ['Policy Servicing > Renewals > Talkbot Calls'],
     jobs: ['talkbot-call-list', 'talkbot-call-list-close'],
   }),
   feature({
     key: 'renewal-analytics', name: 'Retention analytics and renewal performance', module: 'Operations', tier: FUT,
     description: 'Retention KPIs by product, agent and month; renewal rate, premium retention and cycle time',
-    menus: ['Operations > Renewals > Retention Analytics', 'Operations > Renewals > Performance'], api: ['/renewals/performance'],
+    menus: ['Policy Servicing > Renewals > Retention Analytics', 'Policy Servicing > Renewals > Performance'], api: ['/renewals/performance'],
     permissions: ['read:renewals'],
   }),
   feature({
     key: 'renewal-at-risk', name: 'At-risk renewals', module: 'Operations', tier: FUT,
     description: 'Rule-based retention risk score of open renewals with recommended actions and escalation',
-    menus: ['Operations > Renewals > At-Risk Policies'], api: ['/renewals/at-risk'], permissions: ['read:renewals'],
+    menus: ['Policy Servicing > Renewals > At-Risk Policies'], api: ['/renewals/at-risk'], permissions: ['read:renewals'],
   }),
   feature({
     key: 'win-back', name: 'Win-back campaigns', module: 'Operations', tier: FUT,
@@ -309,7 +353,7 @@ export const FEATURES = Object.freeze([
     description: 'COC number series, COC authentication with the accredited provider and the unauthenticated COC report',
     decision: { question: 'The broker does not issue policies (BRD 4.1) and no requirement asks for COC authentication. Is CTPL authentication wanted?',
       options: ['Not wanted', 'Wanted'] },
-    menus: ['Operations > CTPL Authentication'], api: ['/ctpl'], connectors: ['CTPL_AUTH', 'LTO_FEED'],
+    menus: ['Policy Servicing > CTPL Authentication'], api: ['/ctpl'], connectors: ['CTPL_AUTH', 'LTO_FEED'],
     settings: ['ctpl.register_on_issue', 'ctpl.authenticate_on_issue', 'ctpl.lto_feed'], data: ['ctpl_authentications'], permissions: ['read:policies', 'write:policies'],
     documents: ['ctpl-authentication'],
   }),
@@ -390,9 +434,11 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'fixed-assets', name: 'Fixed assets', module: 'Accounts', tier: P2,
     description: 'Asset register by asset class, monthly straight-line depreciation and disposals',
-    requirements: ['TIS-BRD-NIA-07', 'FGA-FA-01', 'FGA-FA-02', 'FGA-FA-04', 'FGA-DS-08', 'TIS-BRD-RPT-FGA-10', 'PBSM-M17v4-PAFA'],
-    decision: { question: 'MOM-S5-AP-ASSET-MASTER (Phase 1) asks for an asset master at requisition while fixed assets (TIS-BRD-NIA-07) are Phase 2. Does the asset master go live in Phase 1?',
-      options: ['Phase 2 (enable with Phase 2)', 'Asset master in Phase 1'] },
+    // MOM-S5-AP-ASSET-MASTER (asset master at requisition) goes with fixed assets in Phase 2 (FT-D01)
+    requirements: ['TIS-BRD-NIA-07', 'FGA-FA-01', 'FGA-FA-02', 'FGA-FA-04', 'FGA-DS-08', 'TIS-BRD-RPT-FGA-10', 'PBSM-M17v4-PAFA', 'MOM-S5-AP-ASSET-MASTER'],
+    decision: { id: 'FT-D01', question: 'MOM-S5-AP-ASSET-MASTER (Phase 1) asks for an asset master at requisition while fixed assets (TIS-BRD-NIA-07) are Phase 2. Does the asset master go live in Phase 1?',
+      options: ['Phase 2 (enable with Phase 2)', 'Asset master in Phase 1'],
+      decided: { answer: 'Phase 2 (enable with Phase 2)', by: 'TISPH', on: '2026-10-11', note: 'Phase 2 with the asset master at requisition (MOM-S5-AP-ASSET-MASTER), enabled by the SUPERID role of TISPH or the platform administrator' } },
     menus: ['Accounts > Fixed Assets > Asset Register', 'Accounts > Fixed Assets > Depreciation Run', 'Accounts > Fixed Assets > Disposals', 'Master > Finance > Asset Classes'],
     api: ['/fixed-assets'], data: ['fixed_assets'], documents: ['fixed-assets-and-depreciation', 'asset-disposal', 'tis-finance-and-general-accounting-depreciation', 'tis-operations-officer-fixed-assets'],
     permissions: ['read:fixed-assets', 'write:fixed-assets'],
@@ -416,9 +462,9 @@ export const FEATURES = Object.freeze([
       'PBSM-M15-REMIT-WEEKLY', 'FR-RMT-001', 'FR-RMT-011', 'FR-RMT-012', 'FR-RMT-020', 'PBSM-M15-BILL-RUN'],
     menus: ['Accounts > Remittance > Remittances', 'Accounts > Remittance > Approvals', 'Accounts > Remittance > Insurer payments', 'Accounts > Remittance > Reconciliation',
       'Accounts > Remittance > Held policies',
-      'Accounts > Remittance > Exceptions', 'Accounts > Remittance > Insurer billing', 'Accounts > Remittance > Setup', 'Accounts > Remittance > Settlement',
-      // the earlier address of the insurer statements, opened as Remittance > Reconciliation (not a menu of the TISPH roles)
-      'Accounts > Insurer Reconciliation > Insurer Statements'],
+      'Accounts > Remittance > Exceptions', 'Accounts > Remittance > Insurer billing', 'Accounts > Remittance > Setup', 'Accounts > Remittance > Settlement'],
+    // the earlier address of the insurer statements opens under Accounts > Remittance > Reconciliation
+    routes: ['/accounts/insurer-reconciliation'],
     jobs: ['remittance-schedules', 'remittance-hold-check', 'insurer-billing-run'],
   }),
   feature({
@@ -453,10 +499,11 @@ export const FEATURES = Object.freeze([
     menus: ['Accounts > Tax > BIR Form 2307', 'Accounts > Tax > Sales Invoices', 'Accounts > Tax > CAS Books and Documents'],
   }),
   feature({
-    key: 'bir-reports', name: 'BIR relief and summary reports', module: 'Accounts', tier: FUT,
+    key: 'bir-reports', name: 'BIR relief and summary reports', module: 'Accounts', tier: P1,
     description: 'VAT summary, SAWT, QAP and the summary lists of sales and purchases',
     decision: { question: 'TIS-BRD-TAX-02 asks for a BIR report on criteria TISPH has not yet given (MOM s.16). Which BIR reports are wanted?',
-      options: ['VAT summary', 'SAWT', 'QAP', 'SLSP sales and purchases', 'None for now'] },
+      options: ['VAT summary', 'SAWT', 'QAP', 'SLSP sales and purchases', 'Phase 1, handled by Finance', 'None for now'],
+      decided: { answer: 'Phase 1, handled by Finance', by: 'TISPH', on: '2026-10-12', note: 'The tax and VAT reports belong to Finance; the BIR selection criteria remain open' } },
     dependsOn: ['tax'],
     menus: ['Accounts > Tax > VAT Summary', 'Accounts > Tax > SAWT', 'Accounts > Tax > QAP', 'Accounts > Tax > SLSP Sales', 'Accounts > Tax > SLSP Purchases'],
     api: ['/reports/bir-vat-summary', '/reports/bir-sawt', '/reports/bir-qap', '/reports/bir-slsp-sales', '/reports/bir-slsp-purchases'],
@@ -508,9 +555,11 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'incentives', name: 'Incentives', module: 'Accounts', tier: P1,
     description: 'Telesales incentive programmes, calculation with approval, statements and reports',
-    requirements: ['TIS-BRD-COMM-08'],
+    requirements: ['TIS-BRD-COMM-08', 'TIS-BRD-RPT-02', 'FR-TSI-001', 'FR-TSI-002', 'FR-TSI-003', 'FR-TSI-004', 'FR-TSI-005', 'FR-TSI-010', 'FR-TSI-011', 'FR-TSI-020', 'FR-TSI-021', 'FR-TSI-022',
+      'FR-TSI-030', 'FR-TSI-031', 'FR-TSI-032', 'FR-TSI-033', 'FR-TSI-034', 'FR-TSI-035', 'FR-TSI-036', 'FR-TSI-037', 'FR-TSI-040', 'FR-TSI-041', 'FR-TSI-042', 'FR-TSI-043'],
+    jobs: ['telesales-incentive-calc'],
     menus: ['Accounts > Incentive > My Programs', 'Accounts > Incentive > Calculations', 'Accounts > Incentive > Approvals', 'Accounts > Incentive > Statement',
-      'Accounts > Incentive > Reports', 'Master > Finance > Incentive Programs'],
+      'Accounts > Incentive > Reports', 'Master > Finance > Incentive Programs', 'Master > Finance > Sales Targets'],
   }),
 
   // ---------------------------------------------------------------- commission
@@ -518,14 +567,14 @@ export const FEATURES = Object.freeze([
     key: 'commission', name: 'Commission and referrer accounts', module: 'Commission', tier: P1,
     description: 'Commission dashboard, the accounts of agents, dealers and referrers with their share, the sharing schemes, the commission basis of a policy and the change requests on commission lines',
     requirements: ['TIS-BRD-COMM-02', 'TIS-BRD-COMM-05', 'TIS-BRD-COMM-06', 'TIS-BRD-PROD-16', 'TIS-BRD-RPT-OPS-07', 'FR-CMR-010', 'FR-CMR-015', 'FR-CMR-022', 'FR-RMT-001', 'FR-RMT-003', 'FR-RMT-005', 'FR-RMT-030'],
-    menus: ['Commission > Commission Dashboard', 'Commission > Agents/Referrer Accounts', 'Commission > Sharing Schemes'],
+    menus: ['Accounts > Commission > Commission Dashboard', 'Accounts > Commission > Agents/Referrer Accounts', 'Accounts > Commission > Sharing Schemes'],
     jobs: ['commission-rules-schemes'],
     permissions: ['read:sharing-schemes', 'write:sharing-schemes', 'approve:sharing-schemes', 'write:commission-share', 'approve:commission'],
   }),
   feature({
     key: 'insurer-overrides', name: 'Insurer overriding commission', module: 'Commission', tier: FUT,
     description: 'Overriding, profit and contingent commission agreements with insurers and their computations',
-    menus: ['Commission > Insurer Overrides > Agreements', 'Commission > Insurer Overrides > Computations'], api: ['/insurer-overrides'],
+    menus: ['Accounts > Commission > Insurer Override Agreements', 'Accounts > Commission > Insurer Override Computations'], api: ['/insurer-overrides'],
     data: ['override_agreements'], permissions: ['read:commission', 'write:commission'],
     documents: ['overriding-profit-and-contingent-commission-from-insurers'],
   }),
@@ -658,6 +707,9 @@ export const FEATURES = Object.freeze([
     requirements: ['TIS-BRD-PROD-01', 'TIS-BRD-PROD-04', 'TIS-BRD-PROD-07', 'TIS-BRD-PROD-09', 'TIS-BRD-PROD-10', 'TIS-BRD-PROD-12', 'TIS-BRD-PROD-13', 'TIS-BRD-PROD-14'],
     menus: ['Product Configurator > Product Templates', 'Product Configurator > Coverage Builder', 'Product Configurator > Rating Engine',
       'Product Configurator > Acceptance Rules', 'Product Configurator > Document Manager', 'Product Configurator > Market Mapping'],
+    decision: { id: 'GAP-POLICY-25', question: 'Which layouts do the customer documents (quotation, placement slip, policy schedule, receipt) use at go-live?',
+      options: ['Standard BrokerVerse prints', 'TISPH layouts'],
+      decided: { answer: 'Standard BrokerVerse prints', by: 'TISPH', on: '2026-10-11', note: 'TISPH layouts can replace them later through Product Configurator > Document Manager and Master > System Configuration > Documents and Reports Layout, without a code change' } },
   }),
   feature({
     key: 'product-analytics', name: 'Product analytics', module: 'Product Configurator', tier: FUT,
@@ -674,6 +726,8 @@ const byKey = new Map(FEATURES.map((f) => [f.key, f]));
 export const featureOf = (key) => byKey.get(key);
 /** Is the tier always on (Phase 1 and platform functions)? */
 export const alwaysOn = (f) => !!TIERS[f?.tier]?.alwaysOn;
+/** Is a decision of TISPH still open on the feature (a decision without its answer)? */
+export const decisionPending = (f) => !!f?.decision && !f.decision.decided;
 /** Features that can be switched on and off (Phase 2 and future releases). */
 export const switchable = () => FEATURES.filter((f) => !alwaysOn(f));
 
@@ -693,6 +747,10 @@ export function catalogueProblems() {
     seen.add(f.key);
     if (!TIERS[f.tier]) problems.push(`${f.key}: unknown tier ${f.tier}`);
     for (const d of f.dependsOn) if (!byKey.has(d)) problems.push(`${f.key}: depends on unknown feature ${d}`);
+    const decided = f.decision?.decided;
+    if (decided && !(f.decision.options || []).includes(decided.answer)) problems.push(`${f.key}: decision answer "${decided.answer}" is not one of its options`);
+    if (decided && /^Phase 2/.test(decided.answer) && f.tier !== 'PHASE_2') problems.push(`${f.key}: decided Phase 2 but in tier ${f.tier}`);
+    if (decided && /^Phase 1/.test(decided.answer) && f.tier !== 'PHASE_1') problems.push(`${f.key}: decided Phase 1 but in tier ${f.tier}`);
     for (const m of f.controls.menus) {
       if (menus.has(m)) problems.push(`menu entry "${m}" is registered by ${menus.get(m)} and ${f.key}`);
       menus.set(m, f.key);

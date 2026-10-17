@@ -1048,18 +1048,15 @@ export default function BatchTable() {
               <Button label={t("batchRenewal.generateQuotes")} icon="pi pi-calculator" outlined onClick={generateQuotes} loading={quoting}
                 disabled={quoting || sendingNotices || !(selectedBatch.policies || []).some((p) => p.isSelected && p.quoteStatus !== "Quoted" && p.quoteStatus !== "Queued")} />
             ) : null}
-            <Button
-              label={t("batchRenewal.sendNotices")}
-              icon="pi pi-envelope"
-              onClick={sendRenewalNotice}
-              disabled={
-                sendingNotices ||
-                (selectedBatch.policies || []).filter(
-                  (p) => p.isSelected && p.noticeStatus === "NotSent"
-                ).length === 0
-              }
-              loading={sendingNotices}
-            />
+            {(() => {
+              // never a disabled primary as an instruction: outlined with the reason until a policy is selected
+              const none = (selectedBatch.policies || []).filter((p) => p.isSelected && p.noticeStatus === "NotSent").length === 0;
+              return (
+                <Button label={t("batchRenewal.sendNotices")} icon="pi pi-envelope" onClick={sendRenewalNotice} disabled={sendingNotices} loading={sendingNotices}
+                  outlined={none} tooltip={none ? t("batchRenewal.selectToSend", "Select policies whose notice is not sent yet") : undefined}
+                  tooltipOptions={{ position: "top", showOnDisabled: true }} />
+              );
+            })()}
           </>
         ) : null}
       >
@@ -1196,38 +1193,23 @@ export default function BatchTable() {
                   field="policy.policyNumber"
                   header={t("batchRenewal.policyNumber")}
                   body={(rowData) => (
-                    <Button
-                      label={rowData.policy?.policyNumber}
-                      link
-                      className="p-0"
-                      onClick={() => navigate(`/agent/policydetail/${rowData.policyId}`)}
-                    />
+                    <span className="bv-cell-stack">
+                      <Button label={rowData.policy?.policyNumber} link className="p-0" onClick={() => navigate(`/agent/policydetail/${rowData.policyId}`)} />
+                      <small className="text-color-secondary">{rowData.policy?.clientName}</small>
+                    </span>
                   )}
                   sortable
                 />
-                <Column field="policy.clientName" header={t("batchRenewal.clientName")} sortable />
-                <Column
-                  field="policy.insuranceCompanyName"
-                  header={t("batchRenewal.insuranceCompany")}
-                  sortable
-                />
-                <Column
-                  field="policy.expiryDate"
-                  header={t("batchRenewal.expiryDate")}
-                  sortable
-                  body={(rowData) => formatDate(rowData.policy?.expiryDate)}
-                />
+                <Column field="policy.insuranceCompanyName" header={t("batchRenewal.insuranceCompany")} sortable style={{ maxWidth: "12rem" }} />
+                <Column field="policy.expiryDate" header={t("batchRenewal.expiryDate")} sortable bodyClassName="bv-nowrap" body={(rowData) => formatDate(rowData.policy?.expiryDate)} />
                 <Column
                   field="noticeStatus"
                   header={t("batchRenewal.noticeStatus")}
                   sortable
                   body={(rowData) => (
                     <span className="bv-cell-stack" title={rowData.noticeStatus === "Skipped" ? rowData.error || undefined : undefined}>
-                      <StatusChip
-                        code={rowData.noticeStatus}
-                        label={noticeLabel(rowData.noticeStatus)}
-                        severity={getNoticeStatusSeverity(rowData.noticeStatus)}
-                      />
+                      <StatusChip code={rowData.noticeStatus} label={noticeLabel(rowData.noticeStatus)} severity={getNoticeStatusSeverity(rowData.noticeStatus)} />
+                      {rowData.noticeSentAt ? <small className="text-color-secondary bv-nowrap">{formatInstant(rowData.noticeSentAt)}</small> : null}
                       {rowData.noticeStatus === "NotSent" && rowData.noticeTreatment && rowData.noticeTreatment.code !== "send" ? (
                         <small className="bv-text-alert">{rowData.noticeTreatment.label}</small>
                       ) : null}
@@ -1236,24 +1218,18 @@ export default function BatchTable() {
                   )}
                 />
                 <Column
-                  field="noticeSentAt"
-                  header={t("batchRenewal.noticeSentAt")}
-                  sortable
-                  body={(rowData) => formatInstant(rowData.noticeSentAt)}
-                />
-                <Column
                   field="quoteStatus"
                   header={t("batchRenewal.quoteStatus")}
                   body={(rowData) => (
-                    <span className="flex flex-column gap-1">
+                    <span className="bv-cell-stack">
                       <StatusChip code={rowData.quoteStatus || "NotQuoted"} label={quoteLabel(rowData)} severity={QUOTE_SEVERITY[rowData.quoteStatus] || "secondary"} />
                       {rowData.skipReason ? <small className="text-color-secondary">{rowData.skipReason}</small> : null}
+                      {talkbotOn && rowData.talkbotOutcome ? (
+                        <small className="text-color-secondary">{t(`talkbot.outcomes.${rowData.talkbotOutcome}`, rowData.talkbotOutcomeLabel)}</small>
+                      ) : null}
                     </span>
                   )}
                 />
-                {talkbotOn ? (
-                  <Column header={t("batchRenewal.talkbotOutcome")} body={(rowData) => (rowData.talkbotOutcome ? t(`talkbot.outcomes.${rowData.talkbotOutcome}`, rowData.talkbotOutcomeLabel) : "-")} />
-                ) : null}
                 <Column
                   field="createdAt"
                   header={t("batchRenewal.addedDate")}

@@ -30,11 +30,17 @@ request, migration 0571), `write:commission-share` (changes the share of a line 
 - A change on a line: direct (`POST .../lines/:lineId/rate|reverse|wht`) or, under review, a request with a reason
   code of the contexts commission_rate_change / commission_reversal / commission_wht_change (seed
   `96_commission_reasons.sql`) decided by `approve:commission` other than the requester.
+- A payee (FGA EN-01, EN-02, migration 0645): Add payee / Edit on Agents/Referrer Accounts (`POST` / `PUT
+  /referrer-accounts`, `GET /referrer-accounts/options`) with the vendor group (`commission.vendor_groups`), a unique
+  vendor code, address, contact person, TIN, bank and withholding tax. While `commission.payee_verification_required`
+  is on (TISPH), a new payee and a change of its name, TIN, bank details or withholding tax wait for `POST
+  /referrer-accounts/:id/verify` by a holder of `approve:commission` other than the user who made them
+  (`verification_changes` keeps what changed); meanwhile `payoutBlockReason` refuses to approve or pay its lines.
 - A scheme: draft -> pending -> scheduled / active -> superseded or ended; the assignment of a referrer or channel is a
   change under review too. The share of a line is changed within the scheme limits with a reason (commission_share_change).
 
 ## Key settings
 
 `commission.adjustment_approval_required` (false; TISPH true), `commission.eligible_requires_remittance` (false; TISPH
-true), `commission.reverse_on_cancellation` (true; the CANC-03 proposal), `commission.max_chain_levels`,
+true), `commission.payee_verification_required` (false; TISPH true), `commission.vendor_groups`, `commission.reverse_on_cancellation` (true; the CANC-03 proposal), `commission.max_chain_levels`,
 `commission.share_change_reason_required`, `commission.variance_channels`, `commission.default_rate`.

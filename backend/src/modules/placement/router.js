@@ -19,6 +19,7 @@ import { getPolicyRow, toPolicy } from '../policies/service.js';
 import * as slips from './brokerSlips.js';
 import * as plc from './placements.js';
 import { journeyFor } from './journey.js';
+import * as checklist from './issuanceChecklist.js';
 import { productLines } from './productLines.js';
 import { many } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
@@ -38,7 +39,7 @@ const insurerRef = z.union([z.number(), z.string().min(1), z.object({}).passthro
 
 // ---------------------------------------------------------------- Broker slips
 const bs = moduleRouter('Broker Slips', '/broker-slips');
-const BS = 'Operations > Sales & Marketing > Request for Quotation (Broker Slip)';
+const BS = 'Sales & Placement > Request for Quotation (Broker Slip)';
 const slipExample = { brokerSlipId: 'bs_1', slipNumber: 'BS-2026-00001', status: 'submitted', insuredName: 'Cebu Cold Storage Corp.', productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000,
   submissionDate: '2026-09-20', responseDueDate: '2026-09-27', offers: [{ offerId: 'ofr_1', offerNumber: 'OFR-2026-00001', insuranceCompanyName: 'Malayan Insurance Co., Inc.', status: 'offered', premium: 212500, rate: 0.25, taxes: 31556.25, premiumTotal: 244056.25, offeredShare: 60, validityDate: '2026-10-20' }] };
 const slipBody = z.object({
@@ -155,7 +156,7 @@ bs.define({
   handler: async (req, res) => {
     const p = await plc.createPlacement({ ...req.body, brokerSlipId: (await slips.getSlipRow(req.params.id)).id }, req.user);
     await audit(req, { entity: 'placement', entityId: p.id, action: 'create-from-broker-slip', after: { placementNumber: p.placementNumber, brokerSlip: p.brokerSlipNumber } });
-    sendEntity(res, p, { status: 201, message: `Placement slip ${p.placementNumber} prepared` });
+    sendEntity(res, { ...p, sendApprovalRequired: await plc.sendApprovalRequired() }, { status: 201, message: `Placement slip ${p.placementNumber} prepared` });
   },
 });
 for (const [path, status, label] of [['/:id/cancel', 'cancelled', 'Cancel the broker slip'], ['/:id/close', 'closed', 'Close the broker slip without a quotation (e.g. not taken up)']]) {
@@ -181,7 +182,7 @@ bs.define({
 
 // ---------------------------------------------------------------- Placement slips
 const { router, define } = moduleRouter('Placement Slips', '/placements');
-const PS = 'Operations > Sales & Marketing > Placement Slips';
+const PS = 'Sales & Placement > Placement Slips';
 const participantExample = { participantId: 11, insuranceCompanyId: 2, insuranceCompanyName: 'Malayan Insurance Co., Inc.', isLead: true, sharePercent: 60, sumInsured: 51000000, premium: 127500, taxes: 18933.75, premiumTotal: 146433.75, commissionAmount: 19125, insurerReference: null, status: 'pending' };
 const placementExample = { placementId: 'plc_1', placementNumber: 'PS-2026-00001', source: 'quote', status: 'draft', placementStatus: 'PlacementRaised', quotationNumber: 'QT-2026-00007', insuredName: 'Cebu Cold Storage Corp.',
   productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000, netPremium: 212500, grossPremium: 244056.25, inceptionDate: '2026-10-01', expiryDate: '2027-10-01', participants: [participantExample] };
@@ -223,7 +224,7 @@ define({
 });
 define({
   method: 'GET', path: '/product-lines', summary: 'Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products',
-  screen: 'Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips',
+  screen: 'Sales & Placement > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips',
   middleware: [requireAuth, requirePermission('read:quotations', 'read:leads')], query: { businessType: 'package' },
   response: { success: true, data: { lines: [{ code: 'ACCIDENT', name: 'Personal Accident', products: [{ id: 9, code: 'PA', name: 'Personal Accident', line: 'ACCIDENT', lob: 'ACCIDENT', businessType: 'package', customerSegment: 'retail' }] }] } },
   handler: async (req, res) => {
@@ -250,14 +251,15 @@ define({
   handler: async (req, res) => {
     const p = await plc.createPlacement(req.body, req.user);
     await audit(req, { entity: 'placement', entityId: p.id, action: 'create', after: { placementNumber: p.placementNumber, source: p.source, quotationNumber: p.quotationNumber, participants: p.participants.map((x) => `${x.insuranceCompanyName} ${x.sharePercent}%`) } });
-    sendEntity(res, p, { status: 201, message: `Placement slip ${p.placementNumber} created` });
+    sendEntity(res, { ...p, sendApprovalRequired: await plc.sendApprovalRequired() }, { status: 201, message: `Placement slip ${p.placementNumber} created` });
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued)',
+  method: 'GET', path: '/:id', summary: 'Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued), the approval to send (sendApproval, sendApprovalRequired, canApproveSend)',
   screen: `${PS} > Detail`, middleware: [...canRead, ownRecord('placement')],
   response: { success: true, ...placementExample, timeline: [{ key: 'quotationSlip', label: 'Quotation Slip', done: true, reference: 'QT-2026-00007' }, { key: 'acknowledged', label: 'Acknowledged', done: false }] },
-  handler: async (req, res) => sendEntity(res, await plc.placementById(req.params.id)),
+  // with the approval to send: whether it is needed (placement.send_requires_approval) and whether the signed-in user may give it
+  handler: async (req, res) => sendEntity(res, { ...await plc.placementById(req.params.id), sendApprovalRequired: await plc.sendApprovalRequired(), canApproveSend: await plc.canApproveSend(req.user) }),
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks; the stored slip PDF is generated again', screen: `${PS} > Edit`,
@@ -266,7 +268,7 @@ define({
   handler: async (req, res) => {
     const r = await plc.updatePlacement(req.params.id, req.body, req.user);
     await audit(req, { entity: 'placement', entityId: r.after.id, action: 'update', before: r.before, after: plc.toPlacement(await plc.getPlacementRow(r.after.id)) });
-    sendEntity(res, r.after, { message: 'Placement slip updated' });
+    sendEntity(res, { ...r.after, sendApprovalRequired: await plc.sendApprovalRequired() }, { message: 'Placement slip updated' });
   },
 });
 define({
@@ -280,7 +282,28 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again', screen: `${PS} > Detail > Send to insurer`,
+  method: 'POST', path: '/:id/request-approval', summary: 'Submit a raised placement slip for approval before it is sent to the insurer (placement.send_requires_approval): the approvers of placement.send_approval_roles are notified; a rejected slip is submitted again',
+  screen: `${PS} > Detail > Submit for approval`, middleware: [...canWrite, ownRecord('placement'), validate(z.object({ remarks: z.string().max(1000).optional().nullable() }))],
+  request: { remarks: 'Firm order for Malayan, premium as quoted' }, response: { success: true, data: { ...placementExample, sendApproval: { status: 'pending', requestedBy: 'Ana Cruz', requestedAt: '2026-10-11T02:00:00Z' } } },
+  handler: async (req, res) => {
+    const p = await plc.requestSendApproval(req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'placement', entityId: p.id, action: 'submit-approval', after: { sendApproval: 'pending', remarks: req.body?.remarks || null } });
+    sendEntity(res, p, { message: `Placement slip ${p.placementNumber} submitted for approval` });
+  },
+});
+define({
+  method: 'POST', path: '/:id/approval', summary: 'Approve or reject (with the reason) a placement slip waiting for approval to send: a user of placement.send_approval_roles who neither raised nor submitted it (maker-checker enforced on the server)',
+  screen: `${PS} > Detail > Approve / Reject`, middleware: [...canRead, ownRecord('placement'), validate(z.object({ decision: z.enum(['approve', 'reject']), note: z.string().max(2000).optional().nullable() }))],
+  request: { decision: 'reject', note: 'Share of the co-insurer not confirmed' }, response: { success: true, data: { ...placementExample, sendApproval: { status: 'rejected', note: 'Share of the co-insurer not confirmed' } } },
+  handler: async (req, res) => {
+    const r = await plc.decideSendApproval(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action: req.body.decision === 'approve' ? 'approve-send' : 'reject-send', before: { sendApproval: 'pending' },
+      after: { sendApproval: r.placement.sendApproval?.status, note: req.body.note || null } });
+    sendEntity(res, r.placement, { message: req.body.decision === 'approve' ? `Placement slip ${r.placement.placementNumber} approved: it can be sent to the insurer` : `Placement slip ${r.placement.placementNumber} rejected` });
+  },
+});
+define({
+  method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A raised slip is sent once approved by a second user (placement.send_requires_approval). A sent or acknowledged placement can be sent again', screen: `${PS} > Detail > Send to insurer`,
   middleware: [...canWrite, ownRecord('placement'), validate(z.object({ insurerIds: z.array(z.union([z.number(), z.string()])).optional() }))], request: {},
   response: { success: true, data: { ...placementExample, status: 'sent' }, sent: [{ insurer: 'Malayan Insurance Co., Inc.', email: 'uw@malayan.example' }] },
   handler: async (req, res) => {
@@ -372,19 +395,48 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/book', summary: 'Book the checked placement (Insurer issued): the policy is created with the e-policy numbers and dates and comes into force; bill or direct-bill commission, journal, commission accrual, participants copied, cover notes superseded, policy schedule e-mailed to the client. The only way a policy is issued for TISPH',
+  method: 'POST', path: '/:id/book', summary: 'Book the checked placement (Insurer issued): the Motor issuance checklist is checked first (placement.issuance_checklist_mode: block refuses with code ISSUANCE_CHECKLIST, warn books and returns warnings); the policy is created with the e-policy numbers and dates and comes into force; bill or direct-bill commission, journal, commission accrual, participants copied, cover notes superseded, policy schedule e-mailed to the client. The only way a policy is issued for TISPH',
   screen: `${PS} > Detail > Book (Insurer issued)`, middleware: [...canIssue, ownRecord('placement'), validate(z.object({ additionalPolicyData: z.record(z.any()).optional() }).passthrough())],
   request: { additionalPolicyData: { idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/maria.jpg', paymentMethod: 'Bank transfer' } },
   response: { success: true, data: { policy: { policyId: 'pol_1', policyNumber: 'POL-2026-00012' }, placement: { ...placementExample, status: 'issued', placementStatus: 'InsurerIssued' }, schedule: { emailId: 813, to: 'maria.santos@example.ph' } } },
   handler: async (req, res) => {
     const r = await plc.bookPlacement(req.params.id, req.body || {}, req.user);
     const policy = toPolicy(await getPolicyRow(r.policyId));
-    await audit(req, { entity: 'placement', entityId: r.placement.id, action: 'book', before: { status: 'checked' }, after: { status: 'issued', policyNumber: policy.policyNumber, insurerPolicyNumber: r.placement.epolicy?.insurerPolicyNumber } });
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action: 'book', before: { status: 'checked' }, after: { status: 'issued', policyNumber: policy.policyNumber, insurerPolicyNumber: r.placement.epolicy?.insurerPolicyNumber,
+      ...(r.checklistWarnings?.length ? { checklistMissing: r.checklistWarnings } : {}) } });
     await audit(req, { entity: 'policy', entityId: policy.id, action: 'issue', after: { policyNumber: policy.policyNumber, placement: r.placement.placementNumber, grossPremium: policy.grossPremium, scheduleEmailedTo: r.schedule?.to || null } });
-    res.status(201).json({ success: true, message: `Policy ${policy.policyNumber} booked`, policyId: policy.id,
+    res.status(201).json({ success: true, message: `Policy ${policy.policyNumber} booked${r.checklistWarnings?.length ? ` (${r.checklistWarnings.join('; ')})` : ''}`, policyId: policy.id, warnings: r.checklistWarnings || [],
       data: { policy, placement: r.placement, receivable: r.receivable || null, commission: r.commission || null, schedule: r.schedule } });
   },
 });
+// ---------------------------------------------------------------- Motor issuance checklist (GAP-QUOTE-23)
+const itemExample = { id: 12, code: 'MIC-SI', document: 'Sales invoice of the vehicle', required: true, canWaive: true, status: 'received', statusLabel: 'Received', onFile: false,
+  fileName: 'sales-invoice.pdf', receivedBy: 'Ana Cruz' };
+const checklistOut = async (res, id, message = 'OK') => res.json({ success: true, message, data: await checklist.checklistOf(id) });
+define({
+  method: 'GET', path: '/:id/issuance-checklist', summary: 'Motor issuance checklist of the placement slip: the documents of the Motor Issuance Checklist master that apply (brand new / used, individual / corporate, financed, transfer, CTPL), their status, the facts matched and the gate (mandatory documents missing); placement.issuance_checklist_mode',
+  screen: `${PS} > Detail > Issuance checklist`, middleware: [...canRead, ownRecord('placement')],
+  response: { success: true, data: { applies: true, mode: 'block', facts: { brandNew: true, corporate: false, financed: true }, items: [itemExample], gate: { missing: 1, documents: ['Delivery receipt of the vehicle'], required: 5 } } },
+  handler: async (req, res) => checklistOut(res, req.params.id),
+});
+const itemAction = (path, summary, screen, body, fn, action, extraMiddleware = []) => define({
+  method: 'POST', path: `/:id/issuance-checklist/:itemId/${path}`, summary, screen: `${PS} > Detail > Issuance checklist > ${screen}`,
+  middleware: [...canRead, ...extraMiddleware, ownRecord('placement'), validate(body)], request: Object.fromEntries(Object.keys(body.shape).slice(0, 1).map((k) => [k, k === 'decision' ? 'approve' : 'text'])),
+  response: { success: true, data: { applies: true, items: [itemExample] } },
+  handler: async (req, res) => {
+    const r = await fn(req.params.id, req.params.itemId, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action, after: { document: r.item.document, ...req.body } });
+    await checklistOut(res, r.placement.id, r.message);
+  },
+});
+itemAction('receive', 'Receive a document of the checklist: the file uploaded through /s3/upload (documentKey) or, for a paper original, a remark', 'Receive',
+  z.object({ documentKey: z.string().max(500).optional().nullable(), documentName: z.string().max(255).optional().nullable(), remark: z.string().max(1000).optional().nullable() }), checklist.receiveItem, 'checklist-receive', [requirePermission('write:quotations')]);
+itemAction('reopen', 'Reopen a received or waived document with a remark (back to pending)', 'Reopen', z.object({ remark: z.string().max(1000) }), checklist.reopenItem, 'checklist-reopen', [requirePermission('write:quotations')]);
+itemAction('waiver', 'Request the waiver of a pending document the master allows to be waived, with the reason; the approvers (approve:policies) are notified', 'Request waiver',
+  z.object({ reason: z.string().max(1000) }), checklist.requestWaiver, 'checklist-waiver-request', [requirePermission('write:quotations')]);
+itemAction('waiver-decision', 'Approve (waived) or reject with the reason (pending) a waiver: approve:policies, never the user who requested it', 'Approve / reject waiver',
+  z.object({ decision: z.enum(['approve', 'reject']), note: z.string().max(1000).optional().nullable() }), checklist.decideWaiver, 'checklist-waiver-decision', [requirePermission('approve:policies')]);
+
 define({
   method: 'GET', path: '/:id/documents/placement-slip', summary: 'Placement Slip PDF: insurerId= gives that participant\'s slip showing its own share (default: the lead insurer); the file stored when the placement was raised is slipDocument.key', screen: `${PS} > Detail > Placement Slip PDF`,
   middleware: [...canRead, ownRecord('placement')], query: { insurerId: 2 }, response: 'application/pdf',

@@ -42,7 +42,7 @@ const AccountLedgerDialog = ({ account, from, to, onHide }) => {
       {error && <div className="pe-error" role="alert">{error}</div>}
       <div className="bv-loading-host">
         <LoadingBar active={refreshing} />
-        <DataTable value={postings} loading={loading} size="small" stripedRows scrollable scrollHeight="50vh"
+        <DataTable value={postings} loading={loading} size="small" stripedRows scrollable
           emptyMessage={t("financialStatements.ledger.none")}>
           <Column header={t("financialStatements.ledger.date")} body={(r) => date(r.date)} style={{ width: "7.5rem" }} />
           <Column header={t("financialStatements.ledger.journal")} body={(r) => <JournalLink journal={r} onOpen={open} />} style={{ width: "10rem" }} />

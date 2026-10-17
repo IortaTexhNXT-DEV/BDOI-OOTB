@@ -85,7 +85,7 @@ describe('segments, next step and actions', () => {
   it('a draft offers submit and the downloads to its preparer, and waits on the preparer', async () => {
     const row = (await list('maker', 'segment=drafts')).data.find((x) => x.id === plain.id);
     expect(row.nextStep).toMatchObject({ code: 'submit', label: 'Submit for approval' });
-    expect(row.actions.map((a) => a.code)).toEqual(['view', 'submit', 'download-schedule-xlsx', 'download-schedule-pdf']);
+    expect(row.actions.map((a) => a.code)).toEqual(['view', 'submit', 'cancel', 'download-schedule-xlsx', 'download-schedule-pdf']);
     expect(row.actions.find((a) => a.code === 'submit')).toMatchObject({ allowed: true });
     expect(row.actions.find((a) => a.code === 'view').link).toBe(`/finance/remittance/remittances/${plain.id}`);
     expect(row).toMatchObject({ source: { code: 'manual', label: 'Manual' }, flags: { offCycle: false, overdue: false, openExceptions: 0 }, basis: 'net', productLine: null,

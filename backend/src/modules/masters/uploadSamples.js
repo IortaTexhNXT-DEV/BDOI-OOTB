@@ -66,6 +66,18 @@ export const MASTER_TEMPLATES = [
     samples: [{ vehicleCode: 'VH-TOY-VELOZ-G', vehicleName: 'Toyota Veloz 1.5 G CVT', vehicleVariant: '1.5 G CVT', vehicleModel: 'Veloz', vehicleBrand: 'Toyota', seatingCapacity: '7', bodyType: 'MPV' }],
   },
   {
+    type: 'scheme-document-checklist', button: true, menu: 'Master > Insurance Management > Scheme Document Checklist',
+    notes: ['A record applies to an application by Scheme Type, KYC Source and Condition (* = every one). A KYC item cannot be waived and must be uploaded, never marked received without a file.'],
+    samples: [{ code: 'SCH-LTO-OR', schemeType: '*', kycSource: '*', condition: 'Always', documentName: 'LTO official receipt and certificate of registration', kycItem: 'No', required: 'No',
+      canWaive: 'Yes', sortOrder: '75' }],
+  },
+  {
+    type: 'motor-issuance-checklist', button: true, menu: 'Master > Insurance Management > Motor Issuance Checklist',
+    notes: ['A record applies to a Motor placement slip by Vehicle, Insured, Financing and Applies When (Any = every one). A KYC Document Type on the client\'s file meets the record.'],
+    samples: [{ code: 'MIC-NOTARY', documentName: 'Notarised deed of sale (second-hand vehicle)', vehicleCondition: 'Used', customerType: 'Any', financing: 'Any', condition: 'Transfer of insurance',
+      minVehicleAge: '', kycDocType: '', required: 'Yes', canWaive: 'Yes', sortOrder: '105' }],
+  },
+  {
     type: 'country', button: true, menu: 'Master > Generals > Location > Country',
     samples: [{ CountryName: 'Indonesia', ISOCode: 'ID', Description: 'Republic of Indonesia', PhoneCode: '+62' }],
   },

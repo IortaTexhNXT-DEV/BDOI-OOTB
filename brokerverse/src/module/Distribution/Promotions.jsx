@@ -26,6 +26,7 @@ import DateField from "../../components/DateField";
 import FieldError from "../../components/FieldError";
 import ApprovalActions, { isInitiator } from "../../components/ApprovalActions";
 import { formatValue } from "../../components/KeyValueGrid/formatValue";
+import { ListCell, PeriodCell } from "../../components/TableCells";
 
 const STATUS_FILTERS = ["", "active", "scheduled", "pending-approval", "draft", "suspended", "expired,withdrawn"];
 const EMPTY = { code: "", name: "", periodFrom: "", periodTo: "", benefit: "rate", unitQuota: null, lockInYears: null, productIds: [], insurerIds: [], channelTypes: [],
@@ -185,7 +186,7 @@ const Promotions = () => {
 
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("promotions.title")}>
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("promotions.title")}>
         {write ? <Button label={t("promotions.add")} icon="pi pi-plus" onClick={() => edit(null)} /> : null}
       </PageHeader>
       <div className="pe-card">
@@ -200,10 +201,10 @@ const Promotions = () => {
         <DataTable value={rows} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={t("promotions.none")}>
           <Column field="code" header={t("promotions.code")} body={(r) => <strong>{r.code}</strong>} />
           <Column field="name" header={t("promotions.name")} />
-          <Column header={t("promotions.products")} body={(r) => r.products.map((p) => p.name).join(", ")} />
-          <Column header={t("promotions.insurers")} body={(r) => r.insurers.map((p) => p.name).join(", ")} />
+          <Column header={t("promotions.products")} body={(r) => <ListCell items={r.products.map((p) => p.name)} />} />
+          <Column header={t("promotions.insurers")} body={(r) => <ListCell items={r.insurers.map((p) => p.name)} />} />
           <Column header={t("promotions.channelTypes")} body={(r) => r.channelTypeLabels.join(", ")} />
-          <Column header={t("promotions.period")} body={(r) => `${formatValue(r.periodFrom, { type: "date" })} - ${formatValue(r.periodTo, { type: "date" })}`} />
+          <Column header={t("promotions.period")} body={(r) => <PeriodCell from={r.periodFrom} to={r.periodTo} />} />
           <Column header={t("promotions.variants")} body={(r) => r.lineCount} className="bv-num" headerClassName="bv-num" />
           <Column header={t("promotions.version")} body={(r) => `v${r.version}`} />
           <Column header={t("promotions.units")} body={(r) => (r.unitQuota ? `${r.unitsUsed} / ${r.unitQuota}` : r.unitsUsed)} className="bv-num" headerClassName="bv-num" />

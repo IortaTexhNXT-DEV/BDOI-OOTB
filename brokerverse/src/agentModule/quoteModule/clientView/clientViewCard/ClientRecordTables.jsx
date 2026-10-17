@@ -24,7 +24,7 @@ import { getCategoriesForLob } from "../../../endorsementModule/constants/endors
 import { CONTINUE_ROUTE, stepForStatus } from "../../../claimsModule/shared/claimJourney";
 
 /**
- * The record lists of the client view (Operations > Clients > client): policies, quotations, claims, renewals,
+ * The record lists of the client view (Policy Servicing > Clients > client): policies, quotations, claims, renewals,
  * endorsements, receipts and KYC documents of one client, each as a compact table with a search box and the row actions
  * of the record (the frequent one as an icon, the others in the More actions menu).
  */

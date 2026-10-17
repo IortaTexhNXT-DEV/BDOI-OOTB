@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import PageHeader from "../../components/PageHeader";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { AutoComplete } from "primereact/autocomplete";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
-import SvgDot from "../../assets/icons/SvgDot";
 import InitialsAvatar from "../../agentModule/component/InitialsAvatar";
 import { ChangePasswordDialog, TwoFactorDialog } from "../../agentModule/authModule/security/AccountSecurityDialogs";
 import profileService from "../../services/profileService";
@@ -59,7 +57,6 @@ const Value = ({ id, children }) => (
  */
 const MyProfile = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [editing, setEditing] = useState(false);
@@ -175,20 +172,14 @@ const MyProfile = () => {
   const genderOptions = useMemo(() => GENDERS.map((g) => ({ value: g, label: t(`myProfile.genders.${g}`) })), [t]);
   const genderText = (g) => (g ? t(`myProfile.genders.${g}`, { defaultValue: g }) : "");
 
-  const breadcrumb = (
-    <BreadCrumb
-      home={{ label: t("myProfile.home"), command: () => navigate("/") }}
-      model={[{ label: t("myProfile.myAccount") }, { label: t("myProfile.title") }]}
-      separatorIcon={<SvgDot color={"#000"} />}
-      className="myprofile__breadcrumb"
-    />
+  const header = (
+    <PageHeader title={t("myProfile.title")} home={{ label: t("myProfile.home"), to: "/" }} section={t("myProfile.myAccount")} trail={[t("myProfile.title")]} />
   );
 
   if (loadError) {
     return (
       <div className="myprofile">
-        <h1 className="page-title">{t("myProfile.title")}</h1>
-        {breadcrumb}
+        {header}
         <div className="myprofile__card myprofile__load-error" role="alert">
           <span>{loadError}</span>
           <Button type="button" label={t("myProfile.retry")} className="p-button-outlined p-button-sm" onClick={load} />
@@ -270,12 +261,7 @@ const MyProfile = () => {
 
   return (
     <div className="myprofile">
-      <div className="myprofile__header">
-        <div>
-          <h1 className="page-title">{t("myProfile.title")}</h1>
-          {breadcrumb}
-        </div>
-      </div>
+      {header}
 
       {/* Identity and access: read-only, maintained in User Management */}
       <section className="myprofile__card myprofile__summary" aria-label={t("myProfile.accountSummary")}>

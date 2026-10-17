@@ -37,7 +37,7 @@ afterAll(async () => { await pool.end(); });
 describe('catalogue', () => {
   it('runs every TISPH layout over the sample business', async () => {
     const codes = (await q("SELECT code FROM report_definitions WHERE code LIKE 'tisph-%' ORDER BY sort_order")).map((r) => r.code);
-    expect(codes).toHaveLength(20);
+    expect(codes).toHaveLength(24);
     for (const code of codes) await run(ctx.api, code, { FromDate: addDays(day, -20), ToDate: day });
   });
 
@@ -98,15 +98,19 @@ describe('CR-15 cash control', () => {
     await q(`INSERT INTO post_dated_cheques(id, pdc_number, client_id, cheque_number, cheque_date, amount, received_date, status, payee, cancel_reason_code, cancel_remarks, cancelled_on, created_by)
       VALUES ('pdc_rpt_1', 'PDC-RPT-0001', $1, '000123', $2, 12500, $2, 'cancelled', 'tisph', 'PDC-CXL-CASH', 'Cash replacement', $2, 'test'),
              ('pdc_rpt_2', 'PDC-RPT-0002', $1, '000124', $2, 7300, $2, 'bounced', 'tisph', NULL, NULL, NULL, 'test')`, [c.id, day]);
-    await q("UPDATE post_dated_cheques SET bounced_on = $1, bounce_reason_code = 'PDC-BNC-DAIF', deposit_account = 'ACC-MBT-001' WHERE id = 'pdc_rpt_2'", [day]);
+    await q("UPDATE post_dated_cheques SET bounced_on = $1, bounce_reason_code = 'PDC-BNC-DAIF', deposit_account = 'ACC-MBT-001', drawee_bank = 'BDO Unibank' WHERE id = 'pdc_rpt_2'", [day]);
     await q(`INSERT INTO audit_log(user_id, username, entity, entity_id, action, after_data) VALUES ('usr_admin', 'admin', 'post_dated_cheque', 'pdc_rpt_2', 'bounce', '{"statusText":"Bounced"}')`);
     const cancelled = await run(bp, 'tisph-pdc-cancelled', { FromDate: day, ToDate: day });
     expect(cancelled.rows.find((r) => r.pdcNumber === 'PDC-RPT-0001')).toMatchObject({ reason: 'Cash replacement', amount: 12500 });
     const reversals = await run(bp, 'tisph-daily-reversals', { FromDate: day, ToDate: day });
-    expect(reversals.rows.find((r) => r.reference === 'PDC-RPT-0002')).toMatchObject({ kind: 'Bounced cheque', reason: 'DAIF - drawn against insufficient funds', bankAccount: 'ACC-MBT-001' });
+    expect(reversals.rows.find((r) => r.reference === 'PDC-RPT-0002')).toMatchObject({ kind: 'Bounced cheque', reason: 'DAIF - drawn against insufficient funds', bankAccount: 'ACC-MBT-001', draweeBank: 'BDO Unibank' });
     expect(reversals.groups.find((g) => g.group === 'ACC-MBT-001')).toBeTruthy();
     const history = await run(bp, 'tisph-pdc-history', { FromDate: day, ToDate: day });
     expect(history.rows.find((r) => r.pdcNumber === 'PDC-RPT-0002')).toMatchObject({ event: 'Bounce', statusAfter: 'Bounced' });
+    // the history is dated by the business day (Manila): 17:00 UTC on the 1st is the 2nd in Manila
+    await q(`INSERT INTO audit_log(user_id, username, entity, entity_id, action, after_data, at) VALUES ('usr_admin', 'admin', 'post_dated_cheque', 'pdc_rpt_1', 'cancel', '{"statusText":"Cancelled"}', '2026-03-01T17:00:00Z')`);
+    expect((await run(bp, 'tisph-pdc-history', { FromDate: '2026-03-02', ToDate: '2026-03-02' })).rows.map((r) => r.pdcNumber)).toEqual(['PDC-RPT-0001']);
+    expect((await run(bp, 'tisph-pdc-history', { FromDate: '2026-03-01', ToDate: '2026-03-01' })).rows).toEqual([]);
     const maturing = await run(bp, 'tisph-pdc-maturing', { FromDate: day, ToDate: day });
     expect(maturing.rows.find((r) => r.pdcNumber === 'PDC-RPT-0002')).toMatchObject({ status: 'Bounced' });
     expect(maturing.rows.find((r) => r.pdcNumber === 'PDC-RPT-0001')).toBeUndefined();
@@ -126,5 +130,51 @@ describe('CR-14 premium and net remittance', () => {
     const premium = await run(ops, 'tisph-premium-payment-status', { FromDate: '2000-01-01', ToDate: day });
     expect(premium.rows.find((r) => r.policyNumber === p.policy_number)).toMatchObject({ paymentStatus: 'Fully paid' });
     expect(premium.groups.map((g) => g.group)).toEqual(expect.arrayContaining(['Fully paid']));
+  });
+});
+
+describe('CR-11 BIR books of accounts (TIS-BRD-TAX-02)', () => {
+  it('lists the posted GL in the General Journal and the cash books, balanced, in Excel and CSV; not for Sales', async () => {
+    const from = addDays(day, -60);
+    const gj = await run(finance, 'bir-book-general-journal', { FromDate: from, ToDate: day });
+    expect(gj.rows.length).toBeGreaterThan(0);
+    expect(r2(gj.rows.reduce((a, r) => a + Number(r.debit), 0))).toBe(r2(gj.rows.reduce((a, r) => a + Number(r.credit), 0)));
+    const crb = await run(finance, 'bir-book-cash-receipts', { FromDate: from, ToDate: day, ReportCriteria: 'Month' });
+    expect(crb.rows.every((r) => Number(r.amount) > 0 && r.cashAccount)).toBe(true);
+    for (const code of ['bir-book-cash-disbursements', 'bir-book-sales-journal', 'bir-book-purchase-journal', 'bir-book-general-ledger']) await run(finance, code, { FromDate: from, ToDate: day });
+    const csv = await finance('post', '/reports/bir-book-general-journal/generate').send({ FromDate: from, ToDate: day, format: 'csv' });
+    expect(csv.status).toBeLessThan(300);
+    expect((await sales('post', '/reports/bir-book-general-journal/run').send({})).status).toBe(403);
+  });
+});
+
+describe('CR-16 GL schedule, journal entries and chart of accounts (RPT-FGA-05 to 07)', () => {
+  it('splits the open-item lines into open and cleared, with the clearing document of a cleared one', async () => {
+    const from = addDays(day, -60);
+    const all = await run(finance, 'tisph-gl-schedule', { FromDate: from, ToDate: day, ReportCriteria: 'Overall' });
+    expect(all.rows.length).toBeGreaterThan(0);
+    for (const r of all.rows) {
+      expect(['40', '50']).toContain(r.postingKey);
+      expect(r2(Math.abs(Number(r.amount)))).toBe(r2(Number(r.clearedAmount) + Number(r.openAmount)));
+      if (r.status === 'Cleared') expect(r.clearingDate).toBeTruthy();
+      else expect(r.clearingDate).toBeNull();
+    }
+    const open = await run(finance, 'tisph-gl-schedule', { FromDate: from, ToDate: day, Status: 'Open' });
+    expect(open.rows.every((r) => r.status === 'Open')).toBe(true);
+  });
+
+  it('lists the journal entries by document type with company code, preparer and approver, balanced', async () => {
+    const je = await run(finance, 'tisph-journal-entries', { FromDate: addDays(day, -60), ToDate: day });
+    expect(je.rows.length).toBeGreaterThan(0);
+    expect(je.rows[0].companyCode).toBe('4F29');
+    expect(je.groups.length).toBeGreaterThan(0);
+    expect(r2(je.totals.debit)).toBe(r2(je.totals.credit));
+  });
+
+  it('lists the chart of accounts, filtered by account prefix; not for Sales', async () => {
+    const coa = await run(finance, 'tisph-chart-of-accounts', { Account: '1' });
+    expect(coa.rows.length).toBeGreaterThan(0);
+    expect(coa.rows.every((r) => r.accountCode.startsWith('1'))).toBe(true);
+    expect((await sales('post', '/reports/tisph-chart-of-accounts/run').send({})).status).toBe(403);
   });
 });

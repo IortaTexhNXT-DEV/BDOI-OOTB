@@ -276,3 +276,48 @@ describe('coverage change endorsements (premium delta)', () => {
     expect((await q('SELECT billing_mode FROM endorsements WHERE id = $1', [e.body.endorsementId]))[0].billing_mode).toBe('direct');
   });
 });
+
+describe('endorsement commission calculated by the insurer (TIS-BRD-COMM-07)', () => {
+  const screen = (od) => ({ LossandDamagecoverage: String(od), LossandDamagecoverageRate: '1.75', BodilyInjury: '', PropertyDamage: '', APPATotalCoverage: '' });
+  const raise = async (od) => {
+    const before = Number((await q("SELECT premium_total FROM policies WHERE id = 'pol_sls_02'"))[0].premium_total);
+    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(od),
+      premiumDelta: r2((await grossOf(r2(od * 0.0175))) - before) });
+    expect(e.status, JSON.stringify(e.body)).toBe(201);
+    return e.body;
+  };
+  const book = (id, no) => ap('post', '/endorsements/complete-endorsement').send({ endorsementId: id, endorsementNumber: no, issuedDate: '2026-09-28' });
+
+  it('books the commission the insurer supplied for one endorsement; refuses a negative amount and a booked endorsement', async () => {
+    const e = await raise(1250000);
+    expect((await cs('put', `/endorsements/${e.endorsementId}/insurer-commission`).send({ amount: -5 })).status).toBe(400);
+    const s = await cs('put', `/endorsements/${e.endorsementId}/insurer-commission`).send({ amount: 333.33 });
+    expect(s.status, JSON.stringify(s.body)).toBe(200);
+    expect(s.body.data.insurerCommission).toBe(333.33);
+    const c = await book(e.endorsementId, 'INS-COM-1');
+    expect(c.status, JSON.stringify(c.body)).toBe(200);
+    expect(Number((await q('SELECT commission_amount FROM receivables WHERE id = $1', [c.body.receivableId]))[0].commission_amount)).toBe(333.33);
+    expect((await cs('put', `/endorsements/${e.endorsementId}/insurer-commission`).send({ amount: 1 })).status).toBe(400);
+  });
+
+  it('takes a bulk file with a result per row, and with the control on refuses to book without the insurer commission', async () => {
+    const e = await raise(1300000);
+    const file = Buffer.from(['Endorsement No,Commission', `${e.endorsementNumber},"1,200.50"`, 'END-NONE,10', `${e.endorsementNumber},abc`].join('\r\n'));
+    const u = await cs('post', '/endorsements/insurer-commission/upload').attach('file', file, 'insurer.csv');
+    expect(u.status, JSON.stringify(u.body)).toBe(200);
+    expect(u.body.data).toMatchObject({ total: 3, created: 1, failed: 2 });
+    expect(u.body.data.errors.map((x) => x.row)).toEqual([3, 4]);
+    expect(Number((await q('SELECT insurer_commission FROM endorsements WHERE id = $1', [e.endorsementId]))[0].insurer_commission)).toBe(1200.5);
+    expect((await book(e.endorsementId, 'INS-COM-2')).status).toBe(200);
+
+    await q("UPDATE app_settings SET value = 'true' WHERE key = 'endorsements.insurer_commission_required'");
+    const { clearSettingsCache } = await import('../src/lib/settings.js');
+    clearSettingsCache();
+    const bare = await raise(1350000);
+    const refused = await book(bare.endorsementId, 'INS-COM-3');
+    expect(refused.status).toBe(400);
+    expect(JSON.stringify(refused.body)).toContain('Record the commission the insurer calculated');
+    await q("UPDATE app_settings SET value = 'false' WHERE key = 'endorsements.insurer_commission_required'");
+    clearSettingsCache();
+  });
+});

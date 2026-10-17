@@ -4,13 +4,15 @@
  * code, a prospect's assignment history and the team view by reporting line.
  */
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
+import { forbidden } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import * as asg from './assignment.js';
+import * as callout from './callout.js';
 
 const { router, define } = moduleRouter('Lead assignment', '/lead-assignment');
-const SCREEN = 'Operations > Sales & Marketing > Lead Assignment';
+const SCREEN = 'Sales & Placement > Lead Assignment';
 const canRead = [requireAuth, requirePermission('read:lead-assignment', 'write:lead-assignment')];
 const canWrite = [requireAuth, requirePermission('write:lead-assignment')];
 // the team view is open to every prospect user: a manager sees the people reporting to them
@@ -28,6 +30,7 @@ const ruleBody = z.object({
   method: z.enum(asg.METHODS).optional(), conditions: conditions.optional(), assignees: z.array(z.string().min(1)).min(1),
   status: z.enum(['active', 'inactive']).optional(), description: z.string().max(500).optional().nullable(),
   maxOpen: z.coerce.number().int().min(0).max(100000).optional().nullable(),
+  callout: z.boolean().optional(),
 });
 const ruleUpdate = ruleBody.partial();
 const leadIds = z.array(z.string().min(1)).min(1).max(1000);
@@ -37,6 +40,14 @@ const queueBody = z.object({ leadIds, ...reasonFields }).refine((b) => b.reasonC
 const takeBody = z.object({ leadIds });
 const orderBody = z.object({ ids: z.array(z.coerce.number().int()).min(1).max(500) });
 const runBody = z.object({ dryRun: z.boolean().optional() });
+const withdrawBody = z.object({ leadIds, reason: z.string().trim().min(1, 'A reason is required to withdraw the endorsement').max(500) });
+// call-out rules and endorsements belong to the Team Leaders of the telesales callers (FR-TSI-010 R4)
+const canEndorse = [requireAuth, requirePermission('write:callout-endorsement')];
+const assertCalloutRule = (req, before = null) => {
+  if ((req.body?.callout === true || before?.callout === true) && !hasPermission(req.user, 'write:callout-endorsement')) {
+    throw forbidden('Call-out rules can be saved only by users who endorse call-out leads (write:callout-endorsement)');
+  }
+};
 
 const rule = { id: 1, name: 'Metro Manila motor', priority: 10, method: 'round_robin', conditions: { lob: 'MOTOR', province: 'Metro Manila' }, assignees: ['usr_1', 'usr_2'], assigneeNames: ['Juan Dela Cruz', 'Maria Santos'], status: 'active' };
 const queued = { id: 'ld_1', leadNumber: 'LD-2026-00012', name: 'Jose Reyes', status: 'New', lob: 'MOTOR', ownerName: 'Juan Dela Cruz', assignmentStatus: 'queued', queueReason: 'No assignment rule matched' };
@@ -51,6 +62,7 @@ define({
   middleware: [...canWrite, validate(ruleBody)], request: { name: 'Metro Manila motor', priority: 10, method: 'round_robin', conditions: { lob: 'MOTOR', province: 'Metro Manila' }, assignees: ['usr_1', 'usr_2'] },
   response: { success: true, data: rule },
   handler: async (req, res) => {
+    assertCalloutRule(req);
     const r = await asg.createRule(req.body, req.user.id);
     await audit(req, { entity: 'lead_assignment_rule', entityId: r.id, action: 'create', after: r });
     res.status(201).json({ success: true, message: 'Assignment rule added', data: r });
@@ -83,6 +95,7 @@ define({
   method: 'PUT', path: '/rules/:id', summary: 'Change an assignment rule (status active / inactive activates or deactivates it)', screen: `${SCREEN} > Rules > Edit`, middleware: [...canWrite, validate(ruleUpdate)],
   request: { priority: 20, status: 'inactive' }, response: { success: true, data: rule },
   handler: async (req, res) => {
+    assertCalloutRule(req, asg.ruleOut(await asg.getRule(req.params.id)));
     const { before, after } = await asg.updateRule(req.params.id, req.body, req.user.id);
     await audit(req, { entity: 'lead_assignment_rule', entityId: after.id, action: 'update', before, after });
     res.json({ success: true, message: 'Assignment rule saved', data: after });
@@ -151,6 +164,27 @@ define({
   screen: SCREEN, middleware: canTeam, query: { leadIds: 'ld_1,ld_2' },
   response: { success: true, data: [{ id: 'usr_1', name: 'Juan Dela Cruz', username: 'agent.jdelacruz', branchCode: 'HO', designation: 'Account Executive', open: 4, suggested: true, rules: ['Metro Manila motor'] }] },
   handler: async (req, res) => res.json({ success: true, data: await asg.assigneeOptions({ leadIds: String(req.query.leadIds || '').split(',').filter(Boolean) }) }),
+});
+
+define({
+  method: 'POST', path: '/callout/endorse', summary: 'Endorse prospects as call-out leads of their callers (the caller\'s Team Leader or a holder of approve:incentive); prospects of another team are skipped with the reason (MSG-TSI-029, 031)',
+  screen: `${SCREEN} > Endorse as call-out lead`, middleware: [...canEndorse, validate(z.object({ leadIds }))], request: { leadIds: ['ld_1'] },
+  response: { success: true, data: { endorsed: [{ leadNumber: 'LD-2026-95102', caller: 'Geralyn Ramos' }], skipped: [] } },
+  handler: async (req, res) => {
+    const out = await callout.endorse(req.body.leadIds, req.user);
+    for (const e of out.endorsed) await audit(req, { entity: 'callout_endorsement', entityId: e.leadId, action: 'endorse', after: e });
+    res.json({ success: true, message: out.message, data: out });
+  },
+});
+define({
+  method: 'POST', path: '/callout/withdraw', summary: 'Withdraw the call-out endorsement of prospects without a quotation, with a reason (MSG-TSI-030)',
+  screen: `${SCREEN} > Withdraw endorsement`, middleware: [...canEndorse, validate(withdrawBody)], request: { leadIds: ['ld_1'], reason: 'Handed to the wrong caller' },
+  response: { success: true, data: { withdrawn: [{ leadNumber: 'LD-2026-95102' }], skipped: [] } },
+  handler: async (req, res) => {
+    const out = await callout.withdraw(req.body.leadIds, req.body.reason, req.user);
+    for (const w of out.withdrawn) await audit(req, { entity: 'callout_endorsement', entityId: w.leadId, action: 'withdraw', after: { ...w, reason: req.body.reason } });
+    res.json({ success: true, message: out.message, data: out });
+  },
 });
 
 export default router;

@@ -191,14 +191,17 @@ describe('post-dated cheque register', () => {
     m = await makePolicy({ net: 8000 });
     rcv = await bill(m);
     const half = r2(m.gross / 2);
-    const reg = (b) => ctx.as('maker')('post', '/pdc').send({ receivableId: rcv.id, bankId: null, draweeBank: 'BDO Unibank', storageLocation: 'Vault A', ...b });
-    const a = await reg({ chequeNumber: '1001', chequeDate: asOf, amount: half });
+    const reg = (b) => ctx.as('maker')('post', '/pdc').send({ receivableId: rcv.id, bankId: null, draweeBank: 'BDO Unibank', storageLocation: 'Vault A', receivedDate: addDays(asOf, -1), ...b });
+    // FR-PDC-002: a cheque number of 6 to 10 digits, dated after the received date
+    expect((await reg({ chequeNumber: '1001', chequeDate: asOf, amount: half })).status).toBe(400);
+    expect((await reg({ chequeNumber: '1000001', chequeDate: addDays(asOf, -1), amount: half })).status).toBe(400);
+    const a = await reg({ chequeNumber: '1000001', chequeDate: asOf, amount: half });
     expect(a.status).toBe(201);
     first = a.body.data;
     expect(first).toMatchObject({ status: 'on-hand', billNumber: rcv.bill_number, amount: half });
-    second = (await reg({ chequeNumber: '1002', chequeDate: addDays(asOf, 30), amount: r2(m.gross - half) })).body.data;
-    expect((await reg({ chequeNumber: '1003', chequeDate: asOf, amount: 1 })).status).toBe(409);
-    expect((await reg({ chequeNumber: '1001', chequeDate: asOf, amount: 1 })).status).toBeGreaterThanOrEqual(400);
+    second = (await reg({ chequeNumber: '1000002', chequeDate: addDays(asOf, 30), amount: r2(m.gross - half) })).body.data;
+    expect((await reg({ chequeNumber: '1000003', chequeDate: asOf, amount: 1 })).status).toBe(409);
+    expect((await reg({ chequeNumber: '1000001', chequeDate: asOf, amount: 1 })).status).toBeGreaterThanOrEqual(400);
     expect((await ctx.as('sales')('get', '/pdc')).status).toBe(403);
     const due = (await ctx.as('maker')('get', '/pdc/deposit-due')).body.data;
     expect(due.rows.map((r) => r.id)).toContain(first.id);
@@ -223,7 +226,8 @@ describe('post-dated cheque register', () => {
     expect(b.body.data.emailedTo).toBe(m.client.email);
     expect(Number((await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id])).balance)).toBe(m.gross);
     expect((await one('SELECT receipt_status FROM receipts WHERE id = $1', [b.body.data.pdc.receiptId])).receipt_status).toBe('Cancelled');
-    const rep = await ctx.as('maker')('post', `/pdc/${first.id}/replace`).send({ draweeBank: 'BPI', chequeNumber: '2001', chequeDate: asOf });
+    expect((await ctx.as('maker')('post', `/pdc/${first.id}/replace`).send({ draweeBank: 'BPI', chequeNumber: '2001', chequeDate: addDays(asOf, 7) })).status).toBe(400);
+    const rep = await ctx.as('maker')('post', `/pdc/${first.id}/replace`).send({ draweeBank: 'BPI', chequeNumber: '2000001', chequeDate: addDays(asOf, 7) });
     expect(rep.status).toBe(201);
     expect(rep.body.data.replaced.status).toBe('replaced');
     expect(rep.body.data.pdc).toMatchObject({ status: 'on-hand', replacesNumber: first.pdcNumber, amount: first.amount });

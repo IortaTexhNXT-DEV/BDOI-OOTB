@@ -364,6 +364,46 @@ async function approvals(ctx) {
       status: 'pm.status', link: "'/sales/promotions'", created_at: 'pm.created_at' })}
       FROM promotions pm WHERE pm.status = 'pending-approval' AND ${notMine(ctx, 'pm.created_by')} AND ${notMine(ctx, 'pm.updated_by')} AND ${notMine(ctx, 'pm.submitted_by')}`);
   }
+  // product templates submitted for review (PROD-03, migration 0660): never decided by who created, changed or submitted them
+  if (ctx.can('approve:products') && await has('product_templates')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Product template'", id: "'ptpl-' || pt.id", ref: "pt.template_code || ' ' || COALESCE(pt.version_label, 'v' || pt.version)", title: 'pt.name',
+      due_date: due('COALESCE(pt.submitted_at, pt.updated_at)'), status: 'pt.status', link: "'/product-configurator/templates'", created_at: 'COALESCE(pt.submitted_at, pt.created_at)' })}
+      FROM product_templates pt WHERE pt.status = 'Pending Approval' AND ${notMine(ctx, 'pt.created_by')} AND ${notMine(ctx, 'pt.updated_by')} AND ${notMine(ctx, 'pt.submitted_by')}`);
+  }
+  // dealer schemes (SCHM-02), checklist waivers of scheme applications (SCHM-01) and lock-in decisions and changes (SCHM-03):
+  // decided by the holders of the approve permission, never by their maker
+  if (ctx.can('approve:schemes') && await has('schemes')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Scheme'", id: 'sc.id', ref: "sc.scheme_no || ' v' || sc.version", title: 'sc.description', due_date: due('COALESCE(sc.submitted_at, sc.created_at)'),
+      status: 'sc.status', link: "'/sales/schemes?scheme=' || sc.id", next_action: "'Approve or return the scheme'", created_at: 'sc.created_at' })}
+      FROM schemes sc WHERE sc.status = 'pending-approval' AND ${notMine(ctx, 'sc.created_by')} AND ${notMine(ctx, 'sc.updated_by')} AND ${notMine(ctx, 'sc.submitted_by')}`);
+  }
+  if (ctx.can('approve:scheme-issuance') && await has('scheme_checklist_items')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Checklist waiver'", id: "'sci-' || ci.id", ref: 'sa.application_number', title: "ci.document || ': ' || COALESCE(ci.waiver_reason, '')",
+      due_date: due('ci.waiver_requested_at'), status: 'ci.status', link: "'/sales/scheme-issuance/' || sa.id", created_at: 'ci.waiver_requested_at' })}
+      FROM scheme_checklist_items ci JOIN scheme_applications sa ON sa.id = ci.application_id WHERE ci.status = 'waiver-requested' AND ${notMine(ctx, 'ci.waiver_requested_by')}`);
+  }
+  // endorsements of an open policy and reversals of declared parcel certificates (FR-PCL-005, 014): approve:marine, never the maker
+  if (ctx.can('approve:marine') && await has('open_cover_endorsements')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Open policy endorsement'", id: 'oe.id', ref: 'oc.cover_number', title: "'Effective ' || to_char(oe.effective_from, 'DD Mon YYYY') || ': ' || oe.reason",
+      client_name: 'occ.display_name', due_date: due('oe.requested_at'), status: 'oe.status', link: "'/operations/open-covers/' || oc.id || '?endorsement=' || oe.id",
+      next_action: "'Approve or return the endorsement'", created_at: 'oe.requested_at' })}
+      FROM open_cover_endorsements oe JOIN open_covers oc ON oc.id = oe.open_cover_id JOIN clients occ ON occ.id = oc.client_id
+      WHERE oe.status = 'pending' AND ${notMine(ctx, 'oe.requested_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Certificate reversal'", id: 'rx.id', ref: 'rx.certificate_number', title: "COALESCE(rx.customer_name, rx.certificate_number) || ': ' || rx.reversal_reason",
+      client_name: 'rcl.display_name', due_date: due('rx.reversal_requested_at'), status: 'rx.reversal_status', link: "'/operations/open-covers/' || roc.id || '?reversal=' || rx.id",
+      amount: 'rx.premium', next_action: "'Approve or return the reversal'", created_at: 'rx.reversal_requested_at' })}
+      FROM open_cover_certificates rx JOIN open_covers roc ON roc.id = rx.open_cover_id JOIN clients rcl ON rcl.id = roc.client_id
+      WHERE rx.reversal_status = 'pending' AND ${notMine(ctx, 'rx.reversal_requested_by')}`);
+  }
+  if (ctx.can('approve:lock-in') && await has('lock_in_reviews')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Lock-in review'", id: 'lr.id', ref: 'lp.policy_number',
+      title: "CASE lr.decision WHEN 'release' THEN 'Release to standard renewal' ELSE 'Not for renewal' END || COALESCE(': ' || lr.reason, '')", due_date: due('lr.decided_at'),
+      status: 'lr.status', link: "'/renewal/lock-in-review?review=' || lr.id", next_action: "'Approve or return the decision'", created_at: 'lr.decided_at' })}
+      FROM lock_in_reviews lr JOIN policies lp ON lp.id = lr.policy_id WHERE lr.status = 'pending-approval' AND ${notMine(ctx, 'lr.decided_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Lock-in change'", id: 'lc.id', ref: 'cp.policy_number', title: "initcap(lc.action) || ' lock-in: ' || lc.remark", due_date: due('lc.requested_at'),
+      status: 'lc.status', link: "'/agent/policydetail/' || cp.id", created_at: 'lc.requested_at' })}
+      FROM lock_in_changes lc JOIN policies cp ON cp.id = lc.policy_id WHERE lc.status = 'pending' AND ${notMine(ctx, 'lc.requested_by')}`);
+  }
   if (ctx.can('approve:discount-caps') && await has('discount_caps')) {
     out.push(`SELECT ${select({ ...base, kind: "'Discount cap'", id: "'dc-' || dc.id", ref: "'DC-' || dc.id", title: "pr.name || ' - ' || replace(initcap(replace(dc.channel_type, '_', ' ')), 'Agent', 'Agent / referrer')",
       due_date: due('dc.created_at'), status: 'dc.status', link: "'/master/finance/discount-caps'", created_at: 'dc.created_at' })}
@@ -427,6 +467,23 @@ async function approvals(ctx) {
       link: "'/renewal/negotiations?renewal=' || ra.id", amount: 'ra.premium_new', created_at: 'ra.created_at' })}
       FROM renewals ra JOIN policies p ON p.id = ra.policy_id LEFT JOIN clients c ON c.id = COALESCE(ra.client_id, p.client_id)
       WHERE ra.status = 'pending-approval' AND ${notMine(ctx, 'ra.submitted_by')} AND ${rec(ctx, 'renewal', 'ra')}`);
+  }
+  // placement slips waiting for approval before they go to the insurer (GAP-POLICY-21): the roles of
+  // placement.send_approval_roles, never the user who raised or submitted the slip (placement/placements.js)
+  const placementApprovers = (await getSetting('placement.send_approval_roles', [])) || [];
+  if (ctx.can('read:quotations') && (isAdmin(ctx.user) || ctx.roles.some((r) => placementApprovers.includes(r))) && await has('placements')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Placement slip'", id: "'pls-' || ps.id", ref: 'ps.placement_number', title: "COALESCE(ic.name, ps.lob, 'Placement slip')", client_name: CLIENT('c', 'l', 'ps.insured_name'),
+      due_date: due('ps.send_approval_requested_at'), status: "'pending'", next_action: "'Approve or reject before it is sent to the insurer'", link: "'/placement/placement-slips/' || ps.id",
+      amount: 'ps.premium_total', created_at: 'ps.send_approval_requested_at' })}
+      FROM placements ps LEFT JOIN clients c ON c.id = ps.client_id LEFT JOIN leads l ON l.id = ps.lead_id LEFT JOIN insurance_companies ic ON ic.id = ps.insurance_company_id
+      WHERE ps.status = 'draft' AND ps.send_approval_status = 'pending' AND ${notMine(ctx, 'ps.send_approval_requested_by')} AND ${notMine(ctx, 'ps.created_by')} AND ${rec(ctx, 'placement', 'ps')}`);
+  }
+  // waivers of the Motor issuance checklist (GAP-QUOTE-23): approve:policies, never the user who requested them
+  if (ctx.can('approve:policies') && await has('placement_checklist_items')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Checklist waiver'", id: "'pci-' || pci.id", ref: 'pw.placement_number', title: "pci.document || ': ' || COALESCE(pci.waiver_reason, '')",
+      due_date: due('pci.waiver_requested_at'), status: 'pci.status', link: "'/placement/placement-slips/' || pw.id", created_at: 'pci.waiver_requested_at' })}
+      FROM placement_checklist_items pci JOIN placements pw ON pw.id = pci.placement_id
+      WHERE pci.status = 'waiver-requested' AND ${notMine(ctx, 'pci.waiver_requested_by')} AND ${rec(ctx, 'placement', 'pw')}`);
   }
   // premium payments captured on a policy wait for the verification of a receipting user (write:receipts, policies/router.js)
   if (ctx.can('write:receipts') && await has('policy_payments')) {

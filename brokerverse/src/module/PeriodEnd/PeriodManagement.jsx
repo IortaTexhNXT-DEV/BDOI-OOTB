@@ -17,6 +17,7 @@ import ConfirmDialog from "../../components/ConfirmDialog";
 import ImportDialog from "../../components/ImportDialog";
 import StatusPanel from "./periodManagement/StatusPanel";
 import HistoryPanel from "./periodManagement/HistoryPanel";
+import FinanceControls from "./periodManagement/FinanceControls";
 import { OPENING_UPLOAD, openingConfirm, openingPreviewFacts } from "./periodManagement/openingBalances";
 import "./periodManagement/PeriodManagement.scss";
 
@@ -50,6 +51,8 @@ const PeriodManagement = () => {
   const [checks, setChecks] = useState(null);
   const [showOpening, setShowOpening] = useState(false);
   const [creating, setCreating] = useState(null);
+  const [showControls, setShowControls] = useState(false);
+  const controlsError = useCallback((e) => showError(toast, e), []);
 
   const yearsLoader = useCallback(() => periodEndService.fiscalYears(), []);
   const { data: years, error: yearsError, reload: reloadYears } = useStableLoad(yearsLoader, { initialData: [] });
@@ -136,7 +139,10 @@ const PeriodManagement = () => {
         {canWrite && (
           <Button type="button" icon="pi pi-upload" label={t("periodManagement.importOpening")} className="p-button-outlined" onClick={() => setShowOpening(true)} />
         )}
+        <Button type="button" icon="pi pi-sliders-h" label={t("periodManagement.financeControls.button")} className="p-button-outlined" onClick={() => setShowControls(true)} />
       </PageHeader>
+      {showControls && <FinanceControls onHide={() => setShowControls(false)} onSaved={() => showSuccess(toast, t("periodManagement.financeControls.saved"))}
+        onError={controlsError} />}
       <ImportDialog visible={showOpening} onHide={() => setShowOpening(false)} title={t("periodManagement.importOpening")} targets={OPENING_UPLOAD} goLiveDate
         help={t("periodManagement.opening.help")} previewFacts={openingPreviewFacts(t)} confirmLoad={openingConfirm(t)} loadLabel={t("periodManagement.opening.load")}
         onDone={() => { reloadYears(); reloadFy(); }} />

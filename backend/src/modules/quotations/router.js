@@ -24,7 +24,7 @@ import mastersRouter from './masters.js';
 import emailRouter from './email.js';
 
 const { router, define } = moduleRouter('Quotations', '/quotations');
-const SCREEN = 'Operations > Sales & Marketing > Quotations';
+const SCREEN = 'Sales & Placement > Quotations';
 const canRead = [requireAuth, requirePermission('read:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
 
@@ -54,6 +54,14 @@ define({
   screen: `${SCREEN} > Policy details / Coverage details`, middleware: canRead,
   response: { success: true, data: { templateCode: 'MOT-003-2025', vehicleTypes: [{ value: 'private_cars', label: 'Private cars', defaultSeats: 5, ctplPremium: 560, ownDamageRate: 2 }], appa: { limits: [50000, 100000], ratePercent: 0.1 } } },
   handler: async (_req, res) => res.json({ success: true, data: await motorTariff() }),
+});
+define({
+  method: 'POST', path: '/motor-rating', summary: 'Motor rating of a draft quotation (PROD-12): default issuing rates (commission rule, motor tariff, standard), the reference value and the FMV less depreciation, the depreciation options, the excess, and whether the user may change rates or the FMV',
+  screen: `${SCREEN} > Coverage details`, middleware: [...canWrite, validate(quoteBody.partial())],
+  request: { leadRefId: 'ld_1', productId: 1, insuranceCompanyId: 1, vehicleType: 'private_cars', fmvRating: { referenceValue: 1000000, depreciationPct: 10 } },
+  response: { success: true, data: { fmv: { referenceValue: 1000000, referenceBasis: 'reference', depreciationPct: 10, computedFmv: 900000 }, depreciationOptions: [8, 10, 15, 20],
+    rates: { OD: 2, AON: 0.5, source: 'rule' }, excess: { pct: 5, basis: 'sum-insured', minimum: 0, amount: 45000 }, canChangeRates: false, canEditFmv: false } },
+  handler: async (req, res) => res.json({ success: true, data: await svc.motorRatingFor(req.body, actor(req)) }),
 });
 define({
   method: 'GET', path: '/stats', summary: 'Quotation KPIs (optionally for one lead)', screen: `${SCREEN} (stats cards)`, middleware: canRead, query: { leadRefId: 'ld_1' },

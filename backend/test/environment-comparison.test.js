@@ -236,7 +236,8 @@ describe('comparison workbook', () => {
     expect(wo[0].at(-1)).toBe('Difference');
     expect(wo[1].at(-1)).toMatch(/^Different: Reason: File "Changed in UAT" \/ This environment "/);
     expect(wo.find((r) => r[0] === 'ZZ-UAT').at(-1)).toBe('Only in File');
-    expect(wo.filter((r) => r.at(-1) === 'Identical').length).toBe(3);
+    // the delivered write-off reasons other than the changed one (WO-SMALL joined them with migration 0631)
+    expect(wo.filter((r) => r.at(-1) === 'Identical').length).toBe(4);
     expect(book.find((s) => s.name === 'Environment-specific').rows[1].slice(0, 4)).toEqual(['Settings', 'general.frontend_url', 'Value', 'https://uat.broker.example']);
     // styles: navy header (8), frozen first row; changed cell (14), only-in-file row (12)
     const zip = readZip(res.body);

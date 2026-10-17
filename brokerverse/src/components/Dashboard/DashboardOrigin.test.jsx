@@ -80,11 +80,11 @@ describe("useDashboardOrigin", () => {
     }
   });
 
-  it("falls back to Issued since go-live when the settings cannot be read", async () => {
+  it("falls back to All business when the settings cannot be read", async () => {
     dashboardService.getSettings.mockRejectedValue(new Error("offline"));
     const { result } = renderHook(() => useDashboardOrigin());
     await waitFor(() => expect(result.current.ready).toBe(true));
-    expect(result.current.origin).toBe("issued");
+    expect(result.current.origin).toBe("all");
   });
 });
 
@@ -117,5 +117,52 @@ describe("Executive Dashboard", () => {
     await waitFor(() => expect(dashboardService.getExecutive).toHaveBeenCalled());
     await screen.findByText("executiveDashboard.totalRevenue");
     expect(screen.queryByText(/policies since/)).toBeNull();
+  });
+
+  // The client report: KPI cards on "-", the premium chart a grey block and the refresh spinner turning, although every
+  // request had answered. Nothing issued since go-live is an answer, not a load: zeros, the reason and the way out.
+  const zero = { value: 0, change: null, target: null, achievement: null };
+  const nothingIssued = {
+    executiveKPIs: { totalRevenue: zero, newBusiness: zero, activePolicies: zero, claimsRatio: { value: null }, retentionRate: { value: null } },
+    issuedSinceGoLive: { cutoverDate: "2026-11-01", policies: 0, premium: 0 }, revenueByProduct: { labels: [], data: [], policies: [] },
+    monthlyTrend: { labels: ["Sep", "Oct"], months: ["2026-09", "2026-10"], premium: [0, 0] }, regionalPerformance: [], topProducts: [], agentPerformance: [],
+    receivables: { premiumFromClients: 0, premiumOverdue: 0, commissionFromInsurers: 0, commissionUnbilled: 0, commissionOverdue: 0 },
+    period: { from: "2026-10-01", to: "2026-10-11" }, origin: "issued", asOf: "2026-10-11T02:00:00Z",
+  };
+  const settle = () => act(async () => { await new Promise((r) => { setTimeout(r, 0); }); });
+
+  it("with nothing issued since go-live: real zeros, no skeleton, no spinner, and the switch to All business", async () => {
+    localStorage.setItem(KEY, "issued");
+    dashboardService.getExecutive.mockResolvedValue(nothingIssued);
+    dashboardService.getClaims.mockResolvedValue({ claimsByStatus: [] });
+    render(<MemoryRouter><ExecutiveDashboard /></MemoryRouter>);
+    await screen.findAllByText("No policies issued since go-live (01/11/2026).");
+    await settle();
+    // real zeros (premium, new business, receivables, policies in force), not "-"
+    expect(screen.getAllByText("₱0").length).toBeGreaterThanOrEqual(4);
+    expect(screen.getByText("0")).toBeInTheDocument();
+    // the ratios over nothing do not apply: an en dash with the reason, not 0 %
+    expect(screen.getByTitle("No premium written yet: the claims ratio does not apply")).toHaveTextContent("\u2013");
+    // the request has finished: no skeleton, and the refresh spinner has stopped
+    expect(screen.queryAllByRole("status", { name: /^Loading/ })).toHaveLength(0);
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
+    expect(dashboardService.getExecutive).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getAllByTestId("origin-empty-switch")[0]);
+    await waitFor(() => expect(dashboardService.getExecutive).toHaveBeenLastCalledWith("month", "previous", "all"));
+  });
+
+  it("keeps the claims chart when the figures fail, offers Retry and stops the spinner", async () => {
+    dashboardService.getExecutive.mockRejectedValueOnce(new Error("Server unavailable"));
+    dashboardService.getClaims.mockResolvedValue({ claimsByStatus: [{ status: "registered", count: 2 }] });
+    render(<MemoryRouter><ExecutiveDashboard /></MemoryRouter>);
+    expect((await screen.findAllByText("Server unavailable")).length).toBeGreaterThan(0);
+    await settle();
+    expect(screen.queryAllByRole("status", { name: /^Loading/ })).toHaveLength(0);
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
+    expect(screen.getAllByTestId("chart").length).toBe(1);
+    dashboardService.getExecutive.mockResolvedValue({ ...nothingIssued, origin: "all", executiveKPIs: { ...nothingIssued.executiveKPIs, totalRevenue: { value: 1000 } } });
+    fireEvent.click(screen.getAllByText("Retry")[0]);
+    await waitFor(() => expect(screen.queryByText("Server unavailable")).toBeNull());
+    expect(await screen.findByText("₱1K")).toBeInTheDocument();
   });
 });

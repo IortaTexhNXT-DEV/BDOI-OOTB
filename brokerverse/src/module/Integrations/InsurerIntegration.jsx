@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
+import FileField from "../../components/FileField";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -97,7 +98,7 @@ const ClaimStatusFile = ({ toast }) => {
     <div className="grid">
       <div className="col-12"><p className="pe-muted mt-0">{t("integrations.claimFileHelp")}</p></div>
       <div className="col-12 md:col-8 flex gap-2 align-items-center">
-        <input type="file" accept=".csv,text/csv" aria-label={t("integrations.chooseFile")} onChange={(e) => setFile(e.target.files?.[0] || null)} />
+        <FileField accept=".csv" value={file} chooseLabel={t("integrations.chooseFile")} onChange={setFile} />
         <Button icon="pi pi-upload" label={t("integrations.import")} loading={busy} disabled={!file} onClick={run} />
       </div>
       <div className="col-12 md:col-4 text-right">

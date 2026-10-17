@@ -35,14 +35,14 @@ migration adds a table that no list names, and the reset itself refuses to run o
 
 | Class | Tables (examples) | Reset |
 |---|---|---|
-| Transactions (95 tables) | leads, clients, quotations, placements, policies, endorsements, receivables, receipts, collections, disbursements, petty cash requests and movements, commissions, debit notes, remittances, cessions, recoveries, bordereaux, incentive results, claims, renewals and win-back campaigns, journals, accounting periods, fiscal years, period-end closes, recurring journals, year-end runs, BIR 2307 certificates, bank and insurer statement reconciliation, instalment plans and warranty extensions, package quotations and policies, payment links, access reviews, calendar events, privacy consents and data subject requests | Emptied |
-| System (14 tables) | notifications, e-mail outbox, generated report records, job run history and queue, sign-in history, sign-in sessions, password reset codes | Emptied |
+| Transactions (158 tables) | leads, clients, quotations, placements, policies, endorsements, receivables, receipts, collections, disbursements, petty cash requests and movements, commissions, debit notes, remittances, incentive results, claims, renewals and win-back campaigns, journals, accounting periods, fiscal years, period-end closes, recurring journals, year-end runs, BIR 2307 certificates, bank and insurer statement reconciliation, instalment plans and warranty extensions, package quotations and policies, payment links, access reviews, calendar events, privacy consents | Emptied |
+| System (36 tables with the rows below) | notifications, e-mail outbox, generated report records, job run history and queue, sign-in history, sign-in sessions, password reset codes | Emptied |
 | | document records (`documents`) | Records of transaction storage folders removed; logo, favicon, company logo and product document records kept |
 | | number counters (`sequences`) | Transaction series removed (restart), master series kept (below) |
 | | go-live opening balances | Removed; kept with `--keep-opening-balances` |
 | | audit trail | Kept (and the reset is recorded in it); emptied with `--purge-audit` |
 | | password history, schema migration history | Kept |
-| Masters and configuration (60 tables) | settings, document numbering series, users, roles, permissions, authority matrix, segregation-of-duties rules, delegations, generic masters and master types, branches, signatories, banks, insurers, reinsurers, referrers, geography, currencies, vehicles, write-off reasons, products, policy types, covers, product configurator templates and components, risk mappings, commission rate matrix, tax codes, LGU rates, premium charge rules, package bundles, insurer rate tables, incentive programmes, reinsurance treaties, payment gateways, chart of accounts, posting rules, accounting change requests, period close checklist, petty cash funds, bank and insurer statement formats, bank match rules, report catalogue, report schedules, scheduled job definitions | Kept as they are |
+| Masters and configuration (91 tables) | settings, document numbering series, users, roles, permissions, authority matrix, segregation-of-duties rules, delegations, generic masters and master types, branches, signatories, banks, insurers, referrers, geography, currencies, vehicles, write-off reasons, products, policy types, covers, product configurator templates and components, risk mappings, commission rate matrix, tax codes, LGU rates, premium charge rules, package bundles, insurer rate tables, incentive programmes, payment gateways, chart of accounts, posting rules, accounting change requests, period close checklist, petty cash funds, bank and insurer statement formats, bank match rules, report catalogue, report schedules, scheduled job definitions | Kept as they are |
 
 ### Numbering
 
@@ -53,7 +53,7 @@ plus one), else at its **start number**. The configured next number is kept on t
 (`document_numbering.period_start_key` / `period_start_number`, migration `0246_numbering_period_start.sql`) and applies
 to the period it was set for; the next period of a yearly series starts at the start number. The reset removes the
 counters of every transaction series (lead, quotation, client code, policy, endorsement, claim, renewal, receipt,
-invoice, voucher, journal, remittance, cession, period close, ...): the first live policy after go-live is the next
+invoice, voucher, journal, remittance, period close, ...): the first live policy after go-live is the next
 number the Numbering sheet set (e.g. `POL-2026-00068`), or `POL-<year>-00001` when none was set.
 
 The counters of series that number **master records** are kept, because those records stay and a restarted counter
@@ -63,8 +63,6 @@ would issue a code that already exists:
 |---|---|
 | `petty_cash_fund` | Petty cash fund codes (Accounts > Petty Cash > Initiate) |
 | `product_template` | Product configurator template codes |
-| `reinsurer` | Reinsurer codes |
-| `treaty` | Reinsurance treaty numbers |
 | `incentive_program` | Incentive programme numbers |
 | `commission_master`, `employee` | Codes of the retired commission and employee masters (records kept, inactive) |
 
@@ -94,8 +92,8 @@ Bank accounts, the chart of accounts, posting rules and account determination ar
 Uploaded and generated files live under `UPLOAD_DIR` in one folder per kind. With `--purge-files`, the reset deletes the
 files of the transaction folders (`vehicle-photos`, `id-cards`, `policy-documents`, `quotation-responses`,
 `insurer-offers`, `endorsement`, `endorsement-documents`, `claim`, `claims`, `payment-proofs`, `direct-bill-payments`,
-`print`, `generated`, `reports`, `bordereaux`, `incentive-reports`, `reinsurance-reports`, `remittance-statements`,
-`remittance-bulk`) after the database transaction has been committed. Logos, favicons, company logos and product
+`print`, `generated`, `reports`, `incentive-reports`, `remittance-statements`, `remittance-bulk`, `remittance-imports`,
+`kyc`, `bi-extract`) after the database transaction has been committed. Logos, favicons, company logos and product
 documents are never touched. Without `--purge-files` the files stay on disk (their records are removed); delete them
 later or leave them to the storage lifecycle.
 

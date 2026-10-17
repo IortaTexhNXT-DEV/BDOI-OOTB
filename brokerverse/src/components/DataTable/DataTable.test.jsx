@@ -2,7 +2,7 @@ import React from "react";
 import { act, render, screen } from "@testing-library/react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { FIRST_LOAD_GRACE_MS } from "./index";
+import { FIRST_LOAD_GRACE_MS, needsPaginator } from "./index";
 
 const table = (props) => (
   <DataTable emptyMessage="No records" {...props}>
@@ -44,5 +44,15 @@ describe("DataTable loading pattern", () => {
     });
     expect(screen.getByText("No records")).toBeInTheDocument();
     jest.useRealTimers();
+  });
+});
+
+describe("needsPaginator", () => {
+  it("hides the paginator of a table that fits in one page", () => {
+    expect(needsPaginator({ paginator: true, rows: 20, value: [1, 2] })).toBe(false);
+    expect(needsPaginator({ paginator: true, rows: 2, value: [1, 2, 3] })).toBe(true);
+    expect(needsPaginator({ paginator: true, rows: 20, lazy: true, totalRecords: 45, value: [] })).toBe(true);
+    expect(needsPaginator({ paginator: true, rows: 20, lazy: true, totalRecords: 4, value: [] })).toBe(false);
+    expect(needsPaginator({ paginator: false, rows: 20, value: [] })).toBe(false);
   });
 });

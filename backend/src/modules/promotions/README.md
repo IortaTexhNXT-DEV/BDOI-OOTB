@@ -4,7 +4,9 @@ Promotional rates and gross premium discounts on brand-new vehicles, and the dis
 (TIS-BRD-PROD-15). Routes: `/promotions` (Operations > Sales & Marketing > Promotions) and `/discount-caps`
 (Master > Finance > Discount Caps). Access: `read:promotions`, `write:promotions`, `approve:promotions`,
 `read:discount-caps`, `write:discount-caps`, `approve:discount-caps`, `write:promotion-rates` (lower a promotion's Own
-Damage rate on a quotation). Migration 0485.
+Damage rate on a quotation). Migration 0485. TISPH decision of 11 Oct 2026 (GAP-SALES-17, migration 0687): the TIS Sales
+Unit Head, the General Manager and IT AppSupport make and approve the promotions (never their own); the Operations
+Officer and Unit Head set up the discount caps and read the promotions.
 
 ## Files
 
@@ -43,3 +45,8 @@ Damage rate on a quotation). Migration 0485.
   through `recordLockIn` of the renewals module). A cancellation from inception returns the unit.
 - **Caps.** One approved cap per product and channel type on a day; not backdated; a replacement ends the replaced cap
   the day before it starts.
+
+## Lock-in end date
+
+`recordLockIn` ends a promotion lock-in at start + years (the day the next term starts). The scheme lock-ins written by
+Scheme Issuance end at start + years - 1 day (FRS SCHM-03 FR-LCK-001); aligning the promotion rule is left to TISPH.

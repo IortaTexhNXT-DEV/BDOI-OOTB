@@ -104,7 +104,7 @@ describe("Campaign templates and marketing consents", () => {
     service.recordMarketingConsent.mockResolvedValue({ success: true, message: "Marketing consent of Maria Santos recorded", data: {} });
     render(<Campaigns />);
     await screen.findByText("October renewals");
-    fireEvent.click(screen.getByRole("tab", { name: "Marketing consents" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Marketing Consents" }));
     expect(await screen.findByText("Maria Santos")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Agreed to receive offers" }));
     fireEvent.click(await screen.findByRole("button", { name: "Save" }));
@@ -118,7 +118,7 @@ describe("Fleet Schedules", () => {
     service.fleets.mockResolvedValue([]);
     mastersService.options.mockResolvedValue([{ id: 3, label: "Malayan Insurance Co., Inc." }]);
     render(<MemoryRouter><FleetSchedules /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("button", { name: "New fleet schedule" }));
+    fireEvent.click(await screen.findByRole("button", { name: "New Fleet Schedule" }));
     await screen.findByText("Period to");
     // the dates show in the date format of the application: the same day and month, the next year
     const [from, to] = screen.getAllByDisplayValue(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/).map((e) => e.value);
@@ -138,12 +138,12 @@ describe("Report Builder", () => {
       rows: [{ insurer: "Malayan Insurance Co., Inc.", grossPremium: 1250400.5 }], totals: { grossPremium: 1250400.5 }, total: 1, truncated: false,
     } });
     render(<ReportBuilder />);
-    fireEvent.click(await screen.findByRole("tab", { name: "Saved reports" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "Saved Reports" }));
     fireEvent.click(await screen.findByRole("button", { name: "Open" }));
     expect(await screen.findByDisplayValue("Premium by insurer")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
     expect(await screen.findByText("Malayan Insurance Co., Inc.")).toBeInTheDocument();
     expect(service.runReport).toHaveBeenCalledWith({ dataset: "policies", columns: ["insurer", "grossPremium"], filters: [], groupBy: ["insurer"], sort: [] });
-    expect(screen.queryByRole("tab", { name: "BI extract" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "BI Extract" })).not.toBeInTheDocument();
   });
 });

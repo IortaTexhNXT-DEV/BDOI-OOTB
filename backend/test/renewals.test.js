@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withoutCommissionTaxes, withDirectSend, withReferenceCommissionControls, enableFeatures } from './helpers.js';
+import { setup, loginAs, withoutCommissionTaxes, withDirectSend, withReferenceCommissionControls, enableFeatures, withoutPlacementControls } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
@@ -26,6 +26,8 @@ async function waitForJob(jobId) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // the approval to send and the Motor issuance checklist are covered by test/placement-send-approval.test.js and test/motor-issuance-checklist.test.js
+  await withoutPlacementControls();
   await withDirectSend();
   await withReferenceCommissionControls();
   // functions of a later release (modules/features), enabled as the platform administrators do
@@ -291,6 +293,8 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
       coverageDetails: { lossAndDamageCoverage: '1,450,000.00', lossAndDamageCoverageRate: '1.6', bodilyInjury: '100,000.00', propertyDamage: '100,000.00', totalSumInsured: '1,650,000.00' },
       accessories: { aircon: '', stereo: '', magWheels: '', others: '', deductible: '', towing: '', repairLimit: '' },
       orderSummary: { discount: '0.00', commissionDetails: { primary: { referrerId: 'direct' }, chain: [] } },
+      // the FMV below the expiring term's less depreciation is an edit with its reason (migration 0615)
+      fmvRating: { reasonCode: 'FMV-CONDITION' },
     };
     const c = await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send(body);
     expect(c.status).toBe(201);
@@ -386,7 +390,7 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
   it('renews a seeded policy without quotation or lead (client e-mail, client-based conversion where renewals convert directly)', async () => {
     await query("UPDATE app_settings SET value = 'false' WHERE key = 'placement.journey_applies_to_renewals'");
     clearSettingsCache();
-    const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_21/quotation').send({ coverageDetails: { lossAndDamageCoverage: '1300000', lossAndDamageCoverageRate: '1.5' } });
+    const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_21/quotation').send({ coverageDetails: { lossAndDamageCoverage: '1300000', lossAndDamageCoverageRate: '1.5' }, fmvRating: { reasonCode: 'FMV-CONDITION' } });
     expect(c.status).toBe(201);
     const q = await one('SELECT * FROM quotes WHERE id = $1', [c.body.data.quotationId]);
     expect(q.client_id).toBe('cl_crs_10');

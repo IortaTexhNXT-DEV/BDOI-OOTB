@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withoutPlacementControls } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { KYC_MODES, kycChecklist, kycModeFor, missingKyc } from '../src/modules/policies/kyc.js';
@@ -22,6 +22,8 @@ const motorId = { idType: 'PhilSys ID', idNumber: '1234-5678-9012-3456', idCardI
 
 beforeAll(async () => {
   ctx = await setup();
+  // the approval to send and the Motor issuance checklist are covered by test/placement-send-approval.test.js and test/motor-issuance-checklist.test.js
+  await withoutPlacementControls();
   const r = await ctx.api('post', '/users').send({ username: 'kyc.ops', password: 'Welcome@123', displayName: 'kyc.ops', email: 'kyc.ops@example.ph', roles: ['tis-ops-associate'] });
   expect(r.status).toBe(201);
   ids['kyc.ops'] = r.body.data.userId;

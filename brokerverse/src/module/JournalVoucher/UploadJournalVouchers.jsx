@@ -9,7 +9,8 @@ import journalVoucherService, { apiErrorMessage } from "../../services/journalVo
 
 /**
  * Accounts > Journal Voucher > Upload (TIS-BRD-NIA-05): journal vouchers from the upload template, one voucher per
- * Voucher Ref. The whole file is checked first; nothing is saved when a row is wrong, and the rows to fix are listed.
+ * Voucher Ref. The whole file is checked first; the rows to fix are listed. With journal.upload_mode partial the valid
+ * vouchers are saved and the failed rows listed with them; with all-or-nothing nothing is saved while a row is wrong.
  * The vouchers created wait for the approval of another user.
  */
 const UploadJournalVouchers = ({ visible, onHide, onUploaded }) => {
@@ -31,6 +32,7 @@ const UploadJournalVouchers = ({ visible, onHide, onUploaded }) => {
       const r = await journalVoucherService.upload(file);
       setResult(r.data);
       setMessage(r.message);
+      setErrors(r.data?.failed || []);
       onUploaded();
     } catch (e) {
       setMessage(apiErrorMessage(e, t("jvTools.uploadFailed")));
@@ -62,9 +64,9 @@ const UploadJournalVouchers = ({ visible, onHide, onUploaded }) => {
         <Button label={t("jvTools.chooseFile")} icon="pi pi-file" onClick={() => input.current?.click()} />
         <span>{file ? file.name : t("jvTools.noFile")}</span>
       </div>
-      {message && <Message severity={result ? "success" : "error"} className="w-full mb-2" text={message} />}
+      {message && <Message severity={result ? (errors.length ? "warn" : "success") : "error"} className="w-full mb-2" text={message} />}
       {errors.length > 0 && (
-        <DataTable value={errors} size="small" stripedRows scrollable scrollHeight="18rem">
+        <DataTable value={errors} size="small" stripedRows scrollable>
           <Column field="path" header={t("jvTools.row")} style={{ width: "14rem" }} />
           <Column field="message" header={t("jvTools.problem")} />
         </DataTable>

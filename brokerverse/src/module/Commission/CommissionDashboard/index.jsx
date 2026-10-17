@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CommissionService from "../../../services/commissionService";
 import {
@@ -9,9 +9,10 @@ import "./style.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import logger from "../../../utility/logger";
-import { DetailPageSkeleton } from "../../../components/Skeletons";
+import LoadState from "../../../components/LoadState";
+import { useStableLoad } from "../../../hooks/useStableLoad";
 import StatCards from "../../../components/StatCards";
-import { ChartCard, DashboardToolbar, ShareChart, ThemedChart, formatValue } from "../../../components/Dashboard";
+import { ChartCard, DashboardToolbar, ShareChart, ThemedChart, ViewState, formatValue } from "../../../components/Dashboard";
 import { useChartTheme } from "../../../theme/chartTheme";
 
 /** Lifecycle of a commission line, in the order it moves (the payable funnel follows this order). */
@@ -31,43 +32,33 @@ const shareTable = (items, header) => ({
 const CommissionDashboard = () => {
   const chart = useChartTheme();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
-  const [asOf, setAsOf] = useState(null);
   const [brokerageView, setBrokerageView] = useState("insurer");
   const [viewMode, setViewMode] = useState(() => getCommissionViewMode());
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  // four states (hooks/useStableLoad): the page skeleton on the first load only (it used to flash "Failed to load
+  // dashboard." before the first request), the reason with Retry when it failed, the figures kept while refreshing
+  const view = useStableLoad(useCallback(async () => {
     try {
       const res = await CommissionService.getDashboard();
-      setData(res?.data || res);
-      setAsOf(new Date());
+      return { figures: res?.data || res, asOf: new Date() };
     } catch (err) {
       logger.error("Failed to load commission dashboard", err);
-      setData(null);
-    } finally {
-      setLoading(false);
+      throw err;
     }
-  }, []);
-  useEffect(() => { loadData(); }, [loadData]);
+  }, []), { isEmpty: (d) => !d?.figures });
+  const data = view.data?.figures || null;
+  const asOf = view.data?.asOf || null;
+  const loading = view.loading || view.refreshing;
+  const loadData = view.reload;
 
   const handleViewModeChange = (mode) => {
     setViewMode(setCommissionViewMode(mode));
   };
 
-  if (loading && !data) {
-    return (
-      <div className="commission-dashboard-page">
-        <DetailPageSkeleton />
-      </div>
-    );
-  }
-
   if (!data) {
     return (
       <div className="commission-dashboard-page">
-        <p className="loading-msg">Failed to load dashboard.</p>
+        <LoadState loading={view.status === "loading"} error={view.error || "The commission figures could not be loaded."} onRetry={loadData} />
       </div>
     );
   }
@@ -119,8 +110,10 @@ const CommissionDashboard = () => {
         </span>
       </DashboardToolbar>
 
-      <StatCards items={figures} className="bv-stat-cards--wide commission-kpis" />
+      <StatCards items={figures} refreshing={view.refreshing} className="bv-stat-cards--wide commission-kpis" />
 
+      {/* a refresh keeps the charts under a light veil */}
+      <ViewState state={view}>
       <div className="bv-dash-grid">
         <ChartCard className="bv-dash-grid__wide" title="Monthly trend: income, payable and margin"
           table={{ columns: [{ field: "month", header: "Month" }, { field: "brokerageIncome", header: "Brokerage income", format: "currency" }, { field: "comsubGross", header: "Comsub gross", format: "currency" }, { field: "netMargin", header: "Net margin", format: "currency" }], rows: data.monthlyTrend }}
@@ -156,6 +149,7 @@ const CommissionDashboard = () => {
           <ShareChart items={brokerageItems} dimension={brokerageView === "insurer" ? "insurer" : "lob"} label="Brokerage income" />
         </ChartCard>
       </div>
+      </ViewState>
     </div>
   );
 };

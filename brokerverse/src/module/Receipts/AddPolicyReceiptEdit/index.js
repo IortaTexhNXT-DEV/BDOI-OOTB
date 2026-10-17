@@ -8,7 +8,6 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import SvgEdits from "../../../assets/icons/SvgEdits";
@@ -584,34 +583,6 @@ function PolicyReceipts() {
     const lineIds = selectedRows.map((row) => row.receiptListId || row.id).filter(Boolean);
     printReceipt(lineIds, `receipt-${customerData.receiptNumber || customerData.receiptId}-selected.pdf`);
   };
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <React.Fragment>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("accounts.addReceiptEdit.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </React.Fragment>
-      );
-    },
-  };
 
   const headerStyle = {
     fontSize: 16,
@@ -723,12 +694,9 @@ function PolicyReceipts() {
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
             className="datatable_container"
             selectionMode="checkbox"
             scrollable={true}
-            scrollHeight="40vh"
             dataKey="id"
             rowClassName={(rowData) =>
               normalizeStatus(rowData?.status) === "Paid" ? "paid-row" : ""

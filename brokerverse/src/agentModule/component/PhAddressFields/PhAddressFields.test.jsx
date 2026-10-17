@@ -50,7 +50,7 @@ beforeEach(() => {
 describe("Philippine address fields", () => {
   it("shows the Philippine address parts, the barangay as free text when the list is not loaded", async () => {
     render(<Form initial={{}} />);
-    for (const label of ["Region", "Province", "City / Municipality", "Barangay", "House / Unit No.", "Street / Subdivision", "ZIP Code"]) {
+    for (const label of ["Region", "Province", "City / municipality", "Barangay", "House / unit no.", "Street / subdivision", "ZIP code"]) {
       expect(await screen.findByText(label)).toBeInTheDocument();
     }
     expect(addressService.getRegionsByCountry).toHaveBeenCalledWith("PH");

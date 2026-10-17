@@ -1,0 +1,197 @@
+@import "../../../theme/bdoi/tokens";
+
+// Report centre (Reports > All Reports): category rail on the left, search and a compact report table on the right;
+// on a narrow screen the rail becomes a dropdown above the table.
+.report-centre {
+  &__layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  &__rail {
+    position: sticky;
+    top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+  }
+
+  &__rail-heading {
+    margin: 10px 10px 4px;
+    padding-top: 10px;
+    border-top: 1px solid $color-border;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $color-text-muted;
+  }
+
+  &__rail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: $radius-sm;
+    background: transparent;
+    color: $color-text;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+
+    i {
+      font-size: 13px;
+      color: $color-text-muted;
+    }
+
+    &:hover {
+      background: var(--bv-sidebar-hover-bg, #f6f6f6);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--bv-focus-color, #0072d8);
+      outline-offset: 1px;
+    }
+
+    &--active {
+      background: var(--bv-sidebar-active-bg, #e5f5ff);
+      color: var(--bv-sidebar-active-text, #004ea8);
+      font-weight: 700;
+
+      i {
+        color: inherit;
+      }
+    }
+  }
+
+  &__rail-label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__rail-count {
+    min-width: 24px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: $color-surface-muted;
+    color: $color-text-muted;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  &__main {
+    min-width: 0;
+  }
+
+  &__toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  &__rail-select {
+    display: none;
+  }
+
+  &__search {
+    position: relative;
+    flex: 1;
+
+    input {
+      width: 100%;
+      height: 44px;
+      padding-right: 40px;
+      font-size: 15px;
+    }
+  }
+
+  &__kbd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 1px 7px;
+    border: 1px solid $color-border-strong;
+    border-radius: 4px;
+    color: $color-text-muted;
+    font-size: 12px;
+    font-family: inherit;
+  }
+
+  &__name-cell {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__name {
+    color: $brand-blue;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  &__desc {
+    overflow: hidden;
+    max-width: 640px;
+    color: $color-text-muted;
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__code {
+    color: $color-text-muted;
+    font-size: 12px;
+  }
+
+  &__star {
+    color: $color-placeholder;
+
+    &--on {
+      color: $brand-gold;
+    }
+  }
+
+  @media (max-width: 960px) {
+    &__layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__rail {
+      display: none;
+    }
+
+    &__rail-select {
+      display: inline-flex;
+      min-width: 220px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    &__toolbar {
+      flex-direction: column;
+    }
+
+    &__rail-select {
+      width: 100%;
+    }
+
+    &__desc {
+      max-width: 100%;
+    }
+  }
+}

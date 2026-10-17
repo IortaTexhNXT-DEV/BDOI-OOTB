@@ -17,6 +17,17 @@ export async function policyExpiry() {
 /** Quotations: the day after the validity ends (quote-expiry) and the reminder before it (quote-expiry-reminder). */
 export { quoteExpiry, quoteExpiryReminders } from '../modules/quotations/validity.js';
 export { promotionStatus } from '../modules/promotions/service.js';
+export { schemeStatus } from '../modules/schemes/service.js';
+export { lockInReview } from '../modules/lock-in/review.js';
+/** Open covers (FR-PCL-020, 022): close the daily declarations of the days ended; open the monthly declaration of the month ended. */
+export async function marineDailyDeclarationClose() {
+  if (!(await tableExists('open_cover_daily_declarations'))) return { skipped: 'open_cover_daily_declarations table missing' };
+  return (await import('../modules/marine/daily.js')).closeDailyDeclarations();
+}
+export async function marineMonthlyDeclarationOpen() {
+  if (!(await tableExists('open_cover_daily_declarations'))) return { skipped: 'open_cover_daily_declarations table missing' };
+  return (await import('../modules/marine/daily.js')).openMonthlyDeclarations();
+}
 export async function receivableAgeing() {
   if (!(await tableExists('receivables'))) return { skipped: 'receivables table missing' };
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90, 120];
@@ -98,6 +109,14 @@ export const dormantUsers = async () => {
 export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/runs.js')).runDueSchedules();
+}
+/**
+ * Telesales incentive (TIS-BRD-COMM-08, FR-TSI-030): every day the telesales policies are attributed and dated; on the
+ * run day (incentive.telesales.run_day) the previous month is calculated for the Telesales program in force.
+ */
+export async function telesalesIncentiveCalc() {
+  if (!(await tableExists('telesales_policies'))) return { skipped: 'telesales_policies table missing' };
+  return (await import('../modules/incentive/telesales.js')).telesalesJob();
 }
 /** Insurer billing run: on a billing date (15th and 26th, moved off non-working days) draft the billing statements of the remitted policies (remittance/billing.js). */
 export async function insurerBillingRun() {

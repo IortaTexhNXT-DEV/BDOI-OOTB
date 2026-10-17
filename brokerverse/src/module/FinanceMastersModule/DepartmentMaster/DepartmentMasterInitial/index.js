@@ -10,7 +10,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { Dropdown } from "primereact/dropdown";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { useMasterRecords } from "../../../GeneralMasters/common/useMasterOptions";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
@@ -18,34 +17,6 @@ import PageActions from "../../../../components/PageActions";
 
 const Index = () => {
   const { t } = useTranslation();
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <React.Fragment>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("financeMasters.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </React.Fragment>
-      );
-    },
-  };
 
   const headerStyle = {
     width: "10rem",
@@ -121,10 +92,7 @@ const Index = () => {
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
             scrollable={true}
-            scrollHeight="40vh"
           >
             <Column
               field="departmentCode"

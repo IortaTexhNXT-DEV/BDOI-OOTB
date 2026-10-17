@@ -7,7 +7,8 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { many, one, query } from '../../db/pool.js';
-import { isAdmin, ADMIN_ROLES, adminEquivalentRoles, revokeSessions } from '../../lib/auth.js';
+import { isAdmin, ADMIN_ROLES, adminEquivalentRoles, hasPermission, revokeSessions } from '../../lib/auth.js';
+import { FINANCE_CONTROL_PERMISSION, isFinanceControl } from '../../lib/financeControls.js';
 import { setSetting } from '../../lib/settings.js';
 import { settingOwner } from '../../lib/settingOwners.js';
 import { localizationErrors } from '../system-settings/service.js';
@@ -165,6 +166,7 @@ const settingsSheet = () => ({
     if (owner) fail('key', `${v.key} is managed in ${owner.screen}; change it there`);
     if (isControlledSetting(v.key)) fail('key', `${v.key} is changed on Master > Finance > Account Determination, where a second user approves it`);
     if (NOT_LOADED.test(v.key)) fail('key', `${v.key} is not loaded from a workbook`);
+    if (isFinanceControl(v.key) && !hasPermission(ctx.user, FINANCE_CONTROL_PERMISSION)) fail('key', `${v.key} is a finance control: Finance changes it on Period Management > Finance Controls`);
     const change = [v.key, parseSettingValue(s, v.value)];
     const [invalid] = await localizationErrors([change]);
     if (invalid) fail('value', `${v.key} ${invalid.message}`);
@@ -657,7 +659,7 @@ const payeeAccountsSheet = () => ({
 });
 
 const cocSeriesSheet = () => ({
-  key: 'coc-series', name: 'COC Series', menu: 'Operations > CTPL Authentication (COC series)',
+  key: 'coc-series', name: 'COC Series', menu: 'Policy Servicing > CTPL Authentication (COC series)',
   columns: [
     { key: 'insurer', header: 'Insurer', required: true, list: 'Insurers', format: 'Insurer code (or name)' },
     { key: 'branchCode', header: 'Branch Code', format: 'Branch the series is for; empty = every branch' },
@@ -759,7 +761,7 @@ export const CONFIGURATION_ON_SCREEN = [
   ['Sales activity types and outcomes (starter lists are installed)', 'Master > Organization > Sales Activity Types / Sales Activity Outcomes'],
   ['Fiscal years and accounting periods (close the periods before the cutover date)', 'Accounts > Period End > Period Management'],
   ['Remittance masters, incentive programs', 'Master > Finance > Remittance Master; Incentive'],
-  ['Referrers / agents and their commission accounts', 'Commission > Agents/Referrer Accounts'],
+  ['Referrers / agents and their commission accounts', 'Accounts > Commission > Agents/Referrer Accounts'],
   ['Petty cash funds', 'Accounts > Petty Cash > Initiate'],
   ['Users\' passwords: never in the workbook. A new user gets a temporary password shown once after the load (change at first sign-in); a forgotten one is reset on the screen', 'Master > Generals > User Management > User > Reset password'],
   ['Cutover date and go-live lock (switched on by two users once the migration is signed off)', 'Master > System Configuration > Data Migration & Go-Live > Go-Live'],

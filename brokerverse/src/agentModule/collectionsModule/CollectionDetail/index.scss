@@ -20,13 +20,13 @@
   .history-card {
     margin-bottom: 24px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
     position: relative;
 
     &:hover {
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      box-shadow: var(--shadow-md);
     }
 
     .p-card-title {
@@ -231,7 +231,7 @@
 
       &:hover {
         background-color: rgba(var(--bv-primary-rgb), 0.05);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-sm);
       }
     }
 
@@ -239,7 +239,7 @@
     .p-datatable-wrapper {
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow-md);
       border: 1px solid var(--color-border);
     }
   }
@@ -325,7 +325,7 @@
     &:hover {
       color: var(--bv-primary);
       background-color: rgba(var(--bv-primary-rgb), 0.08);
-      box-shadow: 0 2px 8px rgba(var(--bv-primary-rgb), 0.2);
+      box-shadow: var(--shadow-sm);
     }
 
     // Add a subtle indicator that content is truncated

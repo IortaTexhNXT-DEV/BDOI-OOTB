@@ -152,30 +152,30 @@ export const ParticipantsTable = ({ participants, currency, actions }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   return (
-    <table className="participant-table readonly">
+    <table className="participant-table readonly participants">
       <thead>
         <tr>
           <th>{t("placement.participants.insurer")}</th><th className="num">{t("placement.participants.share")}</th>
-          <th className="num">{t("placement.participants.sumInsured")}</th><th className="num">{t("placement.participants.premium")}</th><th className="num">{t("placement.participants.taxes")}</th>
-          <th className="num">{t("placement.participants.gross")}</th><th className="num">{t("placement.participants.commission")}</th><th>{t("placement.participants.reference")}</th>
-          <th>{t("placement.participants.status")}</th>{actions && <th />}
+          <th className="num">{t("placement.participants.sumInsured")}</th><th className="num">{t("placement.participants.gross")}</th>
+          <th className="num">{t("placement.participants.commission")}</th>{actions && <th className="actions-head" />}
         </tr>
       </thead>
       <tbody>
         {(participants || []).map((p) => (
           <tr key={p.participantId || p.insuranceCompanyId} className={p.isLead ? "lead-row" : ""}>
             <td>
-              {p.insuranceCompanyName}
-              <small className="participant-role">{p.isLead ? t("placement.participants.leadInsurer") : t("placement.participants.coInsurer")}</small>
+              <div className="insurer-line"><strong>{p.insuranceCompanyName}</strong><StatusTag status={p.status} /></div>
+              <small className="participant-role">
+                {p.isLead ? t("placement.participants.leadInsurer") : t("placement.participants.coInsurer")}{p.insurerReference ? ` · ${p.insurerReference}` : ""}
+              </small>
             </td>
             <td className="num">{Number(p.sharePercent)}%</td>
             <td className="num">{formatCurrency(p.sumInsured)}</td>
-            <td className="num">{formatCurrency(p.premium)}</td>
-            <td className="num">{formatCurrency(p.taxes)}</td>
-            <td className="num">{formatCurrency(p.premiumTotal)}</td>
+            <td className="num">
+              <strong>{formatCurrency(p.premiumTotal)}</strong>
+              <small className="participant-role">{`${formatCurrency(p.premium)} + ${formatCurrency(p.taxes)}`}</small>
+            </td>
             <td className="num">{formatCurrency(p.commissionAmount)}</td>
-            <td>{p.insurerReference || "-"}</td>
-            <td><StatusTag status={p.status} /></td>
             {actions && <td className="actions-cell">{actions(p)}</td>}
           </tr>
         ))}

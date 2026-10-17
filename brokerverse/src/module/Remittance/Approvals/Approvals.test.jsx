@@ -77,15 +77,15 @@ describe("Approvals", () => {
     expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reject" })).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: /comment/i })).not.toBeInTheDocument();
-    expect(screen.getByText("REM-2026-00017 · PHP 371,210.00 · +10.2%")).toBeInTheDocument();
+    expect(screen.getByText("REM-2026-00017 · ₱371,210.00 · +10.2%")).toBeInTheDocument();
   });
 
   it("an item above the approver's limit is under All pending only, as No · Above your limit", async () => {
-    const big = row(30, { amount: 1820000, decision: can({ canDecide: false, blockedCode: "ABOVE_LIMIT", blockedReason: "PHP 1,820,000.00 is above your approval limit of PHP 1,000,000.00.", amount: 1820000 }) });
+    const big = row(30, { amount: 1820000, decision: can({ canDecide: false, blockedCode: "ABOVE_LIMIT", blockedReason: "₱1,820,000.00 is above your approval limit of ₱1,000,000.00.", amount: 1820000 }) });
     remittanceService.approvalInbox.mockImplementation(async ({ view }) => (view === "all" ? inbox([big]) : inbox([], { kpis: kpis({ awaitingMine: { count: 1, amount: 17000 } }) })));
     show("/finance/remittance/approvals?segment=all");
-    expect(await screen.findByText("No · Above your limit (PHP 1,000,000.00)")).toBeInTheDocument();
-    expect(screen.getByText("Remittance up to PHP 1,000,000.00")).toBeInTheDocument();
+    expect(await screen.findByText("No · Above your limit (₱1,000,000.00)")).toBeInTheDocument();
+    expect(screen.getByText("Remittance up to ₱1,000,000.00")).toBeInTheDocument();
     expect(screen.getByText("0 of 1 rows can be approved by you")).toBeInTheDocument();
   });
 
@@ -124,7 +124,7 @@ describe("Approvals", () => {
     const boxes = screen.getAllByRole("checkbox");
     fireEvent.click(boxes[0]);
     fireEvent.click(await screen.findByRole("button", { name: "Approve selected (3)" }));
-    expect(await screen.findByText("Approve 3 items for PHP 1,227,424.29? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
+    expect(await screen.findByText("Approve 3 items for ₱1,227,424.29? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
     const calls = remittanceService.approvalInbox.mock.calls.length;
     fireEvent.click(within(dialog()).getByRole("button", { name: "Approve 3 items" }));
     expect(await screen.findByText("2 approved · 1 not approved")).toBeInTheDocument();
@@ -144,9 +144,9 @@ describe("Approvals", () => {
     remittanceService.approveApproval.mockRejectedValue(err);
     show("/finance/remittance/approvals?approval=remittance:51");
     await waitFor(() => expect(remittanceService.getApproval).toHaveBeenCalledWith("51"));
-    expect(await screen.findByText("Your limit PHP 1,000,000.00")).toBeInTheDocument();
+    expect(await screen.findByText("Your limit ₱1,000,000.00")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-    expect(await screen.findByText("Approve REM-2026-00051 for PHP 409,141.43? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
+    expect(await screen.findByText("Approve REM-2026-00051 for ₱409,141.43? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
     fireEvent.click(within(dialog()).getByRole("button", { name: "Approve" }));
     expect(remittanceService.approveApproval).toHaveBeenCalledWith(51, { version: 1 });
     expect(await screen.findByText("Approved by J. Cruz at 10:32.")).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe("Approvals", () => {
     remittanceService.rejectApproval.mockResolvedValue({ id: 61, status: "Rejected" });
     show("/finance/remittance/approvals?approval=61");
     fireEvent.click(await screen.findByRole("button", { name: "Reject" }));
-    expect(await screen.findByText("REM-2026-00061 · PHP 409,141.43 returns to M. Reyes.")).toBeInTheDocument();
+    expect(await screen.findByText("REM-2026-00061 · ₱409,141.43 returns to M. Reyes.")).toBeInTheDocument();
     fireEvent.click(within(dialog()).getByRole("button", { name: "Reject and return to maker" }));
     expect(await within(dialog()).findByText("Choose the reason")).toBeInTheDocument();
     expect(remittanceService.rejectApproval).not.toHaveBeenCalled();

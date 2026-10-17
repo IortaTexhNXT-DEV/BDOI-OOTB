@@ -28,6 +28,12 @@ import { FLEET_VEHICLE_COLUMNS } from '../fleet/service.js';
 import { IMPORT_COLUMNS as REMITTANCE_IMPORT_COLUMNS, PRODUCT_LINES } from '../remittance/imports.js';
 import { CALL_RECORD_COLUMNS } from '../talkbot/columns.js';
 import { TFS_COLUMNS } from '../leads/tfsImport.js';
+import { SCHEME_LINE_COLUMNS } from '../schemes/service.js';
+import { LOAN_BOOKING_COLUMNS } from '../scheme-issuance/upload.js';
+import { LOAN_STATUS_COLUMNS } from '../lock-in/upload.js';
+import { PARCEL_COLUMNS, SHIPMENT_COLUMNS } from '../marine/parcel.js';
+import { CREDIT_LIFE_COLUMNS } from '../credit-life/service.js';
+import { SALES_TARGET_COLUMNS } from '../incentive/salesTargets.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -87,7 +93,7 @@ const fileBase = (label) => String(label).replace(/&/g, 'and').replace(/[^A-Za-z
 export function staticUploads() {
   return [
     {
-      id: 'leads', file: 'Leads_Upload_Template.xlsx', title: 'Leads upload', menu: 'Operations > Sales & Marketing > Prospects > Bulk Upload', route: 'POST /api/leads/bulk-upload (multipart field "file")',
+      id: 'leads', file: 'Leads_Upload_Template.xlsx', title: 'Leads upload', menu: 'Sales & Placement > Prospects > Bulk Upload', route: 'POST /api/leads/bulk-upload (multipart field "file")',
       columns: LEAD_UPLOAD_COLUMNS, maxRows: IMPORT_ROWS,
       samples: [
         { firstName: 'Maria', lastName: 'Santos', DOB: '1988-04-12', gender: 'Female', emailId: 'maria.santos@example.ph', contactNumber: '09171234567', houseNo: '12 Mabini St.', barangay: 'San Antonio',
@@ -98,7 +104,7 @@ export function staticUploads() {
       notes: ['A lead needs a First Name (individual) or a Company Name (corporate).'],
     },
     {
-      id: 'tfs-accounts', file: 'TFS_Accounts_Upload_Template.xlsx', title: 'TFS accounts upload', menu: 'Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts',
+      id: 'tfs-accounts', file: 'TFS_Accounts_Upload_Template.xlsx', title: 'TFS accounts upload', menu: 'Sales & Placement > Prospects > Bulk Upload > TFS accounts',
       route: 'POST /api/leads/tfs-import (multipart field "file")', columns: TFS_COLUMNS, maxRows: IMPORT_ROWS,
       samples: [
         { tfsReference: 'TFS-2026-104233', loanId: 'LN-0094418', firstName: 'Andrea', lastName: 'Villanueva', DOB: '1987-06-21', contactNumber: '09173047105', emailId: 'andrea.villanueva@gmail.com',
@@ -109,7 +115,7 @@ export function staticUploads() {
       notes: ['One prospect per Loan ID: a Loan ID already loaded updates that prospect (TFS details, status and disposition).', 'An account without a Policy Expiry Date gives no prospect.'],
     },
     {
-      id: 'talkbot-results', file: 'Talkbot_Call_Results_Template.xlsx', title: 'Talkbot call results', menu: 'Operations > Renewals > Talkbot Calls > Upload results',
+      id: 'talkbot-results', file: 'Talkbot_Call_Results_Template.xlsx', title: 'Talkbot call results', menu: 'Policy Servicing > Renewals > Talkbot Calls > Upload results',
       route: 'POST /api/talkbot/lists/:id/results (multipart field "file")', columns: CALL_RECORD_COLUMNS, fileTypes: 'Excel (.xlsx) only. The first sheet is read; the first row must be the column headers.',
       maxRows: 'Up to 20,000 data rows per file (talkbot.max_upload_rows).',
       samples: [
@@ -122,7 +128,7 @@ export function staticUploads() {
         'Each row is matched to the call list by Contact ID (the policy number), else by Contact Number when one account only has it.'],
     },
     {
-      id: 'quotations', file: 'Quotations_Upload_Template.xlsx', title: 'Quotations upload', menu: 'Operations > Sales & Marketing > Quotations > Bulk Upload', route: 'POST /api/quotations/bulk-upload (multipart field "file")',
+      id: 'quotations', file: 'Quotations_Upload_Template.xlsx', title: 'Quotations upload', menu: 'Sales & Placement > Quotations > Bulk Upload', route: 'POST /api/quotations/bulk-upload (multipart field "file")',
       columns: QUOTE_UPLOAD_COLUMNS, maxRows: IMPORT_ROWS,
       samples: [
         { firstName: 'Jose', lastName: 'Reyes', emailId: 'jose.reyes@example.ph', contactNumber: '09189876543', productType: 'Motor', insurancePolicyType: 'PC', insuranceCompanyName: 'Malayan Insurance Co., Inc.',
@@ -131,7 +137,7 @@ export function staticUploads() {
       notes: ['With a Lead Id the quotation is added to that lead; without it a new lead is created from the name columns. Premiums are recalculated by BrokerVerse from the rate and the tariff.'],
     },
     {
-      id: 'policies', file: 'Policies_Upload_Template.xlsx', title: 'Policies upload', menu: 'Operations > Policy > Bulk Upload', route: 'POST /api/policies/bulk-upload (multipart field "file"; mode=go-live for in-force policies of the old system)',
+      id: 'policies', file: 'Policies_Upload_Template.xlsx', title: 'Policies upload', menu: 'Policy Servicing > Policy > Bulk Upload', route: 'POST /api/policies/bulk-upload (multipart field "file"; mode=go-live for in-force policies of the old system)',
       columns: POLICY_UPLOAD_COLUMNS, maxRows: IMPORT_ROWS,
       samples: [
         { policyNumber: 'PC-MLY-2026-000101', insuredName: 'Maria Santos', firstName: 'Maria', lastName: 'Santos', emailId: 'maria.santos@example.ph', contactNumber: '09171234567', productType: 'Motor',
@@ -241,6 +247,19 @@ export function staticUploads() {
       notes: ['These lines are matched to approved remittances on the same screen (Auto Match or Match).'],
     },
     {
+      id: 'endorsement-insurer-commission', file: 'Endorsement_Insurer_Commission_Template.xlsx', csv: 'Endorsement_Insurer_Commission_Template.csv',
+      title: 'Endorsement commission calculated by the insurer (TIS-BRD-COMM-07)',
+      menu: 'Policy Servicing > Policy > Endorsement > Upload insurer commission', route: 'POST /api/endorsements/insurer-commission/upload',
+      fileTypes: 'XLSX or CSV.', maxRows: 'No fixed limit.',
+      onError: 'Row by row: each valid row is recorded on its endorsement; a row with an unknown or already booked endorsement, or no number, is listed with its message. Upload the corrected rows again.',
+      columns: [
+        { key: 'endorsementNumber', header: 'Endorsement No', aliases: ['endorsement number'], required: true, format: 'BrokerVerse endorsement number, not yet booked', example: 'END-2026-00012' },
+        { key: 'commission', header: 'Commission', aliases: ['service fee', 'insurer commission'], required: true, format: 'Amount in PHP, 0 or more', example: '1200.50' },
+      ],
+      samples: [{ endorsementNumber: 'END-2026-00012', commission: '1200.50' }],
+      notes: ['Booking the endorsement takes this commission on its premium change instead of the commission ratio of the policy.'],
+    },
+    {
       id: 'users', file: 'Users_Provisioning_Template.xlsx', csv: 'Users_Provisioning_Template.csv', title: 'Users (named users and their roles)',
       menu: 'Not a screen upload: run by the System Administrator on the server with backend/scripts/provision-users.js (dry run first, then CONFIRM_PROVISION=yes). Single users are added in Master > Generals > User Management > User.',
       screen: 'Server script backend/scripts/provision-users.js, run by the System Administrator (single users: Master > Generals > User Management > User)', button: false,
@@ -257,7 +276,7 @@ export function staticUploads() {
       notes: ['The password column is left empty in the template on purpose. Fill it in only in the copy kept outside the repository, and hand each password to its user privately.', 'An existing username is updated: its role is replaced and the password reset.'],
     },
     {
-      id: 'dealer-sales', file: 'Dealer_Sales_Upload_Template.xlsx', title: 'Dealer vehicle sales (brand-new vehicle programme)', menu: 'Operations > Sales & Marketing > Dealer Programmes > Dealer Sales Upload',
+      id: 'dealer-sales', file: 'Dealer_Sales_Upload_Template.xlsx', title: 'Dealer vehicle sales (brand-new vehicle programme)', menu: 'Sales & Placement > Dealer Programmes > Dealer Sales Upload',
       route: 'POST /api/motor-programmes/:id/sales/upload (multipart field "file")', columns: DEALER_SALE_COLUMNS, maxRows: 'Up to 2,000 sales per file (Configuration setting motor_programmes.max_rows) and 10 MB.',
       onError: ROW_BY_ROW.replace('otherwise the saved rows are created a second time.', 'otherwise the saved rows are refused as already uploaded (same chassis number).'),
       samples: [
@@ -274,7 +293,97 @@ export function staticUploads() {
         'A financed sale names the bank (or the programme\'s bank applies when there is a loan amount): the bank is the mortgagee on the policy and the bank endorsement letter can be printed from the sale.'],
     },
     {
-      id: 'fleet-vehicles', file: 'Fleet_Vehicles_Upload_Template.xlsx', title: 'Fleet vehicles (schedule of a fleet policy)', menu: 'Operations > Fleet Schedules > Schedule > Upload Vehicles',
+      id: 'scheme-vehicle-lines', file: 'Scheme_Vehicle_Lines_Upload_Template.xlsx', title: 'Scheme vehicle lines (make and model range of a scheme)',
+      menu: 'Sales & Placement > Scheme Master > Upload vehicle lines', route: 'POST /api/schemes/lines/upload (multipart field "file", fields schemeId and mode add | replace)',
+      columns: SCHEME_LINE_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting schemes.max_rows).',
+      onError: 'Each row is checked with the rules of the Vehicles tab and added on its own. The result lists the failed rows with their row number and the reason. In mode Replace the rows replace every line of the scheme, and only when at least one row is valid.',
+      samples: [
+        { schemeNo: 'S1-STD-2027', make: 'Toyota', model: 'Vios', variant: 'ALL', yearFrom: '2026', yearTo: '2027', siFrom: '500000', siTo: '1300000', vehicleClass: 'private_cars', odRate: '', aonRate: '' },
+        { schemeNo: 'S1-STD-2027', make: 'Toyota', model: 'Fortuner', variant: '2.4 G 4x2 AT', yearFrom: '2026', yearTo: '2027', siFrom: '1500000', siTo: '2500000', vehicleClass: 'private_cars', odRate: '2.2000', aonRate: '' },
+      ],
+      notes: ['Choose the Draft scheme and the mode (Add or Replace) on the screen. A row may name its scheme in SCHEME_NO; it must be a Draft scheme.',
+        'MODEL and VARIANT blank or ALL mean all models or all variants. When a vehicle is rated, a variant line wins over a model line and a model line over an All models line.'],
+    },
+    {
+      id: 'scheme-loan-bookings', file: 'Scheme_Loan_Bookings_Upload_Template.xlsx', title: 'TFSPH loan bookings (Scheme 1 and 2 applications)',
+      menu: 'Sales & Placement > Scheme Issuance > Upload loan bookings', route: 'POST /api/scheme-issuance/bookings/upload (multipart field "file")',
+      columns: LOAN_BOOKING_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting schemes.max_rows).',
+      onError: 'Each row is checked, priced from its scheme and given its document checklist on its own. A row with any error creates nothing and is listed with its row number and the reason; the other rows become applications in Documents pending. Fix the failed rows and upload only those rows again (a loan account already on an application is refused).',
+      samples: [
+        { schemeNo: 'S1-STD-2026', loanAccount: '8005123456', bankCode: 'TFS-HQ', bookingDate: '2026-10-05', releaseDate: '2026-10-07', loanTermMonths: '60', firstName: 'Ramon', lastName: 'Villanueva',
+          birthday: '1992-03-14', nationality: 'Filipino', mobile: '09175550123', email: 'ramon.villanueva@example.ph', city: 'Makati City', province: 'Metro Manila', kycSource: 'TFSPH', idType: 'PhilID',
+          idNumber: '1234-5678-9012-3456', dealerCode: 'TMK-MKT', make: 'Toyota', model: 'Vios', variant: '1.3 XLE CVT', yearModel: '2026', color: 'Silver Metallic', chassisNumber: 'MR2B29F30R1123456',
+          engineNumber: '2NR-F123456', conductionSticker: 'A1B234', invoicePrice: '1015000', insurer: 'PIONEER', araSignedOn: '2026-10-05', araPaymentMode: 'ADA' },
+      ],
+      notes: ['Documents are not in the file: they are uploaded on each application (Scheme Issuance > application > Document checklist).',
+        'ARA Signed On and ARA Payment Mode are required for a Scheme 1 loan; a Scheme 2 loan pays through the monthly amortisation.'],
+    },
+    {
+      id: 'sales-targets', file: 'Sales_Targets_Upload_Template.xlsx', title: 'Sales targets (commission target of an agent or a sales unit per month)',
+      menu: 'Master > Finance > Sales Targets > Upload', route: 'POST /api/incentive/sales-targets/upload (multipart field "file")',
+      columns: SALES_TARGET_COLUMNS, fileTypes: XLSX_OR_CSV, maxRows: 'Up to 2,000 rows per file (Configuration setting incentive.sales_target_max_rows).',
+      onError: `${ROW_BY_ROW} Each saved row is a Draft target: send the drafts for approval on the screen; a second user approves them.`,
+      samples: [
+        { scope: 'Agent', agent: 'ref-dcruz', salesUnit: '', period: '2026-11', targetAmount: '150000.00', remarks: 'Q4 push' },
+        { scope: 'Sales unit', agent: '', salesUnit: 'MNL', period: '2026-11', targetAmount: '1200000.00', remarks: '' },
+      ],
+      notes: ['A target counts in the reports only once approved (Agent Policy Conversion: Target and Variance; Sales Target Variance).',
+        'A row for an agent or sales unit and month that already has an approved target replaces it when the new target is approved.'],
+    },
+    {
+      id: 'tfs-loan-status', file: 'TFS_Loan_Status_Upload_Template.xlsx', title: 'TFS account status (loan status of the financed accounts)',
+      menu: 'Policy Servicing > Renewals > Lock-in Review > Upload loan status', route: 'POST /api/lock-in/uploads (multipart field "file")',
+      columns: LOAN_STATUS_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 5,000 rows per file (Configuration setting lockin.upload_max_rows).',
+      onError: 'Each row is loaded on its own. A row with a bad loan account, status or date, or a loan account linked to no policy, is listed as failed with its row number; download the failed rows from the upload. A status date older than the one on the policy, and a status set by hand, are counted as Not changed.',
+      samples: [
+        { loanAccount: '8003828889', loanStatus: 'PAST DUE', statusDate: '30/09/2026', daysPastDue: '32', maturity: '02/12/2028', scheme: 'SCHEME 2', borrowerName: 'Mark Ileto', remarks: 'Two amortisations unpaid' },
+        { loanAccount: '8005123456', loanStatus: 'CURRENT', statusDate: '30/09/2026', scheme: 'SCHEME 1', borrowerName: 'Andrea Villanueva' },
+      ],
+      notes: ['The TFS status codes are mapped to the BrokerVerse loan statuses by the Configuration setting lockin.tfs_status_map (MISSED PAYMENT is Past due).',
+        'A blocking status (lockin.blocking_loan_statuses) holds the renewal notices of every policy of the loan account; a return to CURRENT lifts the hold.'],
+    },
+    {
+      id: 'parcel-list', file: 'Parcel_List_Upload_Template.xlsx', title: 'TFS daily parcel list (Parcel / Courier certificates)',
+      menu: 'Policy Servicing > Marine Open Covers > Open Cover > Certificates > Upload Parcels', route: 'POST /api/marine/open-covers/:id/parcels/upload (multipart field "file", field parcelDate)',
+      columns: PARCEL_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting parcel.max_upload_rows) and 10 MB.',
+      onError: 'Each row is checked and becomes one certificate on its own. A row with an error creates nothing and is listed with its row number and the reason; a warning (possible duplicate, late item) is listed and the certificate is issued. Uploading the same file again creates nothing: every waybill is already used.',
+      samples: [
+        { parcelDate: '09/10/2026', customerName: 'Maria Clara Reyes', loanAccount: '0701-2026-118842', addressLine: '18 Sampaguita St.', barangay: 'Bel-Air', city: 'Makati City', province: 'Metro Manila',
+          zipCode: '1209', mobile: '09175550123', email: 'maria.reyes@example.ph', documentsSent: 'Certificate of registration; Deed of sale', courier: 'LBC Express', waybillNo: '143298765012', deliveryType: 'Rush' },
+      ],
+      notes: ['The covers, the premium and the charge come from the open cover in force on the parcel date; they are not in the file.',
+        'A certificate is e-mailed to EMAIL as a password-protected PDF (parcel.certificate_password); the others are printed with Print certificates of the day.'],
+    },
+    {
+      id: 'credit-life-members', file: 'Credit_Life_Members_Upload_Template.xlsx', title: 'Credit Life members (monthly batch of the financing bank)',
+      menu: 'Policy Servicing > Credit Life > Batch > Upload Members', route: 'POST /api/credit-life/batches/:id/upload (multipart field "file")',
+      columns: CREDIT_LIFE_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 10,000 rows per file (Configuration setting credit_life.max_upload_rows) and 10 MB.',
+      onError: 'Every row is kept on the batch: valid, or with the checks it failed (age, number of accounts, loan tenor, sum insured, a loan account already covered, data format) listed with its row number. Only valid members are issued; remove a failed member and encode it again once corrected.',
+      samples: [
+        { customerNo: 'TFS-C-0045821', lastName: 'Dela Cruz', firstName: 'Juan', birthDate: '14/03/1980', loanAccount: '8005123456', loanAmount: '1250000', loanTermMonths: '60', releaseDate: '05/10/2026',
+          accountCount: '1', sumInsured: '1000000', email: 'juan.delacruz@example.ph', mobile: '09175550123', address: '18 Sampaguita St., Bel-Air', city: 'Makati City', province: 'Metro Manila' },
+      ],
+      notes: ['The loans of one customer (same CUSTOMER_NO, else the same name and birth date) share one master policy; each loan gets its own certificate of cover.',
+        'The certificate is e-mailed to EMAIL as a password-protected PDF (credit_life.certificate_password, delivered: the birth date as DDMMYYYY).'],
+    },
+    {
+      id: 'cargo-shipments', file: 'Cargo_Shipments_Upload_Template.xlsx', title: 'Cargo shipment list (Marine Cargo inland declarations)',
+      menu: 'Policy Servicing > Marine Open Covers > Open Cover > Certificates > Upload Shipments', route: 'POST /api/marine/open-covers/:id/shipments/upload (multipart field "file")',
+      columns: SHIPMENT_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting parcel.max_upload_rows) and 10 MB.',
+      onError: 'Each row is priced like Issue certificate on its own: insured value = invoice value plus the mark-up, premium = insured value x the rate of the conveyance, at least the minimum premium. A row above the limit of its conveyance, or on a conveyance the cover does not rate, is listed as failed; the others join the daily declaration of their date.',
+      samples: [
+        { shipmentDate: '05/10/2026', conveyance: 'Land', voyageFrom: 'Manila', voyageTo: 'Batangas City', billOfLading: 'DR-0051234', vesselName: 'NBC 1234', goodsDescription: 'Auto parts', packing: '12 pallets',
+          consignee: 'Batangas Auto Supply', invoiceValue: '850000', markupPercent: '0', certificate: 'N' },
+      ],
+    },
+    {
+      id: 'fleet-vehicles', file: 'Fleet_Vehicles_Upload_Template.xlsx', title: 'Fleet vehicles (schedule of a fleet policy)', menu: 'Policy Servicing > Fleet Schedules > Schedule > Upload Vehicles',
       route: 'POST /api/fleet/:id/vehicles/upload (multipart field "file")', columns: FLEET_VEHICLE_COLUMNS, maxRows: 'Up to 1,000 vehicles per file (Configuration setting fleet.max_upload_rows) and 10 MB.',
       onError: ROW_BY_ROW.replace('otherwise the saved rows are created a second time.', 'otherwise the saved rows are refused as already on the fleet (same plate or chassis number).'),
       samples: [

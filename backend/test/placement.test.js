@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts, enableFeatures } from './helpers.js';
+import { setup, loginAs, withProducts, enableFeatures, withoutPlacementControls } from './helpers.js';
 import { pool, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { splitParticipants } from '../src/modules/placement/participants.js';
@@ -68,6 +68,8 @@ const sumOf = (rows, k) => Math.round(rows.reduce((s, r) => s + Number(r[k]), 0)
 
 beforeAll(async () => {
   ctx = await setup();
+  // the approval to send and the Motor issuance checklist are covered by test/placement-send-approval.test.js and test/motor-issuance-checklist.test.js
+  await withoutPlacementControls();
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['coinsurance', 'rfq-multi-insurer']);
   await withProducts();

@@ -1,5 +1,5 @@
 /**
- * Client comparison and recommendation reports (Operations > Sales & Marketing > Comparison Reports).
+ * Client comparison and recommendation reports (Sales & Placement > Comparison Reports).
  *
  * A report compares the options offered to a client: the insurer offers of a request for quotation (broker slip), or
  * quotations prepared for the same prospect or client. The options are copied into the report when it is prepared, so

@@ -33,7 +33,7 @@ const period = (p, extra = {}) => ({ period: p, periodNo: 1, startDate: `${p}-01
 const FY = {
   code: "FY2028", startDate: "2027-04-01", endDate: "2028-03-31", status: "open",
   periods: [
-    period("2027-04"),
+    period("2027-04", { closing: { operationsCutoff: "2027-04-26", financeClose: "2027-04-29", adjustmentWindowEnd: "2027-05-10" } }),
     period("2027-05", {
       status: "soft_closed",
       lastChange: { to: "soft_closed", at: "2027-06-02T02:00:00Z", byName: "Ana Santos", reasonCode: "PCL-MONTHEND", reasonName: "Month-end close completed", remarks: "Month-end close completed", source: "manual" },
@@ -84,6 +84,18 @@ describe("Period Management", () => {
     expect(within(panel).getByLabelText("Reason")).toHaveAttribute("data-context", "period_close");
     expect(within(panel).getByRole("button", { name: "Soft-close period" })).toBeDisabled();
     expect(screen.queryByText(/The blocking month-end checks run first/)).toBeNull();
+    // the closing calendar of the period (operations cut-off, finance close, end of the adjustment window)
+    expect(within(panel).getByText(/Operations cut-off .*26.* Finance close .*29.* Adjustments until .*10/)).toBeInTheDocument();
+  });
+
+  it("keeps the reopen of a hard-closed period disabled with its reason", async () => {
+    periodEndService.fiscalYear.mockResolvedValue({ ...FY, periods: [period("2027-06", { status: "closed",
+      actions: { reopen: { allowed: false, reason: "hard-closed", message: "Period 2027-06 is closed (hard close)" } } })] });
+    hasPermission.mockImplementation(() => true);
+    renderPage();
+    const row = await rowOf("2027-06");
+    expect(within(row).getByRole("button", { name: "Reopen" })).toBeDisabled();
+    expect(within(row).queryByText(/Operations cut-off/)).toBeNull();
   });
 
   it("asks for a reason and sends it with the status change", async () => {
@@ -107,7 +119,7 @@ describe("Period Management", () => {
     periodEndService.createFiscalYear.mockResolvedValue({ code: "FY2029" });
     fireEvent.click(await screen.findByRole("button", { name: "Next fiscal year" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("Create fiscal year FY2029")).toBeInTheDocument();
+    expect(within(dialog).getByText("Create Fiscal Year FY2029")).toBeInTheDocument();
     expect(periodEndService.createFiscalYear).not.toHaveBeenCalled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Create fiscal year" }));
     await waitFor(() => expect(periodEndService.createFiscalYear).toHaveBeenCalled());

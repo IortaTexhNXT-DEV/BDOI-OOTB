@@ -13,7 +13,7 @@
  */
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { addDays, isoDate, today } from '../../lib/dates.js';
+import { addDays, businessDate, isoDate, today } from '../../lib/dates.js';
 import { formatMoney, round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { printFormat } from '../../lib/pdf/index.js';
@@ -472,7 +472,7 @@ export async function partnerReturned(db, id, b, user) {
   const d = await lockPdc(db, id);
   if (d.status !== 'cancellation-pending' || !d.cancel_approved_at) throw conflict(`Cheque ${d.pdc_number} has no approved pull-out to record`);
   const on = isoDate(b.returnedOn) || (await today());
-  const approved = isoDate(d.cancel_approved_at);
+  const approved = await businessDate(d.cancel_approved_at);
   if (on < approved) throw fail('returnedOn', 'Returned on cannot be before the request was approved');
   if (on > (await today())) throw fail('returnedOn', 'Returned on cannot be in the future');
   await db.query(`UPDATE post_dated_cheques SET status = 'cancelled', custody = 'tis-vault', cancelled_on = $2, cancelled_by = $3,

@@ -7,7 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { menuList } from "./list";
 import "./NewSideBar.scss";
 import { filterMenuForRoles, getUserRoles } from "../../utils/menuPermissions";
-import { findActiveTrail, keyOf, searchMenu } from "./menuTree";
+import { findActiveTrail, keyOf, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
 import { isTyping } from "../HelpPanel/helpEvents";
 import {
   COMMISSION_VIEW_MODE_EVENT,
@@ -41,15 +41,15 @@ const writeExpanded = (keys) => {
 const isTop = (key) => !key.includes("/");
 
 /**
- * A menu label that ends with an ellipsis when it does not fit; the full name is shown as a tooltip when the label
- * is cut or abbreviated (sidebarFull.<name> in en.json).
+ * A menu label that wraps to a second line when it does not fit on one; the full name is shown as a tooltip when the
+ * label is still cut or is abbreviated (sidebarFull.<name> in en.json).
  */
 const NavLabel = ({ text, full }) => {
   const ref = useRef(null);
   const onEnter = () => {
     const el = ref.current;
     if (!el) return;
-    const cut = el.scrollWidth > el.clientWidth + 1;
+    const cut = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
     if (cut || full !== text) el.setAttribute("title", full);
     else el.removeAttribute("title");
   };
@@ -99,9 +99,10 @@ const NewSideBar = ({ onNavigate }) => {
   // Deny-by-default role filter shared with the route guard (utils/menuPermissions.js); Agents/Referrer Accounts is
   // hidden when the Commission view is Management.
   const menu = useMemo(() => {
-    const base = userRoles.length
+    // the entries shown as tabs of another screen are not drawn (components/SideBar/menuTree.js withoutTabs)
+    const base = withoutTabs(userRoles.length
       ? filterMenuForRoles(withoutFeatures(menuList, features), userRoles)
-      : menuList.filter((m) => m.name === "Dashboard");
+      : menuList.filter((m) => m.name === "Dashboard"));
     if (commissionViewMode !== "management") return base;
     return base.map((m) =>
       m.name === "Commission" && m.submenu
@@ -110,7 +111,7 @@ const NewSideBar = ({ onNavigate }) => {
     );
   }, [userRoles, commissionViewMode, features]);
 
-  const activeTrail = useMemo(() => findActiveTrail(menu, pathname), [menu, pathname]);
+  const activeTrail = useMemo(() => visibleTrail(menu, findActiveTrail(menu, pathname)), [menu, pathname]);
   const activeKey = keyOf(activeTrail);
 
   const updateExpanded = useCallback((change) => {
@@ -207,7 +208,7 @@ const NewSideBar = ({ onNavigate }) => {
   };
 
   const renderChildren = (items, parentNames, level) =>
-    items.map((child) => {
+    items.filter((child) => !child.searchOnly).map((child) => {
       const names = [...parentNames, child.name];
       if (child.section && child.submenu) {
         return (

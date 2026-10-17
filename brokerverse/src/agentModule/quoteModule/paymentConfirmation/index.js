@@ -17,7 +17,7 @@ import systemSettingsService from "../../../services/systemSettingsService";
 import PolicyPaymentCapture from "../../../components/PolicyPaymentCapture";
 
 /**
- * Policy payment (Operations > Quotation / Policy > Payment).
+ * Policy payment (Policy Servicing > Quotation / Policy > Payment).
  *
  * Replaces the former mock payment that auto-completed and issued an official receipt without any money captured.
  * The user chooses how the client pays:
@@ -142,7 +142,7 @@ const PaymentConfirmation = () => {
       // the line's placement journey requires a Placement Slip: the policy is issued from it once the insurer(s) confirm
       try {
         const placement = await placementService.placeQuotation(quotationId, { billingMode });
-        showToast("info", t("placement.quoteJourney.created", { number: placement.placementNumber }), t("placement.quoteJourney.createdDetail"), 3000);
+        showToast("info", t("placement.quoteJourney.created", { number: placement.placementNumber }), t(placement.sendApprovalRequired ? "placement.quoteJourney.createdDetailApproval" : "placement.quoteJourney.createdDetail"), 3000);
         navigate(`/placement/placement-slips/${placement.id}`);
       } catch (e) {
         showToast("error", t("agent.policyCreationFailed", "Policy not issued"), e.message, 8000);

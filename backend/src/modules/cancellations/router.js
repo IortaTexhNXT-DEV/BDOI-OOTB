@@ -1,5 +1,5 @@
 /**
- * Policy cancellation (Operations > Policy Cancellation): the return premium of a cancellation computed from the days
+ * Policy cancellation (Policy Servicing > Policy Cancellation): the return premium of a cancellation computed from the days
  * left (pro-rata, short-period scale when the insured cancels, flat from inception), with its premium taxes from the
  * charge engine and the commission taken back. The cancellation endorsement itself is created with
  * POST /endorsements/create-endorsement (isCancelPolicy, cancellationReason, cancellationMethod, effectiveDate), which
@@ -16,7 +16,7 @@ import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Cancellations', '/cancellations');
 const read = [requireAuth, requirePermission('read:endorsements')];
-const S = 'Operations > Policy Cancellation';
+const S = 'Policy Servicing > Policy Cancellation';
 
 define({
   method: 'GET', path: '/reasons', summary: 'Cancellation reasons (master cancellation-reason): who initiates and the return premium method', screen: S, middleware: read,

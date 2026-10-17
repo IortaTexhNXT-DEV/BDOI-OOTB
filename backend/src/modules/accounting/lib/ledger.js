@@ -7,7 +7,7 @@
 import { getSetting } from '../../../lib/settings.js';
 import { baseCurrency } from '../../../lib/currency.js';
 import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.js';
-import { round2, today } from './http.js';
+import { isoDate, round2, today } from './http.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
 import { assertPostingAllowed } from '../../period-end/posting.js';
 import { OPENING_JOURNAL_SOURCE } from '../../period-end/opening.js';
@@ -117,6 +117,17 @@ export async function createJournal(db, j, user) {
     j.entryType || null, j.entrySubType || null, j.referenceType || null, j.referenceId == null ? null : String(j.referenceId),
     j.clientId || null, j.policyId || null, j.policyNumber || null, currency, j.dueDate || null, period, !!j.requiresApproval,
     j.reversalOf || null, j.correctionOf || null, user?.id ?? null])).rows[0];
+  await writeLines(db, h.id, lines, accounts, { centres, fallbackCentre, currency, header: j });
+  if (status === 'posted') {
+    await db.query('UPDATE journal_vouchers SET status = \'posted\', posted_by = $2, posted_at = now() WHERE id = $1', [h.id, user?.id ?? null]);
+  } else if (status !== 'pending') {
+    await db.query('UPDATE journal_vouchers SET status = $2 WHERE id = $1', [h.id, status]);
+  }
+  return { ...h, status };
+}
+
+/** Insert the lines of a journal (numbered from 1); header: clientId, policyId, dueDate used when a line has none. */
+async function writeLines(db, jvId, lines, accounts, { centres, fallbackCentre, currency, header = {} }) {
   let n = 0;
   for (const l of lines) {
     n += 1;
@@ -125,18 +136,27 @@ export async function createJournal(db, j, user) {
         main_account_description, sub_account_description, branch_code, branch_description, department_code, department_description,
         currency_code, foreign_amount, exchange_rate, client_id, policy_id, due_date, insurance_company_id, cost_centre)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)`,
-    [h.id, n, String(l.accountCode), acct.name, l.debit, l.credit, l.memo || null, l.mainAccount || null, l.subAccount || null,
+    [jvId, n, String(l.accountCode), acct.name, l.debit, l.credit, l.memo || null, l.mainAccount || null, l.subAccount || null,
       l.mainAccountDescription || null, l.subAccountDescription || null, l.branchCode || null, l.branchDescription || null,
       l.departmentCode || null, l.departmentDescription || null, l.currencyCode || currency, l.foreignAmount ?? null, l.exchangeRate || 1,
-      l.clientId ?? j.clientId ?? null, l.policyId ?? j.policyId ?? null, l.dueDate ?? j.dueDate ?? null, l.insuranceCompanyId ?? null,
+      l.clientId ?? header.clientId ?? null, l.policyId ?? header.policyId ?? null, l.dueDate ?? header.dueDate ?? null, l.insuranceCompanyId ?? null,
       (l.costCentre ? centres.get(String(l.costCentre)) : fallbackCentre) || null]);
   }
-  if (status === 'posted') {
-    await db.query('UPDATE journal_vouchers SET status = \'posted\', posted_by = $2, posted_at = now() WHERE id = $1', [h.id, user?.id ?? null]);
-  } else if (status !== 'pending') {
-    await db.query('UPDATE journal_vouchers SET status = $2 WHERE id = $1', [h.id, status]);
-  }
-  return { ...h, status };
+}
+
+/**
+ * Replace the lines and header of a manual journal not yet posted (the maker's edit of a voucher awaiting approval or
+ * returned, GAP-FIN-27): j = { date, description, transactionCode, lines }. The voucher keeps its number.
+ */
+export async function replaceJournalLines(db, jv, j) {
+  const { lines, totalDebit, totalCredit, accounts } = await validateLines(db, j.lines, { manual: true });
+  const date = j.date || isoDate(jv.jv_date);
+  const centres = await assertCostCentres(db, lines.map((l) => l.costCentre).filter(Boolean).map(String), date);
+  const fallbackCentre = await defaultCostCentre(db, date);
+  await db.query('DELETE FROM journal_lines WHERE jv_id = $1', [jv.id]);
+  await writeLines(db, jv.id, lines, accounts, { centres, fallbackCentre, currency: jv.currency });
+  return (await db.query(`UPDATE journal_vouchers SET jv_date = $2, period = $3, description = $4, transaction_code = $5, total_debit = $6, total_credit = $7, updated_at = now()
+    WHERE id = $1 RETURNING *`, [jv.id, date, periodOf(date), j.description ?? jv.description, j.transactionCode || jv.transaction_code, totalDebit, totalCredit])).rows[0];
 }
 
 /** Resolve a journal from a journal id, a journal number or a journal line id (entry id). */

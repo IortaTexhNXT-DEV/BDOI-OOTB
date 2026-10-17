@@ -1,4 +1,4 @@
-import { findActiveTrail, matchLength, searchMenu } from "./menuTree";
+import { findActiveTrail, initialsOf, matchLength, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
 import { menuList } from "./list";
 
 const label = (name) => name;
@@ -14,9 +14,9 @@ describe("active menu entry", () => {
     expect(findActiveTrail(menuList, "/my-work")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/operations/my-work")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/executive/dashboard")).toEqual(["Dashboard", "Executive Dashboard"]);
-    expect(findActiveTrail(menuList, "/agent/policydetailedview/123")).toEqual(["Operations", "Clients"]);
-    expect(findActiveTrail(menuList, "/agent/policy")).toEqual(["Operations", "Policy"]);
-    expect(findActiveTrail(menuList, "/renewal/queue")).toEqual(["Operations", "Renewals", "Renewal Queue"]);
+    expect(findActiveTrail(menuList, "/agent/policydetailedview/123")).toEqual(["Policy Servicing", "Clients"]);
+    expect(findActiveTrail(menuList, "/agent/policy")).toEqual(["Policy Servicing", "Policy"]);
+    expect(findActiveTrail(menuList, "/renewal/queue")).toEqual(["Policy Servicing", "Renewals", "Renewal Queue"]);
     expect(findActiveTrail(menuList, "/master/finance/taxation")).toEqual(["Master", "Finance", "Taxation"]);
     expect(findActiveTrail(menuList, "/agent/home")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/account/profile")).toEqual([]);
@@ -35,5 +35,51 @@ describe("menu search", () => {
   });
   it("returns nothing for an empty query", () => {
     expect(searchMenu(menuList, "  ", label)).toEqual([]);
+  });
+});
+
+describe("abbreviations and groups found only by search", () => {
+  const tree = [
+    { name: "Accounts", submenu: [{ name: "Post-Dated Cheques", path: "/accounts/pdc" }, { name: "Journal Voucher", path: "/accounts/jv" }] },
+    { name: "Reports", submenu: [
+      { name: "All Reports", path: "/reports/catalogue", includes: ["/reports/catalogue", "/reports/run/"] },
+      { name: "Operational Reports", searchOnly: true, home: "All Reports", submenu: [{ name: "Dealer Production", path: "/reports/run/dealer-production" }] },
+    ] },
+  ];
+  const label = (name) => name;
+
+  it("finds a screen by the initials of its name", () => {
+    expect(initialsOf("Post-Dated Cheques")).toBe("pdc");
+    expect(searchMenu(tree, "PDC", label).map((r) => r.item.name)).toEqual(["Post-Dated Cheques"]);
+    expect(searchMenu(tree, "jv", label).map((r) => r.item.name)).toEqual(["Journal Voucher"]);
+  });
+
+  it("still finds a report under a group that the tree does not draw", () => {
+    expect(searchMenu(tree, "dealer", label).map((r) => r.item.name)).toEqual(["Dealer Production"]);
+  });
+
+  it("lights up the home entry of a hidden group", () => {
+    const trail = findActiveTrail(tree, "/reports/run/dealer-production");
+    expect(trail).toEqual(["Reports", "Operational Reports", "Dealer Production"]);
+    expect(visibleTrail(tree, trail)).toEqual(["Reports", "All Reports"]);
+    expect(visibleTrail(tree, ["Accounts", "Journal Voucher"])).toEqual(["Accounts", "Journal Voucher"]);
+  });
+});
+
+describe("tabs and highlights", () => {
+  const tree = [
+    { name: "Sales", submenu: [{ name: "Prospects", path: "/agent/leadlisting", includes: ["/agent/uploadpolicy"] }] },
+    { name: "Servicing", submenu: [
+      { name: "Policy", path: "/agent/policy", highlights: ["/agent/uploadpolicy"] },
+      { name: "Claims", path: "/agent/claim" },
+      { name: "Claim Documents", tab: "Claims", path: "/agent/claim/documents" },
+    ] },
+  ];
+  it("leaves the entries shown as tabs out of the drawn menu", () => {
+    expect(withoutTabs(tree)[1].submenu.map((x) => x.name)).toEqual(["Policy", "Claims"]);
+    expect(findActiveTrail(withoutTabs(tree), "/agent/claim/documents")).toEqual(["Servicing", "Claims"]);
+  });
+  it("lights up the entry that highlights an address over the one that grants it", () => {
+    expect(findActiveTrail(tree, "/agent/uploadpolicy/12")).toEqual(["Servicing", "Policy"]);
   });
 });

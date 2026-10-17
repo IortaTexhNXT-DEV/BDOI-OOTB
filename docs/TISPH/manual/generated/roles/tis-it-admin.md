@@ -6,42 +6,47 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
-| Operations > Sales & Marketing | Prospects | View |
-| Operations > Sales & Marketing | Quotations | View |
-| Operations > Sales & Marketing | Requests for Quotation | View |
-| Operations > Sales & Marketing | Placement Slips | View |
-| Operations > Sales & Marketing | Dealer & Bank Programmes | Create and edit |
-| Operations | Clients | View |
-| Operations | Policy | View |
-| Operations | Claims | View |
-| Operations > Renewals | Renewal Policy | View |
-| Operations > Renewals | Renewal Batch | View |
-| Operations > Renewals | Renewal Queue | View |
-| Operations > Renewals | Negotiations | View |
-| Operations > Renewals | Lapse Management | View |
-| Operations | Payments | View |
-| Operations | Cover Notes | View |
-| Operations | Policy Cancellation | View |
+| Sales & Placement | Prospects | View |
+| Sales & Placement | Quotations | View |
+| Sales & Placement | Requests for Quotation | View |
+| Sales & Placement | Placement Slips | View |
+| Sales & Placement | Scheme Issuance | View |
+| Sales & Placement | Dealer & Bank Programmes | Create and edit |
+| Sales & Placement | Promotions | Create and edit |
+| Sales & Placement | Scheme Master | Create and edit |
+| Policy Servicing | Clients | View |
+| Policy Servicing | Policies | View |
+| Policy Servicing | Cover Notes | View |
+| Policy Servicing | Endorsements | View |
+| Policy Servicing | Policy Cancellation | View |
+| Policy Servicing > Renewals | Renewal Queue | View |
+| Policy Servicing > Renewals | Renewal Policy | View |
+| Policy Servicing > Renewals | Renewal Batch | View |
+| Policy Servicing > Renewals | Lock-in Review | View |
+| Policy Servicing > Renewals | Negotiations | View |
+| Policy Servicing > Renewals | Lapse Management | View |
+| Policy Servicing | Claims | View |
 | Accounts | Receipts | View |
-| Accounts | Collections | View |
+| Accounts | Policy Payments to Verify | View |
 | Accounts | Post-Dated Cheques | View |
-| Accounts > Payables | Suppliers | View |
-| Accounts > Payables | Supplier 2307 | View |
-| Accounts | Disbursement | View |
+| Accounts | Collections | View |
+| Accounts > Remittance | Insurer Billing | View |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Approvals | View |
-| Accounts > Remittance | Insurer payments | View |
+| Accounts > Remittance | Insurer Payments | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
-| Accounts > Remittance | Held policies | View |
-| Accounts > Remittance | Insurer billing | View |
-| Accounts > Remittance | Setup | View |
+| Accounts > Remittance | Held Policies | View |
 | Accounts > Remittance | Settlement | View |
-| Accounts | Journal Voucher | View |
+| Accounts > Remittance | Setup | View |
+| Accounts > Commission | Commission Dashboard | View |
+| Accounts > Commission | Sharing Schemes | View |
 | Accounts > Incentive | Calculations | View |
 | Accounts > Incentive | Reports | View |
-| Commission | Commission Dashboard | View |
-| Commission | Sharing Schemes | View |
+| Accounts | Disbursement | View |
+| Accounts > Payables | Suppliers | View |
+| Accounts > Payables | Supplier 2307 | View |
+| Accounts | Journal Voucher | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -53,6 +58,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
+| Reports > Operational Reports | CLI Generated Report | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -64,6 +70,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Financial Reports | General Ledger Detail | View |
 | Reports > Financial Reports | Aged Payables to Insurers | View |
 | Reports > Financial Reports | Month-End Close Status | View |
+| Product Configurator | Dashboard | Create and edit |
+| Product Configurator | Product Templates | Create and edit |
+| Product Configurator | Coverage Builder | Create and edit |
+| Product Configurator | Rating Engine | Create and edit |
+| Product Configurator | Acceptance Rules | Create and edit |
+| Product Configurator | Document Manager | Create and edit |
+| Product Configurator | Market Mapping | Create and edit |
 | Master > Organization | Company | Create and edit |
 | Master > Organization | Branch | Create and edit |
 | Master > Organization | Sales Activity Types | Create and edit |
@@ -78,6 +91,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Cancellation Reasons | Create and edit |
 | Master > Insurance | Endorsement Types | Create and edit |
 | Master > Insurance | Claim Document Checklist | Create and edit |
+| Master > Insurance | Scheme Document Checklist | Create and edit |
+| Master > Insurance | Motor Issuance Checklist | Create and edit |
 | Master > Insurance | Repair Shops | Create and edit |
 | Master > Insurance | Lead Sources | Create and edit |
 | Master > Insurance | Reason Codes | Create and edit |
@@ -100,7 +115,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Transaction Code | Create and edit |
 | Master > Finance | Currency | Create and edit |
 | Master > Finance | Bank | Create and edit |
-| Master > System | E-mail Layout | Create and edit |
+| Master > System | E-Mail Layout | Create and edit |
 | Master > System | Documents and Reports Layout | Create and edit |
 | Master > System | Document Signatures | Create and edit |
 | Master > System | Configuration | Create and edit |
@@ -109,19 +124,12 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | Audit Trail | View |
 | Master > System | Service Levels | Create and edit |
 | Master > System | Security Controls | Create and edit |
-| Master > System | E-mail Outbox | Create and edit |
+| Master > System | E-Mail Outbox | Create and edit |
 | Master > System | Integrations | Create and edit |
 | Master > System | Features & Releases | View |
 | Master > System | Data Migration & Go-Live | Create and edit |
 | Master > Environment Promotion | Compare Environments | Create and edit |
 | Master > Environment Promotion | Promotion Path | Create and edit |
-| Product Configurator | Dashboard | Create and edit |
-| Product Configurator | Product Templates | Create and edit |
-| Product Configurator | Coverage Builder | Create and edit |
-| Product Configurator | Rating Engine | Create and edit |
-| Product Configurator | Acceptance Rules | Create and edit |
-| Product Configurator | Document Manager | Create and edit |
-| Product Configurator | Market Mapping | Create and edit |
 
 ## What you can view, change and approve {#tis-it-appsupport-admin-access}
 
@@ -133,27 +141,35 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Dealer programmes | Create and edit | Maintain programmes and upload dealer vehicle sales |  |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Sales & Marketing | Promotions | Create and edit | Add, amend and submit promotions |  |
+| Sales & Marketing | Promotions | Approve | Approve or return promotions; suspend, resume and withdraw them (never one you made or changed) |  |
+| Sales & Marketing | Scheme Master | View | See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export | Scheme Master |
+| Sales & Marketing | Scheme Master | Create and edit | Add, edit, copy, amend and submit schemes; upload vehicle lines |  |
+| Sales & Marketing | Scheme Master | Approve | Approve or return schemes; suspend, resume and withdraw them (never one you made or changed) |  |
+| Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Operations | Clients | View | See clients | Clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
-| Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies, Cover Notes and Policy Payments to Verify |
+| Operations | Endorsements and cancellations | View | See endorsements and cancellations | Endorsements and Policy Cancellation |
+| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Policy, Renewal Batch, Negotiations and Lapse Management |
+| Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Claims | View | See claims | Claims |
 | Accounts | Receipts | View | See receipts | Receipts |
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Insurer Payments and Disbursement |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Insurer Billing, Remittances, Approvals, Insurer Payments, Reconciliation, Exceptions, Held Policies, Settlement and Setup |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager and Market Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Endorsement Types, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Endorsement Types, Claim Document Checklist, Scheme Document Checklist, Motor Issuance Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-Mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-Mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |
@@ -181,6 +197,8 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Approve role access changes and authority limits of another administrator
+- Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)
+- Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)
 
 Who approves the work of this role:
 
@@ -188,10 +206,13 @@ Who approves the work of this role:
 |---|---|---|
 | Access control | Approve role access changes and authority limits of another administrator | TIS IT AppSupport / Admin |
 | Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
+| Products | Approve or return product templates submitted for review (never one you submitted or last changed) | TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Promotions | Approve or return promotions; suspend, resume and withdraw them (never one you made or changed) | TIS Sales Unit Head, TIS IT AppSupport / Admin or TIS General Manager |
+| Scheme Master | Approve or return schemes; suspend, resume and withdraw them (never one you made or changed) | TIS Sales Unit Head, TIS IT AppSupport / Admin or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
-| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
-| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Sales & Placement > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Sales & Placement > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

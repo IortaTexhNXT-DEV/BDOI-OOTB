@@ -1,4 +1,4 @@
-/** Renewal batches (Operations > Renewals > Renewal Batch): selection, queued notice sending, retry and report. */
+/** Renewal batches (Policy Servicing > Renewals > Renewal Batch): selection, queued notice sending, retry and report. */
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';

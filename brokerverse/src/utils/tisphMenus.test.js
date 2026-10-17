@@ -39,7 +39,7 @@ describe("TISPH roles (RBAC v4): menus", () => {
         .filter((p) => !isPathAllowed(p, menuList, [role])).map((p) => `${role} ${p}`));
     expect(refused).toEqual([]);
     expect(isPathAllowed("/agent/claim", menuList, ["tis-ops-associate"])).toBe(true);
-    expect(isPathAllowed("/operations/claim-documents", menuList, ["tis-sales-officer"])).toBe(false);
+    expect(isPathAllowed("/agent/claim/documents", menuList, ["tis-sales-officer"])).toBe(false);
   });
 
   it("Sales associates and officers open their own incentive programs and statement, not the calculations", () => {
@@ -123,8 +123,27 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(layouts.map((p) => helpSectionFor(p).matched)).toEqual([true, true, true]);
   });
 
+  it("journal vouchers and disbursements are Finance work; incentives are approved by the Sales Unit Head and the General Manager (TISPH decision)", () => {
+    for (const role of ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head", "tis-sales-unit-head"]) {
+      expect(isPathAllowed("/accounts/journalvoucher", menuList, [role])).toBe(false);
+      expect(isPathAllowed("/accounts/paymentvoucher", menuList, [role])).toBe(false);
+    }
+    expect(["/accounts/journalvoucher", "/accounts/paymentvoucher"].filter((p) => !isPathAllowed(p, menuList, ["tis-finance"]))).toEqual([]);
+    expect(isPathAllowed("/incentive/approvals", menuList, ["tis-ops-unit-head"])).toBe(false);
+    expect(isPathAllowed("/incentive/calculations", menuList, ["tis-ops-unit-head"])).toBe(true);
+    for (const role of ["tis-sales-unit-head", "tis-general-manager"]) expect(isPathAllowed("/incentive/approvals", menuList, [role])).toBe(true);
+  });
+
+  it("the servicing roles that raise endorsements have the Endorsements work list; Cash Control does not", () => {
+    for (const role of ["tis-sales-officer", "tis-ops-associate", "tis-ops-unit-head", "tis-general-manager", "tis-finance"]) {
+      expect(isPathAllowed("/operations/endorsements", menuList, [role])).toBe(true);
+      expect(isPathAllowed("/agent/endorsement/summary/end_1", menuList, [role])).toBe(true);
+    }
+    expect(isPathAllowed("/operations/endorsements", menuList, ["tis-ccd-bp"])).toBe(false);
+  });
+
   describe("Accounts > Remittance (spec §1.1 to §1.3)", () => {
-    const ALL = ["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Setup", "Settlement"];
+    const ALL = ["Insurer billing", "Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Settlement", "Setup"];
     const remittanceOf = (role) => {
       const accounts = filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts");
       return accounts?.submenu.find((s) => s.name === "Remittance")?.submenu.map((i) => i.name) || [];
@@ -138,12 +157,12 @@ describe("TISPH roles (RBAC v4): menus", () => {
 
     it("gives each persona the entries of its grants", () => {
       expect(remittanceOf("tis-general-manager")).toEqual(ALL.filter((e) => e !== "Setup"));
-      expect(remittanceOf("tis-ccd-recon")).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ccd-recon")).toEqual(["Insurer billing", "Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies"]);
       expect(remittanceOf("tis-ccd-bp")).toEqual(["Remittances", "Reconciliation", "Exceptions", "Held policies"]);
       expect(remittanceOf("tis-ccd-pdc")).toEqual(["Remittances", "Reconciliation", "Exceptions", "Held policies"]);
       expect(remittanceOf("tis-ops-associate")).toEqual(["Remittances"]);
-      expect(remittanceOf("tis-ops-officer")).toEqual(["Remittances", "Exceptions", "Held policies", "Insurer billing"]);
-      expect(remittanceOf("tis-ops-unit-head")).toEqual(["Remittances", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ops-officer")).toEqual(["Insurer billing", "Remittances", "Exceptions", "Held policies"]);
+      expect(remittanceOf("tis-ops-unit-head")).toEqual(["Insurer billing", "Remittances", "Exceptions", "Held policies"]);
       expect(remittanceOf("tis-ccd-pdu")).toEqual([]);
       expect(remittanceOf("tis-sales-officer")).toEqual([]);
       expect(sees("tis-general-manager")("/finance/remittance/setup/schedules")).toBe(false);
@@ -151,7 +170,9 @@ describe("TISPH roles (RBAC v4): menus", () => {
       expect(sees("tis-ops-officer")("/finance/remittance/payments")).toBe(false);
     });
 
-    it("no TISPH persona has the Insurer Reconciliation menu: its statements open under Remittance > Reconciliation", () => {
+    it("the Insurer Reconciliation menu is merged into Remittance > Reconciliation, which opens its statements", () => {
+      expect(isPathAllowed("/accounts/insurer-reconciliation/statements", menuList, ["tis-finance"])).toBe(true);
+      expect(isPathAllowed("/accounts/insurer-reconciliation/statements", menuList, ["tis-sales-officer"])).toBe(false);
       const withIt = TIS_ROLES.filter((role) => filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts")?.submenu.some((s) => s.name === "Insurer Reconciliation"));
       expect(withIt).toEqual([]);
       expect(helpSectionFor("/finance/remittance/reconciliation/insurer-statements").id).toBe("insurer-statement-reconciliation");

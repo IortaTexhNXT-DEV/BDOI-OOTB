@@ -157,7 +157,6 @@ function PolicyReceipts() {
           }}
           className="datatable_container"
           scrollable={true}
-          scrollHeight="40vh"
           selection={selectedRows}
           onSelectionChange={(e) =>
             setSelectedRows(Array.isArray(e.value) ? e.value : [])

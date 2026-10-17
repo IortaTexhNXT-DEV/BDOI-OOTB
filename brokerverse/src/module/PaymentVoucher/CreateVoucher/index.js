@@ -26,6 +26,7 @@ import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
 import { calendarDateFormat } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import RefundReason, { refundReasonError } from "./RefundReason";
 
 const initialValues = {
   VoucherDate: new Date(),
@@ -418,6 +419,9 @@ function Createvoucher() {
     if (!values.Criteria) {
       errors.Criteria = t("paymentVoucher.thisFieldRequired");
     }
+    // a refund to a customer carries its reason (context refund, e.g. REF-CANCEL; GAP-CASH-17)
+    const refundError = refundReasonError(values);
+    if (refundError) errors.RefundReason = t(refundError);
     if (isAgentPayee && !values.AgentReferrer) {
       errors.AgentReferrer = t("paymentVoucher.thisFieldRequired");
     }
@@ -480,6 +484,8 @@ function Createvoucher() {
         : formik.values.PayeeType;
     return TRANSACTION_OPTIONS_BY_PAYEE[payeeCode] || [];
   }, [formik.values.PayeeType]);
+
+  const isCustomerPayee = (typeof formik.values.PayeeType === "object" ? formik.values.PayeeType?.code : formik.values.PayeeType) === "Customer";
 
   const isInsurerPayee = useMemo(() => {
     const payeeCode =
@@ -620,6 +626,12 @@ function Createvoucher() {
               )}
             </div>
           </div>
+          {isCustomerPayee && (
+            <div className="sm-col-12 col-12 md:col-3 lg-col-4">
+              <RefundReason payeeType={formik.values.PayeeType} value={formik.values.RefundReason} showErrors={formik.submitCount > 0}
+                onChange={(v) => formik.setFieldValue("RefundReason", v)} />
+            </div>
+          )}
           <div class="sm-col-12 col-12 md:col-3 lg-col-4">
             <div>
               <DropDowns

@@ -20,6 +20,7 @@ WHERE t.code = 'reason-code' AND EXISTS (
 INSERT INTO master_records(type_code, code, name, data, status, created_by)
 SELECT 'reason-code', v.code, v.name, jsonb_build_object('code', v.code, 'name', v.name, 'context', v.context, 'requiresNote', v.note, 'sortOrder', v.sort), 'active', 'seed'
 FROM (VALUES ('FTR-CONTRACT', 'Contracted release', 'feature_change', false, 1500),
+             ('FTR-DECISION', 'Decision of TISPH (enabled by TISPH)', 'feature_change', false, 1505),
              ('FTR-CHANGE', 'Approved change request', 'feature_change', false, 1510),
              ('FTR-PROMOTION', 'Promotion from another environment', 'feature_change', false, 1520),
              ('FTR-WITHDRAWN', 'Function withdrawn by the client', 'feature_change', false, 1530),

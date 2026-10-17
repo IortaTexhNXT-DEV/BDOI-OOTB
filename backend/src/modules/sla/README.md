@@ -14,3 +14,10 @@ clocks under Service levels (category `sla`); the register screen lists them wit
 
 Routes: `GET /service-levels`, `GET /service-levels/clocks`, `POST /service-levels/run`, `PUT /service-levels/:code`
 (read:settings / write:settings, audited as `sla_target`).
+
+Reminders follow the same calendar: a scheduled run of a job listed in `calendar.working_days_only_jobs` (collection,
+SMS payment and renewal reminders, quotation expiry reminders, claim document reminders, the post-dated cheque deposit
+and follow-up reminders, the month-end reminder) waits for the next working day when the business date is a weekend
+day off or a national holiday (`nonWorkingDayHold` in `src/lib/workingCalendar.js`, checked by `runJob` in
+`src/jobs/scheduler.js`). The reminders look ahead over a window and remember what they sent, so nothing is lost; Run
+now on Master > Schedules still runs the job at once.

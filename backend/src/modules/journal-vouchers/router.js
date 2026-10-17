@@ -99,13 +99,15 @@ define({
     const rows = parseUploadedRows(req.file);
     const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
     if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
-    const created = await withTransaction((db) => svc.uploadVouchers(db, rows.map((r) => mapColumns(r, svc.JV_UPLOAD_COLUMNS)), req.user));
+    const mode = String(await getSetting('journal.upload_mode', 'partial')) === 'all-or-nothing' ? 'all-or-nothing' : 'partial';
+    const created = await withTransaction((db) => svc.uploadVouchers(db, rows.map((r) => mapColumns(r, svc.JV_UPLOAD_COLUMNS)), req.user, { mode }));
     for (const jv of created) {
       await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'upload', after: { voucherRef: jv.voucher_ref, file: req.file.originalname, lines: jv.line_count } });
       await askApproval(jv, req);
     }
     const vouchers = created.map((jv) => ({ voucherRef: jv.voucher_ref, ...svc.headerRow(jv), lineCount: jv.line_count }));
-    ok(res, { total: rows.length, vouchers }, `${vouchers.length} journal voucher${vouchers.length === 1 ? '' : 's'} uploaded for approval`);
+    const failed = created.failed || [];
+    ok(res, { total: rows.length, mode, vouchers, failed }, `${vouchers.length} journal voucher${vouchers.length === 1 ? '' : 's'} uploaded for approval${failed.length ? `; ${failed.length} row error(s), those vouchers were not saved` : ''}`);
   },
 });
 define({
@@ -120,6 +122,29 @@ define({
 define({
   method: 'GET', path: '/:id', summary: 'One voucher (id or number) with its entries', screen: `${SCREEN} > Details`, middleware: read,
   response: { success: true, data: { ...header, entries: [] } }, handler: async (req, res) => ok(res, await svc.jvDetail(pool, req.params.id)),
+});
+define({
+  method: 'PUT', path: '/:id', summary: 'The maker changes a manual voucher awaiting approval or returned (entries, date, description, transaction code); it waits for approval again',
+  screen: `${SCREEN} > Details > Edit`, middleware: [...write, validate(z.object({ transactionCode: z.string().min(1).optional(), transactionDescription: z.string().optional(), description: z.string().optional(),
+    date: z.string().optional(), entries: z.array(entrySchema).min(2) }).passthrough())],
+  request: { transactionDescription: 'Accrual of audit fees (corrected)', entries: entryExample }, response: { success: true, data: { ...header, status: 'for-approval' } },
+  handler: async (req, res) => {
+    const before = await svc.jvDetail(pool, req.params.id);
+    const jv = await withTransaction((db) => svc.editParked(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'update', before, after: req.body });
+    await askApproval(jv, req);
+    ok(res, svc.headerRow(jv), `Journal voucher ${jv.jv_number} saved and sent for approval`);
+  },
+});
+define({
+  method: 'POST', path: '/:id/withdraw', summary: 'The maker withdraws a manual voucher awaiting approval or returned; it is cancelled, never posted',
+  screen: `${SCREEN} > Details > Withdraw`, middleware: [...write, validate(z.object({ reason: z.string().max(500).optional() }))],
+  request: { reason: 'Keyed twice' }, response: { success: true, data: { ...header, status: 'cancelled' } },
+  handler: async (req, res) => {
+    const jv = await withTransaction((db) => svc.withdrawParked(db, req.params.id, req.body.reason, req.user));
+    await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'withdraw', after: { reason: req.body.reason || null } });
+    ok(res, svc.headerRow(jv), `Journal voucher ${jv.jv_number} withdrawn`);
+  },
 });
 define({
   method: 'POST', path: '/:id/approve', summary: 'Checker approves and posts a voucher (maker cannot approve own voucher)', screen: `${SCREEN} > Details`, middleware: write,

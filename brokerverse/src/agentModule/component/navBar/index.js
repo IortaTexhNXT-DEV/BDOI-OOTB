@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { showLanguagePicker, useLanguageOptions } from "../../../utility/languages";
 import { ChangePasswordDialog, TwoFactorDialog } from "../../authModule/security/AccountSecurityDialogs";
 import "./index.scss";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { logout } from "../../../utility/logout";
 import { useNotificationContext } from "../../../context/NotificationContext";
 import { useTranslation } from "react-i18next";
-import i18n from "../../../i18n";
 import InitialsAvatar from "../InitialsAvatar";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { currentUser, displayNameOf, roleLineOf } from "../../../utility/userIdentity";
@@ -45,8 +42,6 @@ const AgentNavBar = () => {
   const menuProfile = useRef(null);
   // "password" | "2fa" | "" : the account security dialog that is open
   const [securityDialog, setSecurityDialog] = useState("");
-  // configured languages that have a translation (see utility/languages.js); the picker only when there is a choice
-  const languageOptions = useLanguageOptions();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotificationContext();
@@ -69,8 +64,6 @@ const AgentNavBar = () => {
 
   const name = displayNameOf(me);
   const roleLine = roleLineOf(me);
-  const currentLanguage =
-    languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value;
 
   const handleLogOut = async () => {
     try {
@@ -145,15 +138,6 @@ const AgentNavBar = () => {
       <div className="bdo-logo-section"></div>
       <div className="nav-spacer"></div>
       <div className="bv-topbar__tools">
-        {showLanguagePicker(languageOptions) && (
-          <Dropdown
-            value={currentLanguage}
-            options={languageOptions}
-            onChange={(e) => i18n.changeLanguage(e.value)}
-            aria-label={t("common.language")}
-            className="language-selector-navbar"
-          />
-        )}
         <div className="notification-badge-container">
           <Button
             type="button"

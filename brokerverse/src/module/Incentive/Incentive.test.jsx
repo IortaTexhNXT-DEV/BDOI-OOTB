@@ -93,7 +93,7 @@ describe("calculation batch details", () => {
     const onChanged = jest.fn();
     render(<BatchDetailDialog batchId="CALC-2026-00007" onHide={() => {}} onChanged={onChanged} />);
     fireEvent.click(await screen.findByRole("button", { name: "Reject" }));
-    const dialog = await screen.findByRole("dialog", { name: "Reject calculation batch" });
+    const dialog = await screen.findByRole("dialog", { name: "Reject Calculation Batch" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Reject batch" }));
     expect(incentiveService.rejectCalculation).not.toHaveBeenCalled();
     await waitFor(() => expect(opsAccountingService.masterRecords).toHaveBeenCalledWith("reason-code", { status: "Active", context: "incentive_batch_reject" }));
@@ -130,7 +130,7 @@ describe("My Programs", () => {
     incentiveService.myPrograms.mockResolvedValue({ agentId: "usr_a", assignedPrograms: [{ ...program, ended: false, daysRemaining: 12, achieved: 4, achievementPercent: 20,
       nextTier: { level: "11-20 policies", needed: 7 } }], activity: [] });
     render(<MyPrograms />);
-    fireEvent.click(await screen.findByRole("button", { name: "View Details" }));
+    fireEvent.click(await screen.findByRole("button", { name: "View details" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).queryByRole("tab")).toBeNull();
     expect(within(dialog).getByRole("heading", { name: "Tiers" })).toBeInTheDocument();
@@ -170,7 +170,7 @@ describe("Statement", () => {
     expect(screen.queryByText(/Contact Information/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Print" }));
     await waitFor(() => expect(printView).toHaveBeenCalledTimes(1));
-    expect(printView.mock.calls[0][1]).toEqual({ title: "Incentive statement AG900 September 2026" });
+    expect(printView.mock.calls[0][1]).toEqual({ title: "Incentive Statement AG900 September 2026" });
   });
 });
 

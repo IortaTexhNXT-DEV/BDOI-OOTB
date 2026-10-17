@@ -49,6 +49,22 @@ describe("client onboarding access and help", () => {
   });
 });
 
+describe("onboarding a new client", () => {
+  it("is refused with a message to a user without write:clients (Operations keep the KYC of existing clients)", async () => {
+    for (const fn of Object.values(addressService)) fn.mockResolvedValue({ success: true, data: [] });
+    onboardingService.options.mockResolvedValue([]);
+    localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:clients", "write:client-kyc"]));
+    render(
+      <MemoryRouter initialEntries={["/agent/client-onboarding"]}>
+        <Routes><Route path="/agent/client-onboarding" element={<ClientOnboarding />} /></Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText(/Onboarding a new client needs the right to create clients/)).toBeInTheDocument();
+    expect(onboardingService.onboard).not.toHaveBeenCalled();
+    localStorage.removeItem("USER_PERMISSIONS");
+  });
+});
+
 describe("client onboarding screen", () => {
   it("shows the KYC status, what is missing and the documents of an existing client, without a risk rating", async () => {
     for (const fn of Object.values(addressService)) fn.mockResolvedValue({ success: true, data: [] });

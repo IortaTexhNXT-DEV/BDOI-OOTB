@@ -17,7 +17,7 @@ import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import UploadJournalVouchers from "./UploadJournalVouchers";
 import { OriginFilter } from "../../components/OriginChip";
-import { hasPermission } from "../../utils/canOpen";
+import { canOpen, hasPermission } from "../../utils/canOpen";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
@@ -128,6 +128,13 @@ const JournalVoucher = () => {
             </div>
             <Button className="ml-2" icon="pi pi-upload" label={t("jvTools.upload")} outlined onClick={() => setUploading(true)} />
           </>
+        )}
+        {/* Correction and Reversal JV are actions of the Journal Voucher screen (not menu entries of their own) */}
+        {canOpen("/accounts/correctionsjv/correctionsjvdetails") && (
+          <Button className="ml-2" icon="pi pi-pencil" label={t("jvTools.correct")} outlined onClick={() => navigate("/accounts/correctionsjv/correctionsjvdetails")} />
+        )}
+        {canOpen("/accounts/reversaljv/reversaljvdetails") && (
+          <Button className="ml-2" icon="pi pi-replay" label={t("jvTools.reverse")} outlined onClick={() => navigate("/accounts/reversaljv/reversaljvdetails")} />
         )}
       </div>
       <UploadJournalVouchers visible={uploading} onHide={() => setUploading(false)} onUploaded={() => { setFirst(0); setReloads((n) => n + 1); }} />

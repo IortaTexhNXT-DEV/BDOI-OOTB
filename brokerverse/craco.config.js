@@ -12,6 +12,9 @@ const DATATABLE_WRAPPER = path.resolve(__dirname, 'src/components/DataTable/inde
 // The same for `import { Calendar } from "primereact/calendar"`: the application's date field (components/Calendar),
 // in the configured date format with its calendar button.
 const CALENDAR_WRAPPER = path.resolve(__dirname, 'src/components/Calendar/index.jsx');
+// And for `import { Dialog } from "primereact/dialog"`: the application's dialog (components/Dialog), whose footer
+// follows the UI standard (Close on the left, one primary, destructive actions set apart, a More actions menu).
+const DIALOG_WRAPPER = path.resolve(__dirname, 'src/components/Dialog/index.jsx');
 const brandVars = require('./scripts/postcss-brand-vars');
 
 module.exports = {
@@ -32,6 +35,7 @@ module.exports = {
     alias: {
       'primereact/datatable$': DATATABLE_WRAPPER,
       'primereact/calendar$': CALENDAR_WRAPPER,
+      'primereact/dialog$': DIALOG_WRAPPER,
     },
     configure: (webpackConfig) => {
       const oneOfRule = webpackConfig.module.rules.find((rule) => rule.oneOf);
@@ -58,6 +62,8 @@ module.exports = {
         '^primereact/datatable/datatable\\.esm\\.js$': 'primereact/datatable/datatable.cjs.js',
         '^primereact/calendar$': '<rootDir>/src/components/Calendar/index.jsx',
         '^primereact/calendar/calendar\\.esm\\.js$': 'primereact/calendar/calendar.cjs.js',
+        '^primereact/dialog$': '<rootDir>/src/components/Dialog/index.jsx',
+        '^primereact/dialog/dialog\\.esm\\.js$': 'primereact/dialog/dialog.cjs.js',
       },
     }),
   },

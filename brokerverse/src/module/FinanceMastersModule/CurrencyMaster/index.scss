@@ -3,7 +3,7 @@
     // justify-content: center;
     .add__icon__title {
         color: #111927;
-        font-size: 30px;
+        font-size: 20px;
         font-weight: 600;
         font-family: "Nunito", Arial, sans-serif;
 
@@ -82,7 +82,7 @@
     }
 
     .sub__account__sub__container {
-        box-shadow: 0px 0px 20px 0px #00000014;
+        box-shadow: var(--shadow-md);
         border-radius: 10px;
 
 

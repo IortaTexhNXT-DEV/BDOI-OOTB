@@ -105,7 +105,7 @@ export const ChangeLines = ({ lines }) => {
   const value = (l) => (l.removes ? k("authority.removal", "Remove the limit") : limitValue(l.measure, l.maxAmount, l.unlimited, noLimit));
   const was = (l) => (l.before?.set ? limitValue(l.measure, l.before.maxAmount, l.before.unlimited, noLimit) : k("notSet", "Not set"));
   return (
-    <DataTable value={lines.map((l, i) => ({ ...l, lineKey: i }))} dataKey="lineKey" size="small" className="rp-table am-lines" scrollable scrollHeight="24rem">
+    <DataTable value={lines.map((l, i) => ({ ...l, lineKey: i }))} dataKey="lineKey" size="small" className="rp-table am-lines" scrollable>
       <Column header={k("colTransaction", "Transaction")} body={(l) => l.transactionName} />
       <Column header={k("authority.roleOrPerson", "Role or person")} body={(l) => l.who} />
       <Column header={k("authority.inEffect", "In effect")} body={(l) => <span className="am-num rp-muted">{was(l)}</span>} />

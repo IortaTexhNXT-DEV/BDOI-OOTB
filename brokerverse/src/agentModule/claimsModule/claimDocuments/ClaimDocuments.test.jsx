@@ -84,7 +84,7 @@ describe("claim Documents step", () => {
     const next = await screen.findByRole("region", { name: "Next step" });
     await waitFor(() => expect(next).toHaveTextContent("All required documents received: submit the claim file to the insurer"));
     fireEvent.click(within(next).getByRole("button", { name: "Submit to insurer" }));
-    const dialog = await screen.findByRole("dialog", { name: "Submit the claim file to the insurer" });
+    const dialog = await screen.findByRole("dialog", { name: "Submit the Claim File to the Insurer" });
     fireEvent.change(within(dialog).getByLabelText("Reference (e-mail, transmittal)"), { target: { value: "E-mail to FPG claims" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Submit to insurer" }));
     await waitFor(() => expect(service.submitClaimToInsurer).toHaveBeenCalledWith("clm_1", { reference: "E-mail to FPG claims" }));

@@ -225,6 +225,17 @@ export async function registerPdc(db, b, user, { migration = null } = {}) {
   const amount = round2(b.amount);
   if (!(amount > 0)) throw badRequest('Validation failed', [{ path: 'amount', message: 'Amount must be greater than zero' }]);
   if (!b.bankId && !String(b.draweeBank || '').trim()) throw badRequest('Validation failed', [{ path: 'bankId', message: 'Choose the drawee bank' }]);
+  // FR-PDC-002 on screen as in a set: a cheque number of 6 to 10 digits, dated after the day it is received (a cheque
+  // of a go-live load keeps the number and date of the old system)
+  if (!migration) {
+    const errors = [];
+    if (!/^\d{6,10}$/.test(String(b.chequeNumber || '').trim())) errors.push({ path: 'chequeNumber', message: 'Cheque number must be 6 to 10 digits' });
+    const received = isoDate(b.receivedDate) || (await today());
+    if (!(isoDate(b.chequeDate) > received)) {
+      errors.push({ path: 'chequeDate', message: `The cheque is dated ${isoDate(b.chequeDate) || '-'}, not after the received date ${received}: receipt it as a cheque payment` });
+    }
+    if (errors.length) throw badRequest('Validation failed', errors);
+  }
   if (t.receivable) {
     const pending = Number((await db.query(`SELECT COALESCE(sum(amount), 0) AS a FROM post_dated_cheques WHERE receivable_id = $1 AND status = ANY($3)
       AND ($2::text IS NULL OR id <> $2)`, [t.receivable.id, b.replacesId || null, LIVE])).rows[0].a);

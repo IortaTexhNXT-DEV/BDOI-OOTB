@@ -115,6 +115,9 @@ const StatusPanel = ({ request, onHide, onDone }) => {
         { label: t("periodManagement.dates"), value: `${date(period.startDate)} – ${date(period.endDate)}` },
         { label: t("periodManagement.currentStatus"), value: <StatusChip code={period.status} label={t(`periodEnd.status.${period.status}`)} /> },
         { label: t("periodManagement.newStatus"), value: <StatusChip code={to} label={t(`periodEnd.status.${to}`)} /> },
+        ...(period.closing ? [{ label: t("periodManagement.closing"), value: t("periodManagement.closingText", {
+          cutoff: date(period.closing.operationsCutoff) || "–", close: date(period.closing.financeClose) || "–", window: date(period.closing.adjustmentWindowEnd) || "–",
+        }) }] : []),
       ]} />
 
       {to !== "open" && (

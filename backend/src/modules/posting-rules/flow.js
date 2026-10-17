@@ -21,7 +21,8 @@ import { CHANGE_LABELS, ROLE_SECTIONS, configurationReview } from './service.js'
 
 /** Modules of the reference, in the order of the accounting cycle (one source for grouping and order). */
 export const AREAS = [
-  { code: 'premium', name: 'Premium billing', events: ['policy.issue.broker_billed', 'policy.renewal.broker_billed', 'endorsement.additional_premium', 'endorsement.return_premium', 'policy.cancel'] },
+  { code: 'premium', name: 'Premium billing', events: ['policy.issue.broker_billed', 'policy.renewal.broker_billed', 'endorsement.additional_premium', 'endorsement.return_premium', 'policy.cancel',
+    'parcel.service_fee'] },
   { code: 'collections', name: 'Collections', events: ['receipt.apply', 'pdc.partner_collected', 'receipt.insurer_direct', 'receipt.unapplied', 'unapplied.allocate', 'unapplied.refund'] },
   { code: 'remittance', name: 'Remittance to insurers', events: ['remittance.settlement', 'remittance.adjustment', 'remittance.transfer', 'insurer_statement.adjustment', 'insurer.refund_due', 'insurer.refund_applied'] },
   { code: 'direct-bill', name: 'Direct-bill commission', events: ['directbill.commission', 'directbill.commission_return', 'commission.billing_statement', 'directbill.collection'] },
@@ -76,6 +77,9 @@ export const EVENT_FLOW = {
     approval: { setting: 'renewals.maker_checker', name: 'Approval of renewal terms', on: 'Renewal terms approved by a second user', off: 'None: renewal terms are issued without a second approval' }, ...PREMIUM },
   'endorsement.additional_premium': { when: 'An endorsement with additional premium is completed', screen: '/agent/policy', where: 'Operations › Policy',
     approval: { text: 'None: posted when the endorsement is completed' }, ...PREMIUM },
+  'parcel.service_fee': { when: 'A monthly declaration of a Parcel / Courier open cover is billed: the charge per certificate less the premium', screen: '/operations/open-covers',
+    where: 'Operations › Marine Open Covers', approval: { text: 'None: posted when the declaration is billed' },
+    amounts: { amount: 'Service fee billed to the client', fee: 'Service fee income net of VAT', vat: 'Output VAT inside the service fee (none when the fee is VAT exempt)' } },
   'endorsement.return_premium': { when: 'An endorsement with return premium is completed', screen: '/agent/policy', where: 'Operations › Policy',
     approval: { text: 'None: posted when the endorsement is completed' }, ...RETURN },
   'policy.cancel': { when: 'A policy cancellation is completed', screen: '/operations/policy-cancellation', where: 'Operations › Policy Cancellation',

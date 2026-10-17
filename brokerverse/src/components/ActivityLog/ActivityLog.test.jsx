@@ -44,7 +44,7 @@ describe("action dictionary", () => {
     const codes = [...steps, "reject", "create-agency-bill", "send-bill", "settle"];
     expect(codes.filter((code) => !actionKey(code) || /-/.test(actionText(code)))).toEqual([]);
     expect(steps.map(actionText)).toEqual(["Created", "Submitted", "Withdrawn", "Returned", "Approved", "Revoked", "Cancelled", "Line excluded",
-      "Line included", "Recalculated", "Payment voucher raised", "In payment", "Paid", "Payment failed", "Advice sent", "Confirmation recorded",
+      "Line included", "Recalculated", "Payment Voucher raised", "In payment", "Paid", "Payment failed", "Advice sent", "Confirmation recorded",
       "Reminder sent", "Imported", "Run"]);
     expect(["revoke", "exclude-line", "payment-failed"].map(actionTone)).toEqual(["negative", "negative", "negative"]);
     expect(["include-line", "raise-voucher", "record-confirmation"].map(actionTone)).toEqual(["positive", "positive", "positive"]);

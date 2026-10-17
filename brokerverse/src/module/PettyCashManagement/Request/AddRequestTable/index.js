@@ -212,7 +212,6 @@ const AddRequestTable = () => {
             value={AddRequestTable}
             tableStyle={{ minWidth: "50rem" }}
             emptyMessage={isEmpty ? emptyTableIcon : null} scrollable={true}
-            scrollHeight="40vh"
           >
             <Column
               field="Narration"

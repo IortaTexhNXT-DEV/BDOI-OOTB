@@ -1,4 +1,4 @@
--- Sample overriding commission agreements (Commission > Insurer Overrides): a quarterly production override on the motor
+-- Sample overriding commission agreements (Accounts > Commission > Insurer Overrides): a quarterly production override on the motor
 -- business placed with Pioneer (slab tiers) and an annual profit commission on loss ratio with AXA. Fictional terms for
 -- the demo; removed by npm run purge:sample (SAMPLE_MASTERS). Idempotent.
 INSERT INTO override_agreements(agreement_code, name, insurance_company_id, commission_type, basis, period_type, premium_measure, tier_method, min_production, vat_applicable, ewt_rate,

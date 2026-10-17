@@ -16,6 +16,7 @@ import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
 import PageActions from "../../../components/PageActions";
 import LoadingBar from "../../../components/LoadingBar";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import { canOpen, hasPermission } from "../../../utils/canOpen";
 import { remittanceService } from "../../../services/remittanceService";
@@ -33,6 +34,7 @@ import {
 import "../remittance.scss";
 
 const DOWNLOADS = ["download-schedule-xlsx", "download-schedule-pdf", "download-advice"];
+const LIFECYCLE = { withdraw: remittanceService.withdrawRemittance, cancel: remittanceService.cancelRemittance, revoke: remittanceService.revokeRemittance };
 const dayOf = (instant) => instantParts(instant)?.date || "-";
 
 /**
@@ -111,6 +113,29 @@ const Remittances = () => {
     refresh();
   };
 
+  // withdraw from approval, cancel a draft or returned remittance, revoke an approval not yet paid: each with a coded reason
+  const changeStatus = async (row, action) => {
+    const done = await openConfirm({
+      title: t(`remittance.list.lifecycle.${action.code}.title`, { reference: row.remittanceNo }), severity: action.code === "withdraw" ? "warning" : "danger",
+      message: t(`remittance.list.lifecycle.${action.code}.message`), reason: { context: action.reasonContext },
+      confirmLabel: t(`remittance.list.actions.${action.code}`), onConfirm: (reason) => LIFECYCLE[action.code](row.id, reason),
+    });
+    if (!done) return;
+    toast.current?.show({ severity: "success", summary: row.remittanceNo, detail: t(`remittance.list.lifecycle.${action.code}.done`), life: 5000 });
+    refresh();
+  };
+
+  const sendToInsurer = async (row) => {
+    const done = await openConfirm({
+      title: t("remittance.list.send.title", { reference: row.remittanceNo }), severity: "neutral",
+      input: { type: "text", label: t("remittance.list.send.email"), required: false, maxLength: 200 },
+      confirmLabel: t("remittance.list.actions.send"), onConfirm: (email) => remittanceService.sendRemittance(row.id, email || undefined),
+    });
+    if (done === null) return;
+    toast.current?.show({ severity: "success", summary: row.remittanceNo, detail: t("remittance.list.send.done"), life: 5000 });
+    refresh();
+  };
+
   const setSegment = (key) => update({ segment: key, kpi: null, status: null });
   const segments = [
     ...(canWrite ? ["my-work"] : []), "drafts", "in-approval", "in-payment", "all",
@@ -167,6 +192,8 @@ const Remittances = () => {
   const onRowAction = (row) => (action) => {
     if (action.code === "view" || action.code === "open-voucher") navigate(action.link || row.link);
     else if (action.code === "submit") submitRows([row]);
+    else if (LIFECYCLE[action.code]) changeStatus(row, action);
+    else if (action.code === "send") sendToInsurer(row);
     else if (DOWNLOADS.includes(action.code)) download(action.href, action.href.split("/").pop());
   };
 
@@ -308,7 +335,7 @@ const Remittances = () => {
             {show("bankRef") ? <Column header={t("remittance.list.columns.bankRef")} body={(r) => r.bankReference || "-"} /> : null}
             {show("submittedBy") ? <Column header={t("remittance.list.columns.submittedBy")} body={(r) => r.submittedBy?.name || "-"} /> : null}
             {show("createdOn") ? <Column header={t("remittance.list.columns.createdOn")} body={(r) => dayOf(r.createdAt)} /> : null}
-            <Column header={<span className="p-sr-only">{t("remittance.list.columns.actions")}</span>} align="center" style={{ width: "3.5rem" }}
+            <Column header={<span className="p-sr-only">{t("remittance.list.columns.actions")}</span>} className="bv-actions" headerClassName="bv-actions"
               body={(r) => <RowActions label={t("remittance.list.actionsFor", { reference: r.remittanceNo })} actions={rowActions(r)} labelOf={actionLabel} onAction={onRowAction(r)} />} />
           </DataTable>
         </div>

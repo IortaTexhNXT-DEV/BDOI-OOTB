@@ -92,7 +92,7 @@ export async function workspaceSettings() {
     commissionIncludeMigrated: (await getSetting('migration.commission_include_migrated', false)) === true,
     incentiveIncludeMigrated: (await getSetting('migration.incentive_include_migrated', false)) === true,
     sapGlIncludeOpening: (await getSetting('migration.sap_gl_include_opening', false)) === true,
-    dashboardDefaultOrigin: (await getSetting('dashboard.default_origin', 'issued')) === 'all' ? 'all' : 'issued',
+    dashboardDefaultOrigin: [await getSetting('dashboard.default_origin', 'auto')].map((v) => (['auto', 'issued', 'all'].includes(v) ? v : 'auto'))[0],
     unlockWindowDays: Number(await getSetting('migration.unlock_window_days', 7)),
     unlockMaxHours: Number(await getSetting('migration.unlock_max_hours', 4)),
     approvalExpiryHours: Number(await getSetting('migration.approval_expiry_hours', 72)),

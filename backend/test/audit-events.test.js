@@ -110,7 +110,7 @@ describe('audit grouping, user and source', () => {
     expect(g[1]).toMatchObject({ action: 'Status Changed', entity: 'claim', entity_id: 'clm_1' });
   });
   it('names the source and the user of an event', () => {
-    expect(sourceOf({ source: { channel: 'screen', name: 'Operations > Claims > Request approval' } })).toEqual({ channel: 'screen', label: 'Screen', name: 'Operations > Claims > Request approval' });
+    expect(sourceOf({ source: { channel: 'screen', name: 'Policy Servicing > Claims > Request approval' } })).toEqual({ channel: 'screen', label: 'Screen', name: 'Policy Servicing > Claims > Request approval' });
     expect(sourceOf({ source: { channel: 'screen', name: 'Master > (any master screen)' } }).name).toBe('Master');
     expect(sourceOf({ source: { channel: 'api', name: 'PUT /claims/:id' } }).label).toBe('Integration');
     expect(sourceOf({ user_id: null, username: null, action: 'run' })).toMatchObject({ channel: 'job', label: 'System job' });
@@ -118,15 +118,15 @@ describe('audit grouping, user and source', () => {
     expect(userOf({ user_id: 'usr_1', username: 'j.claims', display_name: 'Jasmine Cruz', role_names: ['Claims Officer'] }))
       .toEqual({ id: 'usr_1', username: 'j.claims', displayName: 'Jasmine Cruz', roles: ['Claims Officer'] });
     expect(userOf({ user_id: null, username: 'customer:a@b.ph' }).displayName).toBe('Customer');
-    expect(auditSource({ headers: { origin: 'https://app' }, get: (h) => ({ origin: 'https://app' })[h], routeInfo: { screen: 'Operations > Policies', method: 'PUT', path: '/policies/:id' } }))
-      .toEqual({ channel: 'screen', name: 'Operations > Policies' });
+    expect(auditSource({ headers: { origin: 'https://app' }, get: (h) => ({ origin: 'https://app' })[h], routeInfo: { screen: 'Policy Servicing > Policies', method: 'PUT', path: '/policies/:id' } }))
+      .toEqual({ channel: 'screen', name: 'Policy Servicing > Policies' });
     expect(auditSource({ headers: {}, get: () => undefined, routeInfo: { screen: 'X', method: 'PUT', path: '/policies/:id' } })).toEqual({ channel: 'api', name: 'PUT /policies/:id' });
   });
   it('exports one row per changed field', () => {
     const rows = exportRows([{ date: '02/10/2026', time: '09:49', user: { displayName: 'A', roles: ['R'] }, entityLabel: 'Policy', reference: 'MC-1', title: 'Policy updated',
-      note: null, source: { label: 'Screen', name: 'Operations > Policies' }, changes: [{ label: 'Gross premium', from: '₱1.00', to: '₱2.00' }, { label: 'Remarks', from: null, to: 'x' }] }]);
+      note: null, source: { label: 'Screen', name: 'Policy Servicing > Policies' }, changes: [{ label: 'Gross premium', from: '₱1.00', to: '₱2.00' }, { label: 'Remarks', from: null, to: 'x' }] }]);
     expect(rows).toHaveLength(2);
-    expect(rows[1]).toMatchObject({ field: 'Remarks', from: '', to: 'x', source: 'Screen: Operations > Policies', role: 'R' });
+    expect(rows[1]).toMatchObject({ field: 'Remarks', from: '', to: 'x', source: 'Screen: Policy Servicing > Policies', role: 'R' });
   });
 });
 

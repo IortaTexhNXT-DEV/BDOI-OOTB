@@ -373,11 +373,20 @@ A control enforced by the application is changed on its own screen (the cog open
 
 {{screen:/master/configuration/features}}
 
-Master > System > Features & Releases lists every function of the system with its release: **Phase 1** (the TISPH scope, always on), **Platform** (users, configuration, audit and jobs, always on), **Phase 2** and **Future release** (available on request). Each line shows the **Tier**, the **Status** (Enabled, Read-only or Not enabled), the **Requirement IDs**, the **Enabled On** date, **Enabled By** (the system supplier) and the **Release Reference** of the change that enabled it. **Decision pending** marks a function whose release TISPH still has to confirm; open the line to read the question.
+Master > System > Features & Releases lists every function of the system with its release: **Phase 1** (the TISPH scope, always on), **Platform** (users, configuration, audit and jobs, always on), **Phase 2** and **Future release** (available on request). Each line shows the **Tier**, the **Status** (Enabled, Read-only or Not enabled), the **Requirement IDs**, the **Enabled On** date, **Enabled By** (the system supplier, or the TISPH user who approved the change) and the **Release Reference** of the change that enabled it. **Decision pending** marks a function whose release TISPH still has to confirm; open the line to read the question. **Decided by TISPH** marks a function whose release TISPH has confirmed: Fixed assets (FT-D01, with the asset master at requisition) and the Sales dashboard (FT-D02) are Phase 2, decided on 11 October 2026.
 
 The tab **Future releases** lists the functions TISPH can ask for, with their description. **Export to Excel** downloads both lists.
 
-The screen is read only. Phase 2 and future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator; IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
+For most users the screen is read only. Future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator. Phase 2 functions are enabled either by the platform administrator or by the **SUPERID** of TISPH on this screen:
+
+1. Select the Phase 2 functions and choose **Enable selected** or **Disable selected**, or choose **Enable Phase 2** for the whole Phase 2 bundle. Phase 1, platform and future-release lines cannot be selected.
+2. Check the impact: the functions changed, with the functions they need that are not enabled yet (on an enable) or that need them (on a disable), the menus, the roles that gain access, the jobs, connectors and settings to configure, and the functions kept **Read-only** because they hold records.
+3. Choose the reason, enter the contract or change request reference and the effective date (immediately on approval, or on a date), then **Submit for approval**.
+4. Another SUPERID (or the platform administrator) opens the tab **Changes** and chooses **Approve** or **Reject** (with a reason). The requester cannot approve its own request and may **Withdraw** it while it waits.
+
+IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
+
+Who may enable Phase 2 is configuration, in the Security settings of Master > Configuration: the **roles** whose users enable Phase 2 (SUPERID by default; the role also needs the Features and releases permission to enable Phase 2 functions on Role Permissions), the **release tiers** TISPH enables itself (Phase 2 only, or none to leave all enabling to the supplier) and the **approval** of a change raised by TISPH (*four-eyes*, or *single* for a development environment, never in Production). SUPERID is for user acceptance testing and is set inactive before go-live: in Production the platform administrator enables Phase 2 unless TISPH names another role in the setting and grants it the permission.
 
 ## Data Migration & Go-Live {#data-migration-and-go-live}
 

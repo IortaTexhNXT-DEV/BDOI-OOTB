@@ -300,7 +300,7 @@ const Workspace = () => {
               </div>
             </div>
             <DataTable value={bankRows} dataKey="id" size="small" loading={loading} selectionMode="checkbox" selection={bankSel} onSelectionChange={(e) => setBankSel(e.value.filter((x) => !x.matchId))}
-              scrollable scrollHeight="560px" emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
+              scrollable emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
               {canWork && <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />}
               <Column header={t("bankReconciliation.date")} body={(l) => date(l.date)} style={{ width: "6.5rem" }} />
               <Column header={t("bankReconciliation.description")} body={(l) => (
@@ -322,7 +322,7 @@ const Workspace = () => {
               </div>
             </div>
             <DataTable value={bookRows} dataKey="id" size="small" loading={loading} selectionMode="checkbox" selection={bookSel} onSelectionChange={(e) => setBookSel(e.value.filter((x) => !x.matchId))}
-              scrollable scrollHeight="560px" emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
+              scrollable emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
               {canWork && <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />}
               <Column header={t("bankReconciliation.date")} body={(v) => date(v.date)} style={{ width: "6.5rem" }} />
               <Column header={t("bankReconciliation.document")} body={(v) => (

@@ -11,6 +11,14 @@
  *   comparison-report      { reportId }      client comparison and recommendation report
  *   endorsement            { endorsementId } endorsement or cancellation request to the insurer
  *   quotation-slip         { quoteId }       the quotation as printed for the client
+ *   remittance-schedule    { remittanceId }  the remittance schedule to the insurer (XLSX, insurer copy)
+ *   parcel-certificate     { certificateId } parcel certificate of insurance, protected by parcel.certificate_password
+ *   marine-declaration-file { declarationId } latest declaration file of a monthly declaration (Excel, insurer layout)
+ *   marine-declaration-summary { declarationId } Declaration summary (parcel) or Declaration of Shipments (cargo)
+ *   parcel-certificate-register { declarationId } certificate register of a parcel declaration (Excel)
+ *   credit-life-certificate { memberId }     Credit Life certificate of cover, protected by credit_life.certificate_password
+ *   credit-life-soa        { batchId }       statement of account of a Credit Life batch to the financing bank
+ *   credit-life-batch-list { batchId }       the issued accounts of a Credit Life batch forwarded to the insurer (Excel)
  */
 import { pool } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
@@ -67,10 +75,53 @@ const GENERATORS = {
     const q = await quoteById(String(quoteId));
     return { fileName: `quotation-${q.quotationNumber}.pdf`, content: buildPdf(await quoteDoc(q)) };
   },
+  'remittance-schedule': async ({ remittanceId }) => {
+    // the insurer's copy of the remittance schedule (FR-RMT-015): never the variance share or the referrer
+    const { scheduleXlsx } = await import('../remittance/documents.js');
+    const { buffer, fileName } = await scheduleXlsx(remittanceId, { id: null, username: 'system', roles: [], permissions: [] });
+    return { fileName, content: buffer, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+  },
   'comparison-report': async ({ reportId }) => {
     const { comparisonReportSpec } = await import('../comparison-reports/service.js');
     const spec = await comparisonReportSpec(reportId);
     return { fileName: `comparison-report-${spec.number}.pdf`, content: buildPdf(spec) };
+  },
+  // open covers (marine/files.js, marine/documents.js) and Credit Life (credit-life/certificates.js)
+  'parcel-certificate': async ({ certificateId }) => {
+    const { certificatePdf } = await import('../marine/documents.js');
+    const { pdf, row } = await certificatePdf(certificateId, { protect: true });
+    return { fileName: `parcel-certificate-${row.certificate_number}.pdf`, content: pdf };
+  },
+  'marine-declaration-file': async ({ declarationId }) => {
+    const { latestFile } = await import('../marine/files.js');
+    return latestFile(declarationId);
+  },
+  'marine-declaration-summary': async ({ declarationId }) => {
+    const { declarationSummarySpec } = await import('../marine/files.js');
+    const { formatters } = await import('./templates.js');
+    const { printContext } = await import('./pdf.js');
+    const ctx = await printContext({ user: null });
+    const spec = await declarationSummarySpec(declarationId, formatters(ctx));
+    return { fileName: `declaration-summary-${spec.number}.pdf`, content: buildPdf({ ...ctx, ...spec }) };
+  },
+  'parcel-certificate-register': async ({ declarationId }) => {
+    const { certificateRegister } = await import('../marine/files.js');
+    return certificateRegister({ declarationId });
+  },
+  'credit-life-certificate': async ({ memberId }) => {
+    const { certificatePdf } = await import('../credit-life/certificates.js');
+    const { pdf, row } = await certificatePdf(memberId, { protect: true });
+    return { fileName: `credit-life-certificate-${row.certificate_number}.pdf`, content: pdf };
+  },
+  'credit-life-soa': async ({ batchId }) => {
+    const { batchSoaPdf } = await import('../credit-life/certificates.js');
+    const { pdf, number } = await batchSoaPdf(batchId);
+    return { fileName: `credit-life-soa-${number}.pdf`, content: pdf };
+  },
+  'credit-life-batch-list': async ({ batchId }) => {
+    const { batchList } = await import('../credit-life/certificates.js');
+    const { fileName, content, contentType } = await batchList(batchId);
+    return { fileName, content, contentType };
   },
 };
 

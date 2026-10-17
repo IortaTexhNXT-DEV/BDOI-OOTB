@@ -74,6 +74,7 @@ export const PII_STORAGE = [
   { table: 'policies', column: 'doc', json: true }, { table: 'policies', column: 'details', json: true },
   { table: 'audit_log', column: 'before_data', json: true }, { table: 'audit_log', column: 'after_data', json: true },
   { table: 'data_load_rows', column: 'data', json: true }, { table: 'data_load_rows', column: 'before', json: true },
+  { table: 'scheme_applications', column: 'borrower', json: true },
 ];
 
 export const isPiiCipher = (v) => typeof v === 'string' && v.startsWith(PREFIX);

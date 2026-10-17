@@ -128,7 +128,12 @@ export async function normalizeParams(query, raw = {}) {
 
 async function extraValues(query) {
   const out = [];
-  for (const e of query.extras || []) out.push(e.today ? isoInZone(new Date(), await businessTimeZone()) : (await getSetting(e.key, e.fallback)) ?? e.fallback);
+  for (const e of query.extras || []) {
+    // e.today: the business date; e.timeZone: the business time zone, for the business date of a timestamp
+    if (e.today) out.push(isoInZone(new Date(), await businessTimeZone()));
+    else if (e.timeZone) out.push(await businessTimeZone());
+    else out.push((await getSetting(e.key, e.fallback)) ?? e.fallback);
+  }
   return out;
 }
 

@@ -15,10 +15,17 @@ import { payLines, lineView } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postingDate } from '../../lib/dates.js';
 import { assertAuthority } from '../access-control/service.js';
+import { requiredReason } from '../ops-masters/records.js';
+import { queueEmail } from '../../lib/mailer.js';
+import { companyName } from '../../lib/letterhead.js';
+import { formatMoney } from '../../lib/money.js';
+import { emailTemplate, renderTemplate } from '../documents/common.js';
 
 const AGENT = 'Agent/Referrer';
 /** Payee types of a payment voucher. */
 export const PAYEE_TYPES = ['Customer', 'Client', 'Insurer', AGENT, 'Supplier'];
+/** Payee types of a refund to the insured client: Client is the API and upload spelling of Customer (the screen offers Customer). */
+export const REFUND_PAYEES = ['Customer', 'Client'];
 
 /**
  * Columns of the payment voucher bulk upload (Accounts > Payment Voucher > Bulk upload); header names are read
@@ -36,7 +43,25 @@ export const DISBURSEMENT_UPLOAD_COLUMNS = [
   { key: 'transactionCode', header: 'Transaction Code', format: 'Transaction code master', example: '' },
   { key: 'transactionDescription', header: 'Transaction Description', format: 'Text; printed on the voucher', example: 'Premium remittance September 2026' },
   { key: 'remarks', header: 'Remarks', format: 'Text', example: 'Net of commission' },
+  { key: 'refundReasonCode', header: 'Refund Reason', aliases: ['refundReason'], format: 'Customer refund: reason code of the refund context (e.g. REF-CANCEL); required with disbursements.refund_reason_required', example: '' },
+  { key: 'refundNote', header: 'Refund Note', format: 'Note of the refund reason, when the reason asks for one', example: '' },
 ];
+
+/**
+ * The refund reason of a customer refund voucher (GAP-CASH-17): a reason of the refund context, with its note when the
+ * reason asks for one; required with disbursements.refund_reason_required (create, update, bulk upload). Returns the
+ * reason { code, text } or null when none is given and none is required.
+ */
+async function refundReasonOf(db, b, { required }) {
+  if (!b.refundReasonCode) {
+    if (required && (await getSetting('disbursements.refund_reason_required', true)) !== false) {
+      const message = 'A refund to a customer needs its refund reason (e.g. REF-CANCEL)';
+      throw badRequest(message, [{ path: 'refundReasonCode', message }]);
+    }
+    return null;
+  }
+  return requiredReason(db, 'refund', { reasonCode: b.refundReasonCode, note: b.refundNote });
+}
 
 export const checkbookRow = (c) => ({
   checkbookId: c.id, id: c.id, invoiceListRefId: c.invoice_list_id, disbursementId: c.disbursement_id, customerCode: c.customer_code, customerName: c.customer_name,
@@ -57,7 +82,7 @@ export const disbursementRow = (d) => ({
   transactionCode: d.transaction_code, transactionDescription: d.transaction_description, departmentCode: d.department_code, branchCode: d.branch_code,
   payeeType: d.payee_type, payeeId: d.payee_id, payeeName: d.payee_name, criteria: d.criteria, customerCode: d.customer_code, clientId: d.client_id,
   referrerId: d.referrer_id, referrerName: d.referrer_name, insuranceCompanyId: d.insurance_company_id, insurerName: d.insurer_name,
-  policyId: d.policy_id, policyNumber: d.policy_number, instrumentCurrency: d.instrument_currency, remarks: d.remarks, purpose: d.purpose,
+  policyId: d.policy_id, policyNumber: d.policy_number, refundReasonCode: d.refund_reason_code || null, refundReason: d.refund_reason || null, refundNotifiedAt: d.refund_notified_at || null, instrumentCurrency: d.instrument_currency, remarks: d.remarks, purpose: d.purpose,
   amount: Number(d.amount), grossAmount: Number(d.gross_amount), whtAmount: Number(d.wht_amount), paymentMode: d.payment_mode, bankId: d.bank_id,
   status: d.status, source: d.source, journalId: d.journal_id, approvedBy: d.approved_by, approvedAt: d.approved_at, paidAt: d.paid_at,
   createdBy: d.created_by, createdAt: d.created_at, updatedAt: d.updated_at, disbursementDate: d.voucher_date,
@@ -86,15 +111,43 @@ async function resolveInsurer(db, ref) {
   return (await db.query('SELECT * FROM insurance_companies WHERE id::text = $1 OR code = $1 OR name = $1 OR short_name = $1 LIMIT 1', [String(ref)])).rows[0] || null;
 }
 
+/**
+ * The bank a voucher is paid from (TIS-BRD-DISB-01, CR-09): the bank chosen on the voucher, else the dedicated bank of
+ * the dealer (the distribution channel whose payee is the voucher's referrer), else disbursements.default_bank_code.
+ * A chosen bank must be active and, when disbursements.allowed_bank_codes lists banks (TISPH: Metrobank only), one of
+ * them. Returns the bank id or null.
+ */
+export async function voucherBank(db, { bankId = null, referrerId = null } = {}) {
+  const allowed = ((await getSetting('disbursements.allowed_bank_codes', [])) || []).map((c) => String(c).toUpperCase());
+  if (bankId) {
+    const bank = (await db.query('SELECT id, code, name, status FROM banks WHERE id::text = $1 OR upper(code) = upper($1)', [String(bankId)])).rows[0];
+    if (!bank || bank.status !== 'active') throw badRequest('Validation failed', [{ path: 'bankId', message: 'Choose an active bank' }]);
+    if (allowed.length && !allowed.includes(String(bank.code).toUpperCase())) {
+      throw badRequest('Validation failed', [{ path: 'bankId', message: `Vouchers are paid from ${allowed.join(', ')} only; ${bank.name} is not a disbursing bank` }]);
+    }
+    return bank.id;
+  }
+  if (referrerId) {
+    const dealer = (await db.query(`SELECT c.bank_id FROM distribution_channels c JOIN banks b ON b.id = c.bank_id AND b.status = 'active'
+      WHERE c.referrer_id = $1 AND c.bank_id IS NOT NULL ORDER BY c.id LIMIT 1`, [referrerId])).rows[0];
+    if (dealer) return dealer.bank_id;
+  }
+  const code = await getSetting('disbursements.default_bank_code', null);
+  if (!code) return null;
+  return (await db.query("SELECT id FROM banks WHERE upper(code) = upper($1) AND status = 'active'", [String(code)])).rows[0]?.id ?? null;
+}
+
 /** Create a voucher from the Create Voucher screen payload (or bulk upload row). */
 export async function createDisbursement(db, b, user, { source = 'manual', status = 'draft' } = {}) {
   const payeeType = b.payeeType || 'Customer';
+  const refund = REFUND_PAYEES.includes(payeeType) ? await refundReasonOf(db, b, { required: true }) : null;
   const client = await findClient(db, b.customerCode);
   const insurer = await resolveInsurer(db, b.insurerName || b.insuranceCompanyId);
   const policy = await findPolicy(db, b.policyNumber || b.policyId);
   let referrer = null;
   if (payeeType === AGENT && b.referrerId) referrer = (await db.query('SELECT * FROM commission_referrers WHERE id = $1', [b.referrerId])).rows[0] || null;
   const payeeName = b.payeeName || referrer?.name || b.referrerName || (payeeType === 'Insurer' ? insurer?.name || b.insurerName : null) || client?.display_name || b.customerCode || payeeType;
+  const bankId = await voucherBank(db, { bankId: b.bankId, referrerId: referrer?.id || null });
   const voucherNumber = await nextDocumentNumber('voucher', { db, unique: { table: 'disbursements', column: 'voucher_number' } });
   const txn = b.transactionNumber || await nextDocumentNumber('disbursement_txn', { db });
   const d = (await db.query(`INSERT INTO disbursements(voucher_number, payee_type, payee_id, payee_name, amount, payment_mode, bank_id, reference_no, purpose, status,
@@ -102,12 +155,34 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
       referrer_id, referrer_name, insurance_company_id, insurer_name, policy_id, policy_number, instrument_currency, remarks, source, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29) RETURNING *`,
   [voucherNumber, payeeType, referrer?.id || client?.id || (insurer ? String(insurer.id) : null), payeeName, round2(num(b.amount)),
-    b.paymentMode || (await getSetting('disbursements.default_payment_mode', 'check')), b.bankId || null, str(b.referenceNo), str(b.purpose || b.transactionDescription),
+    b.paymentMode || (await getSetting('disbursements.default_payment_mode', 'check')), bankId, str(b.referenceNo), str(b.purpose || b.transactionDescription),
     status, isoDate(b.voucherDate) || (await today()), txn, str(b.transactionCode), str(b.transactionDescription), str(b.departmentCode), str(b.branchCode), str(b.criteria),
     str(b.customerCode) || (referrer ? referrer.id : null), client?.id || null, referrer?.id || str(b.referrerId), referrer?.name || str(b.referrerName),
     insurer?.id || null, insurer?.name || str(b.insurerName), policy?.id || null, policy?.policy_number || str(b.policyNumber),
     b.instrumentCurrency || (await baseCurrency()), str(b.remarks), source, user?.id ?? null])).rows[0];
+  // a refund to a customer carries its reason (context refund, e.g. REF-CANCEL; GAP-CASH-17)
+  if (refund) {
+    return (await db.query('UPDATE disbursements SET refund_reason_code = $2, refund_reason = $3 WHERE id = $1 RETURNING *', [d.id, refund.code, refund.text])).rows[0];
+  }
   return d;
+}
+
+/**
+ * Refund Amount Notification (Pre-BSM M16): once a refund voucher to a customer is paid, the client is e-mailed the
+ * amount, the policy and the refund reason (template refund_notice), once. Returns the address e-mailed or null.
+ */
+export async function notifyRefund(db, disbursementId) {
+  const d = (await db.query('SELECT * FROM disbursements WHERE id = $1', [disbursementId])).rows[0];
+  if (!d || !REFUND_PAYEES.includes(d.payee_type) || d.refund_notified_at || !d.client_id) return null;
+  if ((await getSetting('disbursements.refund_notify_client', true)) === false) return null;
+  const c = (await db.query('SELECT email, display_name FROM clients WHERE id = $1', [d.client_id])).rows[0];
+  if (!c?.email) return null;
+  const t = await emailTemplate('refund_notice');
+  const v = { customerName: c.display_name, amount: (await formatMoney(d.amount)).replace(/^[^0-9-]+/, ''), currency: d.instrument_currency || (await getSetting('currency.default', 'PHP')),
+    policyNumber: d.policy_number || '', reason: d.refund_reason || 'refund', voucherNumber: d.voucher_number, companyName: await companyName() };
+  await queueEmail({ db, to: c.email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'refund_notice', entity: 'disbursement', entityId: d.id });
+  await db.query('UPDATE disbursements SET refund_notified_at = now() WHERE id = $1', [d.id]);
+  return c.email;
 }
 
 /** Voucher for commission lines of one referrer (used by bulk agent disburse and single-line pay). */
@@ -167,8 +242,14 @@ export async function updateDisbursement(db, id, b, user) {
   const d = await getDisbursementRaw(db, id, true);
   if (['paid', 'cancelled'].includes(d.status)) throw conflict(`Voucher ${d.voucher_number} is ${d.status} and cannot be changed`);
   const sets = []; const p = [d.id];
+  if (b.bankId) b = { ...b, bankId: await voucherBank(db, { bankId: b.bankId }) };
   for (const [k, col] of Object.entries(EDITABLE)) if (b[k] !== undefined) { p.push(col === 'voucher_date' ? isoDate(b[k]) : b[k]); sets.push(`${col} = $${p.length}`); }
   if (b.amount !== undefined) { p.push(round2(num(b.amount))); sets.push(`amount = $${p.length}`); }
+  if (REFUND_PAYEES.includes(d.payee_type)) {
+    // a customer refund keeps a reason: a new one replaces it; one is required while the voucher has none
+    const refund = await refundReasonOf(db, b, { required: !d.refund_reason_code && b.status !== 'cancelled' });
+    if (refund) { p.push(refund.code, refund.text); sets.push(`refund_reason_code = $${p.length - 1}`, `refund_reason = $${p.length}`); }
+  }
   if (b.status !== undefined) {
     if (!['draft', 'for-approval', 'cancelled'].includes(b.status)) throw badRequest('Status can only be set to draft, for-approval or cancelled here; use the cheque / payout approval for the rest');
     p.push(b.status); sets.push(`status = $${p.length}`);
@@ -287,6 +368,7 @@ async function approveCheque(db, c, amount, user) {
     // A cheque drawn on the whole voucher (no single payable named) pays the voucher's payables once the approved cheques
     // cover the voucher, so they no longer show as open payables to the insurer (aged payables, remittances due)
     if (!inv) await settleVoucherPayables(db, d.id);
+    if (REFUND_PAYEES.includes(payeeType)) await notifyRefund(db, d.id);
   }
 }
 

@@ -181,7 +181,7 @@
     border-left: 4px solid $brand-blue;
     border-radius: $radius-sm;
     background: $color-surface;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-md);
 
     &--warning {
       border-left-color: $color-warning;

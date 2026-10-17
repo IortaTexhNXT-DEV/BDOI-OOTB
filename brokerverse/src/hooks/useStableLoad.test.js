@@ -100,4 +100,87 @@ describe("useStableLoad", () => {
     expect(requests).toHaveLength(1);
     expect(result.current.load.loading).toBe(true);
   });
+
+  describe("the four states of a view", () => {
+    it("loading, then loaded with data", async () => {
+      const requests = [];
+      const { result } = renderHook(() => useStatement(requests));
+      expect(result.current.load.status).toBe("loading");
+      await act(async () => requests[0].resolve({ premium: 0 }));
+      // a real zero is data, not an empty view
+      expect(result.current.load).toMatchObject({ status: "loaded", loading: false, refreshing: false });
+    });
+
+    it("loaded-empty when the answer holds nothing (isEmpty decides)", async () => {
+      const requests = [];
+      const { result } = renderHook(() => useStatement(requests, { isEmpty: (d) => !d?.rows?.length }));
+      await act(async () => requests[0].resolve({ rows: [] }));
+      expect(result.current.load).toMatchObject({ status: "empty", loading: false, refreshing: false });
+      const plain = [];
+      const { result: list } = renderHook(() => useStatement(plain));
+      await act(async () => plain[0].resolve([]));
+      expect(list.current.load.status).toBe("empty");
+    });
+
+    it("error when the first load fails, loaded again after Retry; no loading flag is left on", async () => {
+      const requests = [];
+      const { result } = renderHook(() => useStatement(requests));
+      await act(async () => requests[0].reject(new Error("Server unavailable")));
+      expect(result.current.load).toMatchObject({ status: "error", error: "Server unavailable", loading: false, refreshing: false, timedOut: false });
+      act(() => { result.current.load.reload(); });
+      expect(result.current.load.status).toBe("error");
+      expect(result.current.load.refreshing).toBe(true);
+      await act(async () => requests[1].resolve({ ok: true }));
+      expect(result.current.load).toMatchObject({ status: "loaded", error: null, refreshing: false });
+    });
+
+    it("stays loading while it waits to be enabled (no empty state flashes before the first request)", () => {
+      const requests = [];
+      const { result } = renderHook(() => useStatement(requests, { enabled: false }));
+      expect(result.current.load.status).toBe("loading");
+      expect(requests).toHaveLength(0);
+    });
+
+    describe("time limit", () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
+
+      it("gives a request up after 10 s: error with timedOut, and the late answer is ignored", async () => {
+        const requests = [];
+        const { result } = renderHook(() => useStatement(requests));
+        await act(async () => { jest.advanceTimersByTime(9999); });
+        expect(result.current.load.status).toBe("loading");
+        await act(async () => { jest.advanceTimersByTime(1); });
+        // tried once more after a short pause (a server restarting) before the error shows
+        expect(result.current.load.status).toBe("loading");
+        await act(async () => { jest.advanceTimersByTime(1500); });
+        expect(requests).toHaveLength(2);
+        await act(async () => { jest.advanceTimersByTime(10000); });
+        expect(result.current.load).toMatchObject({ status: "error", timedOut: true, loading: false, refreshing: false });
+        await act(async () => requests[0].resolve({ late: true }));
+        expect(result.current.load.data).toBeNull();
+      });
+
+      it("tries a gateway error again after a pause and shows the answer of the second try", async () => {
+        const requests = [];
+        const { result } = renderHook(() => useStatement(requests));
+        await act(async () => requests[0].reject(new Error("Request failed (502)")));
+        expect(result.current.load.status).toBe("loading");
+        await act(async () => { jest.advanceTimersByTime(1500); });
+        await act(async () => requests[1].resolve({ period: "2026-10" }));
+        expect(result.current.load).toMatchObject({ status: "loaded", data: { period: "2026-10" }, error: null });
+      });
+
+      it("keeps the data on screen when a refresh times out", async () => {
+        const requests = [];
+        const { result } = renderHook(() => useStatement(requests, { timeoutMs: 500 }));
+        await act(async () => requests[0].resolve({ period: "2026-09" }));
+        act(() => { result.current.load.reload(); });
+        await act(async () => { jest.advanceTimersByTime(500); });
+        await act(async () => { jest.advanceTimersByTime(1500); });
+        await act(async () => { jest.advanceTimersByTime(500); });
+        expect(result.current.load).toMatchObject({ status: "loaded", data: { period: "2026-09" }, timedOut: true, refreshing: false });
+      });
+    });
+  });
 });

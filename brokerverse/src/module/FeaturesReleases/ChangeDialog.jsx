@@ -22,9 +22,16 @@ const List = ({ items, empty }) => (items.length ? <ul className="fr-impact__lis
  * Enable or disable features, or a tier bundle (Enable Phase 2): the impact preview of the server (features with their
  * dependencies, read-only where records exist, menus, roles that gain access, jobs, connectors, settings to configure)
  * and the request: reason, contract or change request reference, effective date. The request waits for a second
- * platform administrator.
+ * platform administrator; on Master > System Configuration (`scope` "tenant", the SUPERID of TISPH) for a second
+ * enabler or a platform administrator, or applies at once when the approval of the tenant is "single".
  */
-const ChangeDialog = ({ visible, onHide, request, onDone }) => {
+const API = {
+  platform: { preview: (body) => featuresService.preview(body), requestChange: (body) => featuresService.requestChange(body) },
+  tenant: { preview: (body) => featuresService.tenantPreview(body), requestChange: (body) => featuresService.tenantRequestChange(body) },
+};
+
+const ChangeDialog = ({ visible, onHide, request, onDone, scope = "platform", single = false }) => {
+  const api = API[scope] || API.platform;
   const { t } = useTranslation();
   const [reason, setReason] = useState(null);
   const [releaseRef, setReleaseRef] = useState("");
@@ -44,7 +51,7 @@ const ChangeDialog = ({ visible, onHide, request, onDone }) => {
     setError(null);
   }, [visible, request]);
 
-  const loader = useCallback(() => featuresService.preview(request), [request]);
+  const loader = useCallback(() => (API[scope] || API.platform).preview(request), [request, scope]);
   const { data: preview, loading, refreshing, error: loadError } = useStableLoad(loader, { enabled: !!(visible && request) });
   const enabling = request?.action === "enable";
   const problems = {
@@ -58,7 +65,7 @@ const ChangeDialog = ({ visible, onHide, request, onDone }) => {
     setBusy(true);
     setError(null);
     try {
-      const r = await featuresService.requestChange({ ...request, ...reasonPayload(reason), releaseRef: releaseRef.trim(), effective,
+      const r = await api.requestChange({ ...request, ...reasonPayload(reason), releaseRef: releaseRef.trim(), effective,
         effectiveAt: effective === "scheduled" ? `${effectiveAt}T00:00:00+08:00` : undefined });
       onDone(r);
     } catch (e) {
@@ -72,7 +79,7 @@ const ChangeDialog = ({ visible, onHide, request, onDone }) => {
   const footer = (
     <>
       <Button type="button" label={t("features.common.cancel")} text onClick={onHide} disabled={busy} />
-      <Button type="button" label={t("features.change.submit")} icon="pi pi-send" onClick={submit} loading={busy} disabled={!preview?.changes || busy} data-testid="submit-change" />
+      <Button type="button" label={t(single ? "features.change.submitSingle" : "features.change.submit")} icon="pi pi-send" onClick={submit} loading={busy} disabled={!preview?.changes || busy} data-testid="submit-change" />
     </>
   );
 
@@ -143,6 +150,8 @@ ChangeDialog.propTypes = {
   onHide: PropTypes.func.isRequired,
   request: PropTypes.shape({ action: PropTypes.string, features: PropTypes.arrayOf(PropTypes.string), tier: PropTypes.string }),
   onDone: PropTypes.func.isRequired,
+  scope: PropTypes.oneOf(["platform", "tenant"]),
+  single: PropTypes.bool,
 };
 
 export default ChangeDialog;

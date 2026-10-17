@@ -158,7 +158,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
       </div>
 
       <DataTable value={accounts} loading={loading} rowGroupMode="subheader" groupRowsBy="accountType" rowGroupHeaderTemplate={groupHeader} dataKey="code"
-        emptyMessage="No accounts" size="small" stripedRows scrollable scrollHeight="flex" className="coa-table">
+        emptyMessage="No accounts" size="small" stripedRows scrollable className="coa-table">
         <Column field="code" header="Code" style={{ width: "8rem" }} />
         {level === "sub" && <Column field="parentCode" header="Main Account" style={{ width: "8rem" }} />}
         <Column field="name" header="Account Name" />

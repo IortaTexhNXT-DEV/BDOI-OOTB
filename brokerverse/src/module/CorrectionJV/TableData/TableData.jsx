@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import SvgEditIcon from "../../../assets/icons/SvgEditicons";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -38,34 +37,6 @@ const TableData = ({ newDataTable, editID }) => {
       };
     }
   );
-
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              {t("correctionJv.rowCount")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
   const [visible, setVisible] = useState(false);
   const renderEditButton = (rowData) => {
     return (
@@ -210,8 +181,6 @@ const TableData = ({ newDataTable, editID }) => {
         paginator={(correctionJVList || []).length > 20}
         rows={20}
         rowsPerPageOptions={[20, 50, 100]}
-        currentPageReportTemplate="{first} - {last} of {totalRecords}"
-        paginatorTemplate={template2}
         className="corrections__table__main"
       >
         <Column

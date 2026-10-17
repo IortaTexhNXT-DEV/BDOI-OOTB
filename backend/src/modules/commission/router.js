@@ -13,7 +13,7 @@ import { policyBreakdown, recomputeBasis } from './breakdown.js';
 const { router, define } = moduleRouter('Commission', '/commission');
 const read = [requireAuth, requirePermission('read:commission', 'read:quotations')];
 const write = [requireAuth, requirePermission('write:commission')];
-const SCREEN = 'Commission > Agents/Referrer Accounts';
+const SCREEN = 'Accounts > Commission > Agents/Referrer Accounts';
 
 /** Lines marked eligible go to the approvers (write:commission); approved lines are reported to whoever made them eligible. */
 async function notifyPayout(req, action, makers) {
@@ -26,7 +26,7 @@ const lineExample = { id: 'cm_1', policyNo: 'POL-2026-00001', productInsurer: 'M
 const accountExample = { referrer: { id: 'ref-dcruz', name: 'Juan Dela Cruz', type: 'Agent', level: 'L1', whtApplicable: true }, summary: { cycleLabel: 'Sep 2026', dueThisCycle: 1140, upcoming: 0, paidToDate: 0 }, currentCycle: { label: 'Sep 2026', totalNet: 1140, lines: [lineExample] }, futureCycles: { totalNet: 0, lines: [] }, past: { totalNet: 0, lines: [] }, actions: { approveCount: 1, generatePayoutCount: 0, markEligibleCount: 0 } };
 
 define({
-  method: 'GET', path: '/dashboard', summary: 'Commission KPIs, comsub by referrer / product, brokerage by insurer, payable funnel, trend', screen: 'Commission > Commission Dashboard', middleware: read,
+  method: 'GET', path: '/dashboard', summary: 'Commission KPIs, comsub by referrer / product, brokerage by insurer, payable funnel, trend', screen: 'Accounts > Commission > Commission Dashboard', middleware: read,
   response: { success: true, data: { kpis: { brokerageIncome: 448530, comsubGross: 221706, netMargin: 226824, marginPct: 50.6, outstandingPayable: 150146, whtWithheldPaid: 1228 }, linesByStatus: [{ status: 'Accrued', count: 9 }] } },
   handler: async (req, res) => ok(res, await svc.dashboard(pool, await scopeOf(req)), 'Commission dashboard retrieved'),
 });
@@ -45,9 +45,28 @@ const referrerSchema = z.object({
   parentReferrerId: z.string().nullable().optional(), userId: z.string().nullable().optional(), tin: z.string().optional(), email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(), whtCode: z.string().nullable().optional(), whtApplicable: z.boolean().optional(), bankName: z.string().optional(),
   bankAccountNo: z.string().optional(), status: z.enum(['Active', 'Inactive']).optional(),
+  vendorGroup: z.string().trim().max(60).nullable().optional(), vendorCode: z.string().trim().max(30).nullable().optional(), address: z.string().trim().max(300).nullable().optional(),
+  contactPerson: z.string().trim().max(120).nullable().optional(),
 }).passthrough();
 define({
-  method: 'POST', path: '/referrer-accounts', summary: 'Create a referrer (agent, sub-agent or external)', screen: SCREEN, middleware: [...write, validate(referrerSchema)],
+  method: 'GET', path: '/referrer-accounts/options', summary: 'Lists of the payee enrolment form: payee types, levels, vendor groups (commission.vendor_groups), withholding tax codes, and whether a new payee or a change of its payment details is verified by a second user',
+  screen: `${SCREEN} > Add / Edit payee`, middleware: read,
+  response: { success: true, data: { types: svc.REFERRER_TYPES, levels: ['L1', 'L2'], vendorGroups: ['Agents', 'Dealers'], whtCodes: [{ code: 'WI515', label: 'WI515 · 5%' }], verificationRequired: true } },
+  handler: async (req, res) => ok(res, await svc.referrerOptions(pool)),
+});
+define({
+  method: 'POST', path: '/referrer-accounts/:id/verify', summary: 'Verify the enrolment of a payee or the change of its payment details (approve:commission; never the user who enrolled or changed it); its commission can then be approved and paid',
+  screen: `${SCREEN} > Verify payee`, middleware: [requireAuth, requirePermission('approve:commission'), validate(z.object({ note: z.string().trim().max(500).optional() }).passthrough())],
+  request: { note: 'Bank certificate checked' }, response: { success: true, data: accountExample },
+  handler: async (req, res) => {
+    const before = await withTransaction((db) => svc.verifyReferrer(db, req.params.id, req.user, req.body || {}));
+    await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action: 'verify', before: { verificationStatus: 'pending', changes: before.verification_changes },
+      after: { verificationStatus: 'verified', note: req.body?.note || null } });
+    ok(res, await svc.buildAccount(pool, req.params.id), 'Payee verified');
+  },
+});
+define({
+  method: 'POST', path: '/referrer-accounts', summary: 'Enrol a payee (agent, dealer, referral, vendor) with its vendor group and code, address, contact, TIN and bank details; awaits verification by a second user while commission.payee_verification_required is on', screen: SCREEN, middleware: [...write, validate(referrerSchema)],
   request: { name: 'Juan Dela Cruz', type: 'Agent', level: 'L1', bankName: 'BDO', bankAccountNo: '001234564521' }, response: { success: true, data: accountExample },
   handler: async (req, res) => {
     const id = await withTransaction((db) => svc.upsertReferrer(db, null, req.body, req.user));
@@ -61,10 +80,12 @@ define({
   handler: async (req, res) => {
     const before = await svc.getReferrer(pool, req.params.id);
     const b = { name: before.name, type: before.referrer_type, level: before.level, parentReferrerId: before.parent_referrer_id, userId: before.user_id, tin: before.tin, email: before.email, phone: before.phone,
-      whtCode: before.wht_code, whtApplicable: before.wht_applicable, bankName: before.bank_name, bankAccountNo: before.bank_account_no, status: before.status, ...req.body };
+      whtCode: before.wht_code, whtApplicable: before.wht_applicable, bankName: before.bank_name, bankAccountNo: before.bank_account_no, status: before.status,
+      vendorGroup: before.vendor_group, vendorCode: before.vendor_code, address: before.address, contactPerson: before.contact_person, ...req.body };
     await withTransaction((db) => svc.upsertReferrer(db, req.params.id, b, req.user));
     await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action: 'update', before, after: req.body });
-    ok(res, await svc.buildAccount(pool, req.params.id), 'Referrer updated');
+    const account = await svc.buildAccount(pool, req.params.id);
+    ok(res, account, account.referrer.verificationStatus === 'pending' ? 'Payee updated; the change awaits verification by a second user' : 'Referrer updated');
   },
 });
 define({
@@ -223,13 +244,13 @@ define({
 const breakdownRead = [requireAuth, requirePermission('read:commission-rules', 'read:remittance', 'write:remittance', 'read:commission', 'read:policies')];
 define({
   method: 'GET', path: '/policies/:policyId/breakdown', summary: 'Commission breakdown of a policy: per peril the sum insured, premium, issuing, insurer net and TIS remitting rates, insurer remitting, commission and variance share; gross commission, shares, retained; the remittance and billing statement carrying it; whether Recompute is allowed',
-  screen: 'Operations > Policy > Commission breakdown', middleware: breakdownRead,
+  screen: 'Policy Servicing > Policy > Commission breakdown', middleware: breakdownRead,
   response: { success: true, data: { policyNumber: 'POL-2026-00412', basis: { rateBasis: 'issuing-remitting', grossCommission: 16131.25, varianceShare: 4800, retained: 11331.25, perils: [] }, recompute: { allowed: true, reason: null } } },
   handler: async (req, res) => ok(res, await policyBreakdown(req.params.policyId)),
 });
 define({
   method: 'POST', path: '/policies/:policyId/recompute', summary: 'Recompute the commission of a policy from the rules register on its inception date (write:remittance); refused once the policy is on an approved remittance',
-  screen: 'Operations > Policy > Commission breakdown', middleware: [requireAuth, requirePermission('write:remittance')],
+  screen: 'Policy Servicing > Policy > Commission breakdown', middleware: [requireAuth, requirePermission('write:remittance')],
   response: { success: true, data: { message: 'Commission recomputed: 0.00 to 7,891.25.' } },
   handler: async (req, res) => {
     const r = await recomputeBasis(req.params.policyId, req.user);
@@ -242,7 +263,7 @@ define({
 const schemeRead = [requireAuth, requirePermission('read:sharing-schemes', 'write:sharing-schemes', 'approve:sharing-schemes')];
 const schemeWrite = [requireAuth, requirePermission('write:sharing-schemes')];
 const schemeApprove = [requireAuth, requirePermission('approve:sharing-schemes')];
-const SCHEMES = 'Commission > Sharing Schemes';
+const SCHEMES = 'Accounts > Commission > Sharing Schemes';
 const schemeExample = { id: 1, code: 'EXT-AGENT-STD', name: 'External agents, TFS team members and referrals', partyTypes: ['Agent', 'TFS team member', 'Referral', 'External'], productIds: [2], policyType: 'any',
   effectiveFrom: '2026-11-01', effectiveTo: null, status: 'active', statusLabel: 'Active', version: 1, lines: [{ lineNo: 1, paidTo: 'referrer', basis: 'variance', perils: ['OD', 'AON'], defaultValue: 0.3, min: 0, max: 0.3 }] };
 const lineSchema = z.object({ paidTo: z.enum(schemes.PAID_TO), basis: z.enum(schemes.SHARE_BASES), perils: z.array(z.string()).optional(), defaultValue: z.coerce.number().min(0), min: z.coerce.number().min(0).optional(),

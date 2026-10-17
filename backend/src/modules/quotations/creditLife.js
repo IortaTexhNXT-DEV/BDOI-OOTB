@@ -41,7 +41,8 @@ export async function creditLifeTerms(c, { productId = null, productType = null 
   const birth = cl.borrowerBirthDate || party?.birth_date;
   if (!birth) throw fail('borrowerBirthDate', "Enter the borrower's date of birth");
   const age = ageOn(birth, await today());
-  if (age >= rules.maxAge) throw fail('borrowerBirthDate', `The borrower is ${age}: Credit Life excludes borrowers aged ${rules.maxAge} and over`);
+  // BRD QUOT-06 / PJRN-01: a borrower aged maxAge (65) or younger is eligible; older is refused
+  if (age > rules.maxAge) throw fail('borrowerBirthDate', `The borrower is ${age}: Credit Life covers borrowers aged up to ${rules.maxAge}`);
   const accounts = Number(cl.accountCount);
   if (!Number.isInteger(accounts) || accounts < 1) throw fail('accountCount', "Enter the number of the borrower's TFS accounts");
   if (accounts > rules.maxAccounts) throw fail('accountCount', `The borrower has ${accounts} accounts: Credit Life excludes borrowers with more than ${rules.maxAccounts}`);

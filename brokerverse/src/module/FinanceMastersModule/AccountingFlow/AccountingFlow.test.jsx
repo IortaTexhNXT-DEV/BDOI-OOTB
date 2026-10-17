@@ -17,7 +17,7 @@ const role = (glCode, glName, over = {}) => ({ kind: "role", role: "r", label: "
   mapping: null, configure: "/master/finance/premium-account-setup", fallback: null, options: null, pendingChange: null, ...over });
 const line = (lineNo, side, amount, account, over = {}) => ({ lineNo, side, amountKey: `key_${lineNo}`, amount, formula: null, perParticipant: false, narration: null,
   accountType: "role", accountRef: "premium_receivable", fallbackRole: null, condition: null, account, ...over });
-const event = (over) => ({ module: "policies", summary: null, screen: "/agent/policy", where: "Operations › Policy", approval: "None: posted when the policy is issued", approvalControl: null,
+const event = (over) => ({ module: "policies", summary: null, screen: "/agent/policy", where: "Policy Servicing › Policies", approval: "None: posted when the policy is issued", approvalControl: null,
   authority: null, posting: "posted", postingText: "Posted at once", alwaysPosted: null, ruleId: 12, version: 2, effectiveFrom: "2000-01-01", approvedAt: null, scheduled: null,
   pending: null, lastPosted: null, mappingPending: false, settings: [], ...over });
 
@@ -111,7 +111,7 @@ describe("flowView", () => {
   });
 });
 
-describe("Accounting Flow", () => {
+describe("Accounting flow", () => {
   it("lists the events under their modules in cycle order with contents, facts and entries in business words", async () => {
     renderAt();
     await loaded();
@@ -122,7 +122,7 @@ describe("Accounting Flow", () => {
     expect(within(contents).getByRole("button", { name: /Premium collection applied/ })).toBeInTheDocument();
     const c = card("Policy issued – broker billed");
     expect(within(c).getByText("A broker-billed policy is issued")).toBeInTheDocument();
-    expect(within(c).getByText("Operations › Policy")).toBeInTheDocument();
+    expect(within(c).getByText("Policy Servicing › Policies")).toBeInTheDocument();
     expect(within(c).getByText("None: posted when the policy is issued")).toBeInTheDocument();
     const rows = within(c).getAllByRole("row").slice(1);
     expect(rows.map((r) => within(r).getAllByRole("cell")[0].textContent)).toEqual(["Dr", "Cr", "Cr"]);

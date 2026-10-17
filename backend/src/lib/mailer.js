@@ -40,10 +40,37 @@ const cleanAttachments = (list) => (Array.isArray(list) ? list : []).filter((a) 
   .map((a) => (a.kind === 'document' ? documentAttachment(a.document, a.params, a.fileName, a.contentType) : fileAttachment(a.key, a.fileName, a.contentType)));
 
 /**
+ * Whether a template is marketing or otherwise non-transactional (email.non_transactional_templates: names, a trailing
+ * * matching a prefix, e.g. campaign:*). Transactional e-mail (policy documents, notices, billing, claims) is not.
+ */
+export async function isNonTransactional(template) {
+  if (!template) return false;
+  const list = await getSetting('email.non_transactional_templates', ['campaign:*']);
+  return (Array.isArray(list) ? list : []).some((p) => {
+    const s = String(p || '');
+    return s.endsWith('*') ? String(template).startsWith(s.slice(0, -1)) : String(template) === s;
+  });
+}
+
+/**
+ * Whether every address of `to` belongs to a client who opted out of non-transactional e-mail or refused marketing
+ * consent (clients.email_opt_out, clients.marketing_consent false; NFR-17.1). An address of no client is not opted out.
+ */
+export async function optedOut(to, db = null) {
+  const addresses = String(to || '').split(/[,;]/).map((a) => a.trim().toLowerCase()).filter(Boolean);
+  if (!addresses.length) return false;
+  const r = await (db || { query }).query(`SELECT count(DISTINCT lower(email))::int AS n FROM clients
+    WHERE lower(email) = ANY($1::text[]) AND (email_opt_out OR marketing_consent IS FALSE)`, [addresses]);
+  return r.rows[0].n === new Set(addresses).size;
+}
+
+/**
  * Queue an e-mail in email_outbox. The email-outbox job sends it (every 5 minutes by the seed). `attachments`: see
  * documentAttachment / fileAttachment. `db` queues it in the caller's transaction (it is dropped when that rolls back).
  */
 export async function queueEmail({ to, cc, subject, html, template, entity, entityId, attachments = [], db = null }) {
+  // NFR-17.1: marketing and other non-transactional e-mail is not queued for a client who opted out (returns null)
+  if (await isNonTransactional(template) && await optedOut(to, db)) return null;
   const r = await (db || { query }).query(`INSERT INTO email_outbox(to_address, cc, subject, body_html, template, entity, entity_id, attachments)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`, [to, cc || null, subject, html, template || null, entity || null, entityId == null ? null : String(entityId), JSON.stringify(cleanAttachments(attachments))]);
   return Number(r.rows[0].id);

@@ -135,7 +135,6 @@ import QuoteDetailView from "../agentModule/quoteModule/quoteDetailView";
 import QuoteListing from "../agentModule/quoteModule/quoteListing";
 import CustomerInfo from "../agentModule/quoteModule/customerInfo";
 import CustomerInfoFire from "../agentModule/quoteModule/customerInfo/CustomerInfoFire";
-import QuoteComparisonView from "../agentModule/quoteModule/quoteComparisonView";
 import UploadVehiclePhotos from "../agentModule/quoteModule/uploadVehiclePhotos";
 import CoverageDetailedVew from "../agentModule/quoteModule/coverageDetailedView";
 import PolicyApproval from "../agentModule/quoteModule/policyApproval";
@@ -156,7 +155,6 @@ import SettlementApproval from "../agentModule/claimsModule/settlementApproval";
 import SettlementDetails from "../agentModule/claimsModule/settlementDetails";
 import PersonalDetails from "../agentModule/endorsementModule/personalDetails";
 import CoverageDetails from "../agentModule/endorsementModule/coveragedetails";
-import EndorsementApproval from "../agentModule/endorsementModule/endorsementApproval";
 import UploadEndorsement from "../agentModule/endorsementModule/uploadEndorsement";
 import EndorsementDetailedView from "../agentModule/endorsementModule/endorsementDetailedView";
 import PaymentOptionsEndorsement from "../agentModule/endorsementModule/paymentOptions";
@@ -173,12 +171,10 @@ import ClaimRejected from "../agentModule/claimsModule/claimRejected";
 import ClaimDocumentUpload from "../agentModule/claimsModule/claimDocumentUpload";
 import LeadEdit from "../agentModule/leadModule/leadEdit";
 import LeadDetail from "../agentModule/leadModule/leadDetail";
-import ViewEndorsement from "../agentModule/endorsementModule/viewUploadEndorsement";
 import EndorsementRejected from "../agentModule/endorsementModule/EndorsementRejected";
 import Production from "../module/Reports/OperationalReports/Production";
 // Dashboard Imports
 import ExecutiveDashboard from "../module/ExecutiveDashboard";
-import MyDashboard from "../components/Dashboard/MyDashboard";
 import ClaimsDashboard from "../module/ClaimsModule/ClaimsDashboard";
 import SalesDashboard from "../module/SalesDashboard";
 import UnderwritingDashboard from "../module/UnderwritingModule/UnderwritingDashboard";
@@ -225,15 +221,14 @@ import CreditLimits from "../module/CreditControl/CreditLimits";
 import RemittanceAgeing from "../module/CreditControl/RemittanceAgeing";
 // operations and accounting: cover notes, cancellation, post-dated cheques, claims, payables, fixed assets
 import CoverNotes from "../module/OpsAccounting/CoverNotes";
+import EndorsementWorklist from "../module/Endorsements/EndorsementWorklist";
 import PolicyCancellation from "../module/OpsAccounting/PolicyCancellation";
 import PostDatedCheques from "../module/OpsAccounting/PostDatedCheques";
 import ClaimsSettlements from "../module/OpsAccounting/ClaimsSettlements";
-import ClaimDocuments from "../module/OpsAccounting/ClaimDocuments";
-import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
 import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
-import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, SchemeDocumentChecklist, MotorIssuanceChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 // sales activities, asset disposal and the BIR 2307 of suppliers
 import SalesActivities from "../module/SalesActivities/SalesActivities";
 import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
@@ -270,6 +265,7 @@ import MyPrograms from "../module/Incentive/MyPrograms";
 import IncentiveCalculations from "../module/Incentive/Calculations";
 import IncentiveApprovals from "../module/Incentive/Approvals";
 import IncentiveReports from "../module/Incentive/Reports";
+import SalesTargets from "../module/Incentive/SalesTargets";
 import IncentiveStatement from "../module/Incentive/Statement";
 
 // Renewal Module
@@ -283,6 +279,7 @@ import NegotiationWorkspace from "../module/Renewal/NegotiationWorkspace";
 import LapseManagement from "../module/Renewal/LapseManagement";
 import PerformanceTracking from "../module/Renewal/PerformanceTracking";
 import LockInAccounts from "../module/Renewal/LockInAccounts";
+import LockInReview from "../module/Renewal/LockInReview";
 
 // Accounts > Remittance
 import { remittanceRoutes } from "../module/Remittance/routes";
@@ -365,8 +362,12 @@ import LeadAssignment from "../module/Distribution/LeadAssignment";
 import DistributionChannels from "../module/Distribution/DistributionChannels";
 import DealerProgrammes from "../module/Distribution/DealerProgrammes";
 import Promotions from "../module/Distribution/Promotions";
+import SchemeMaster from "../module/Sales/SchemeMaster";
+import SchemeIssuance from "../module/Sales/SchemeIssuance";
+import SchemeApplication from "../module/Sales/SchemeApplication";
 import FleetSchedules from "../module/Distribution/FleetSchedules";
 import OpenCovers from "../module/Distribution/OpenCovers";
+import CreditLife from "../module/Distribution/CreditLife";
 import ComparisonReports from "../module/Distribution/ComparisonReports";
 import Campaigns from "../module/Distribution/Campaigns";
 import ReportBuilder from "../module/Distribution/ReportBuilder";
@@ -454,6 +455,10 @@ const Maincomponent = () => {
           <Route path="/accounts/journalvoucher" element={<Journalvoucher />} />
           <Route
             path="/accounts/journalvoucher/addjournalvoucture"
+            element={<AddJournalVoucture />}
+          />
+          <Route
+            path="/accounts/journalvoucher/editjournalvoucture/:id"
             element={<AddJournalVoucture />}
           />
           <Route
@@ -1105,6 +1110,7 @@ const Maincomponent = () => {
             path="master/incentive/programs/:mode"
             element={<IncentiveProgramMaster />}
           />
+          <Route path="master/incentive/sales-targets" element={<SalesTargets />} />
 
           {/* Incentive User Routes */}
           <Route path="incentive/my-programs" element={<MyPrograms />} />
@@ -1127,6 +1133,7 @@ const Maincomponent = () => {
           <Route path="renewal/analytics" element={<RetentionAnalytics />} />
           <Route path="renewal/at-risk" element={<AtRiskAnalysis />} />
           <Route path="renewal/lock-in-accounts" element={<LockInAccounts />} />
+          <Route path="renewal/lock-in-review" element={<LockInReview />} />
           <Route
             path="renewal/negotiations"
             element={<NegotiationWorkspace />}
@@ -1218,7 +1225,6 @@ const Maincomponent = () => {
           {/* // Dashboard Routes */}
           {/* after sign-in: My Work with the role preset */}
           <Route path="/" element={<ToMyWork />} />
-          <Route path="/dashboard" element={<MyDashboard />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
           <Route path="/sales/dashboard" element={<SalesDashboard />} />
@@ -1327,6 +1333,8 @@ const Maincomponent = () => {
           />
           <Route path="/agent/claim/claimtable" element={<ClaimModule />} />
           <Route path="/agent/claim" element={<Claim />} />
+          <Route path="/agent/claim/documents" element={<Claim />} />
+          <Route path="/agent/claim/motor-repairs" element={<Claim />} />
           <Route path="/agent/policy" element={<Policy />} />
           <Route path="/agent/policy/policytable" element={<PolicyModule />} />
           <Route path="/agent/Quotation" element={<Quotation />} />
@@ -1357,10 +1365,6 @@ const Maincomponent = () => {
             element={<QuoteDetailView action="edit" />}
           />
           <Route path="/agent/quotelisting" element={<QuoteListing />} />
-          <Route
-            path="/agent/quotecomparisonview"
-            element={<QuoteComparisonView />}
-          />
           <Route
             path="/agent/convertpolicy/customerinfo/view/:id"
             element={<CustomerInfo action="post" />}
@@ -1473,10 +1477,6 @@ const Maincomponent = () => {
             element={<RequestApproval flow="normal" />}
           />
           <Route
-            path="/agent/quotationmrequest/requestapproval/:id"
-            element={<RequestApproval flow="quotation" />}
-          />
-          <Route
             path="/agent/claimrequest/adjustersubmission/:id"
             element={<AdjusterSubmission />}
           />
@@ -1514,14 +1514,9 @@ const Maincomponent = () => {
             element={<CoverageDetails />}
           />
           <Route
-            path="/agent/endorsementapproval"
-            element={<EndorsementApproval />}
-          />
-          <Route
             path="/agent/uploadendorsement/:endorsementId"
             element={<UploadEndorsement />}
           />
-          <Route path="/agent/viewendorsement" element={<ViewEndorsement />} />
           <Route
             path="/agent/endorsementdetailedview/:endorsementId"
             element={<EndorsementDetailedView action="continue" />}
@@ -1611,9 +1606,11 @@ const Maincomponent = () => {
           <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />
           <Route path="/accounts/credit-control/remittance-ageing" element={<RemittanceAgeing />} />
           <Route path="/operations/cover-notes" element={<CoverNotes />} />
+          <Route path="/operations/endorsements" element={<EndorsementWorklist />} />
           <Route path="/operations/policy-cancellation" element={<PolicyCancellation />} />
-          <Route path="/operations/claim-documents" element={<ClaimDocuments />} />
-          <Route path="/operations/motor-claim-repairs" element={<MotorClaimRepairs />} />
+          {/* Claim Documents and Motor Claim Repairs are tabs of Claims: the former addresses open the tab */}
+          <Route path="/operations/claim-documents" element={<Navigate to="/agent/claim/documents" replace />} />
+          <Route path="/operations/motor-claim-repairs" element={<Navigate to="/agent/claim/motor-repairs" replace />} />
           <Route path="/accounts/post-dated-cheques" element={<PostDatedCheques />} />
           <Route path="/accounts/unapplied-collections" element={<UnappliedCollections />} />
           <Route path="/accounts/claims-settlements" element={<ClaimsSettlements />} />
@@ -1633,6 +1630,8 @@ const Maincomponent = () => {
           <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
           <Route path="/master/insurance/endorsement-types" element={<EndorsementTypes />} />
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
+          <Route path="/master/insurance/scheme-document-checklist" element={<SchemeDocumentChecklist />} />
+          <Route path="/master/insurance/motor-issuance-checklist" element={<MotorIssuanceChecklist />} />
           <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
           <Route path="/master/insurance/lead-sources" element={<LeadSources />} />
           <Route path="/master/insurance/reason-codes" element={<ReasonCodes />} />
@@ -1773,6 +1772,9 @@ const Maincomponent = () => {
           <Route path="/sales/lead-assignment" element={<LeadAssignment />} />
           <Route path="/sales/dealer-programmes" element={<DealerProgrammes />} />
           <Route path="/sales/promotions" element={<Promotions />} />
+          <Route path="/sales/scheme-master" element={<SchemeMaster />} />
+          <Route path="/sales/scheme-issuance" element={<SchemeIssuance />} />
+          <Route path="/sales/scheme-issuance/:id" element={<SchemeApplication />} />
           <Route path="/sales/comparison-reports" element={<ComparisonReports />} />
           <Route path="/sales/campaigns" element={<Campaigns />} />
           <Route path="/master/insurance/channels" element={<DistributionChannels />} />
@@ -1780,6 +1782,8 @@ const Maincomponent = () => {
           <Route path="/operations/fleet-schedules/:id" element={<FleetSchedules />} />
           <Route path="/operations/open-covers" element={<OpenCovers />} />
           <Route path="/operations/open-covers/:id" element={<OpenCovers />} />
+          <Route path="/operations/credit-life" element={<CreditLife />} />
+          <Route path="/operations/credit-life/:id" element={<CreditLife />} />
           <Route path="/reports/builder" element={<ReportBuilder />} />
 
           {/* Any other address inside the application */}

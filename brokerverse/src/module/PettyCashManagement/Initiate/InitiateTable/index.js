@@ -63,36 +63,6 @@ const InitiateTable = () => {
       <div className="no__data__found">{t("pettyCash.noDataEntered")}</div>
     </div>
   );
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="paginatoroverall__container">
-          <React.Fragment>
-            <span
-              className="mx-1"
-              style={{ color: "var(--text-color)", userSelect: "none" }}
-            >
-              {t("pettyCash.rowCount")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdowninner_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
 
   // a fund waiting for approval is established or rejected by a user other than the one who initiated it
   const decide = async (rowData, action) => {
@@ -196,12 +166,9 @@ const InitiateTable = () => {
               color: "var(--text-color)",
             }}
             scrollable={true}
-            scrollHeight="40vh"
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
           >
             <Column

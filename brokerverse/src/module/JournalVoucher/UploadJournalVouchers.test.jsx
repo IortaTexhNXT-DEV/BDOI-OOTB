@@ -41,4 +41,14 @@ describe("journal voucher upload", () => {
     expect(await screen.findByText("row 4 (UNBAL)")).toBeInTheDocument();
     expect(screen.getByText(/not balanced/)).toBeInTheDocument();
   });
+  it("lists the saved vouchers and the failed rows of a partial upload", async () => {
+    journalVoucherService.upload.mockResolvedValue({ message: "1 journal voucher uploaded for approval; 1 row error(s), those vouchers were not saved",
+      data: { total: 4, mode: "partial", vouchers: [{ id: "jv_1", voucherRef: "GOOD-1", transactionNumber: "JV-2026-00009", date: "2026-10-11", lineCount: 2, totalDebit: 100 }],
+        failed: [{ path: "row 4 (UNBAL-2)", message: "Journal is not balanced" }] } });
+    render(<UploadJournalVouchers visible onHide={() => {}} onUploaded={() => {}} />);
+    choose("jv.csv");
+    fireEvent.click(screen.getByRole("button", { name: /^Upload$/ }));
+    expect(await screen.findByText("JV-2026-00009")).toBeInTheDocument();
+    expect(screen.getByText("row 4 (UNBAL-2)")).toBeInTheDocument();
+  });
 });

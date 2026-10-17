@@ -12,7 +12,7 @@ import * as svc from './service.js';
 import { bankLetterSpec, batchLetterSpecs } from './letters.js';
 
 const { router, define } = moduleRouter('Dealer programmes', '/motor-programmes');
-const SCREEN = 'Operations > Sales & Marketing > Dealer Programmes';
+const SCREEN = 'Sales & Placement > Dealer Programmes';
 const canRead = [requireAuth, requirePermission('read:motor-programmes', 'write:motor-programmes')];
 const canWrite = [requireAuth, requirePermission('write:motor-programmes')];
 

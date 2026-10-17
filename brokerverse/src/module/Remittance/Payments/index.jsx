@@ -107,7 +107,8 @@ const Payments = () => {
     if (action.code === "bank-payment-files") navigate(BANK_PAYMENT_FILES);
   };
 
-  const primaryLabel = selection.length ? t("remittance.payments.createBatch", { count: selection.length }) : t("remittance.payments.selectToBatch");
+  // never a disabled primary as an instruction: "Create batch" outlined with the reason until payments are ticked
+  const primaryLabel = selection.length ? t("remittance.payments.createBatch", { count: selection.length }) : t("remittance.payments.createBatchPlain");
   const headerActions = readOnly ? (
     <PageActions className="rm-header-actions">
       <StatusChip label={t("remittance.common.viewOnly")} severity="secondary" />
@@ -116,6 +117,8 @@ const Payments = () => {
   ) : (
     <PageActions className="rm-header-actions">
       <Button type="button" label={canBatch ? primaryLabel : t("remittance.payments.createBatchPlain")} disabled={!canBatch || !selection.length || legacy}
+        outlined={!selection.length} tooltip={canBatch && !selection.length ? t("remittance.payments.selectToBatch") : undefined}
+        tooltipOptions={{ position: "left", showOnDisabled: true }}
         onClick={() => setBatching(true)} aria-describedby={batchState && !canBatch ? "rm-batching-reason" : undefined} />
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} />
     </PageActions>
@@ -127,7 +130,8 @@ const Payments = () => {
   const tick = (row, on) => setSelection((cur) => (on ? [...cur.filter((r) => r.id !== row.id), row] : cur.filter((r) => r.id !== row.id)));
   const open = batchable(rows);
   const allTicked = open.length > 0 && open.every(ticked);
-  const selectColumn = readOnly || legacy ? null : (
+  // the tick column only when a row of the page can be batched: an empty first column reads as a misaligned table
+  const selectColumn = readOnly || legacy || !open.length ? null : (
     <Column frozen style={{ width: "3rem" }}
       header={open.length ? <Checkbox checked={allTicked} onChange={(e) => setSelection(e.checked ? open : [])} aria-label={t("remittance.payments.selectAll")} /> : null}
       body={(r) => (r.selectable ? <Checkbox checked={ticked(r)} onChange={(e) => tick(r, e.checked)} aria-label={t("remittance.payments.select", { voucher: r.voucherNo })} /> : null)} />
@@ -161,7 +165,7 @@ const Payments = () => {
   );
   const methodCell = (r) => (
     <span className="rm-cell-stack">
-      <span>{r.method?.label || "-"}</span>
+      <span className={r.method?.label ? undefined : "rm-muted"}>{r.method?.label || t("remittance.payments.methodNotSet", "Not chosen")}</span>
       {r.valueDate ? <span className="rm-muted">{formatDate(r.valueDate)}</span> : null}
     </span>
   );

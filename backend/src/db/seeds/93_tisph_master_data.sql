@@ -40,6 +40,14 @@ UPDATE master_records m SET status = 'inactive', updated_at = now()
    AND EXISTS (SELECT 1 FROM master_records t WHERE t.type_code = 'company' AND t.code = 'TISPH' AND t.status = 'active'
                  AND lower(COALESCE(t.data->>'IsPrimary', 'false')) IN ('true', 'yes', '1'));
 
+-- ---------------------------------------------------------------- Disbursing bank (migration 0647, DISB-01)
+-- TISPH pays every voucher from Metrobank.
+UPDATE app_settings s SET value = v.value, updated_at = now()
+  FROM (VALUES ('disbursements.default_bank_code', 'null'::jsonb, '"MBT"'::jsonb), ('disbursements.allowed_bank_codes', '[]'::jsonb, '["MBT"]'::jsonb)) AS v(key, reference, value)
+ WHERE s.key = v.key AND s.updated_by IS NULL AND s.value = v.reference
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance')
+   AND EXISTS (SELECT 1 FROM banks WHERE code = 'MBT');
+
 -- ---------------------------------------------------------------- Bank file layouts
 -- TISPH disburses through Metrobank only (TIS-BRD-DISB-01): the other starter layouts are set inactive while no bank
 -- payment file uses them.

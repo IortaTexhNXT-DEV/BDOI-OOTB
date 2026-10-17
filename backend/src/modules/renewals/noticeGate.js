@@ -16,15 +16,17 @@ import { lobOf } from '../documents/common.js';
 import { shownDate } from '../claims/util.js';
 
 export const TREATMENT_LABELS = { send: 'Send', 'lock-in': 'Suppressed: lock-in', scheme2: 'Suppressed: Scheme 2', held: 'Held: loan status' };
-export const LOAN_STATUS_LABELS = { current: 'Current', 'past-due': 'Past due', fraud: 'Fraud', terminated: 'Terminated', 'legal-dispute': 'Legal dispute', closed: 'Closed' };
+export const LOAN_STATUS_LABELS = { current: 'Current', 'past-due': 'Past due', fraud: 'Fraud', 'early-terminated': 'Early terminated', terminated: 'Terminated', 'legal-dispute': 'Legal dispute', closed: 'Closed' };
 export const LOCK_IN_SOURCES = { promotion: 'Promotion', 'scheme1-ara': 'Scheme 1 ARA', scheme2: 'Scheme 2' };
+/** A TFS loan account kept on a policy without a lock-in (source loan, migration 0602): only the loan status rule applies. */
+export const LOAN_ONLY = 'loan';
 
 /** Columns of the lock-in of a policy, for a query joining policy_lock_ins as lk. */
 export const LOCK_IN_COLUMNS = `lk.source AS lock_source, lk.reference AS lock_reference, lk.start_date AS lock_start, lk.years AS lock_years, lk.end_date AS lock_end,
   lk.status AS lock_status, lk.tfs_loan_account, lk.loan_status, lk.loan_status_at, lk.loan_status_note`;
 
 export async function gateContext() {
-  const blocking = (await getSetting('lockin.blocking_loan_statuses', ['past-due', 'fraud', 'terminated', 'legal-dispute'])) || [];
+  const blocking = (await getSetting('lockin.blocking_loan_statuses', ['past-due', 'fraud', 'early-terminated', 'terminated', 'legal-dispute'])) || [];
   return {
     blocking: Array.isArray(blocking) ? blocking : [],
     suppressScheme2: (await getSetting('lockin.suppress_scheme2_motor', true)) !== false,

@@ -5,7 +5,7 @@
  * (finance manager) to approve closes, reopen periods, post into soft-closed periods and reverse a year-end close.
  */
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { formatMoney } from '../../lib/money.js';
@@ -14,6 +14,7 @@ import { ok, created } from '../../lib/respond.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { APPROVE } from './posting.js';
+import { FINANCE_CONTROL_KEYS, FINANCE_CONTROL_PERMISSION } from '../../lib/financeControls.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as fiscal from './fiscal.js';
 import * as close from './close.js';
@@ -21,6 +22,7 @@ import * as ye from './yearend.js';
 import * as tax from './tax.js';
 import { AUTO_CHECKS, blockingChecks, checklistItems, closeBlockers, manualSignOffs, runChecks } from './checks.js';
 import { generateDue, rjRow, saveRecurring } from './journals.js';
+import { closingCalendar } from './jobs.js';
 import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS, validateOpeningBalances } from './opening.js';
 import { migrationImportOpen } from '../../lib/goLiveLock.js';
 import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
@@ -121,9 +123,10 @@ async function periodActions(db, p, user) {
 }
 
 define({
-  method: 'GET', path: '/fiscal-years/:code', summary: 'A fiscal year with its periods, the latest status change of each period and the status moves the user may make',
+  method: 'GET', path: '/fiscal-years/:code', summary: 'A fiscal year with its periods, the closing calendar of each period (operations cut-off, finance close, end of the adjustment window), the latest status change of each period and the status moves the user may make',
   screen: `${S} > Period Management`, middleware: read,
   response: { success: true, data: { code: 'FY2026', periods: [{ period: '2026-01', periodNo: 1, status: 'closed',
+    closing: { operationsCutoff: '2026-01-26', financeClose: '2026-01-29', adjustmentWindowEnd: '2026-02-09' },
     lastChange: { to: 'closed', at: '2026-02-05T02:00:00Z', byName: 'Ana Santos', reasonCode: 'PCL-MONTHEND', reasonName: 'Month-end close completed', remarks: 'Month-end close completed', source: 'manual' },
     actions: { reopen: { allowed: false, reason: 'permission', message: 'Reopening a period requires permission approve:period-end' } } }] } },
   handler: async (req, res) => {
@@ -136,7 +139,7 @@ define({
     for (const p of periods) {
       const run = runOf.get(p.period);
       rows.push({ ...fiscal.periodRow(p), closeRun: run ? { id: run.id, runNumber: run.run_number, status: run.status } : null,
-        lastChange: changes.get(p.period) || null, actions: await periodActions(pool, p, req.user) });
+        lastChange: changes.get(p.period) || null, closing: p.is_adjustment ? null : await closingCalendar(p), actions: await periodActions(pool, p, req.user) });
     }
     ok(res, { ...fiscal.fyRow(f), periods: rows });
   },
@@ -195,6 +198,36 @@ define({
   handler: async (req, res) => {
     const p = await fiscal.getPeriod(pool, req.params.period);
     ok(res, await runChecks(pool, p, await checklistItems(pool)));
+  },
+});
+
+// ---------- finance controls (GAP-FIN-05) ----------
+const controlRows = async (user) => {
+  const rows = (await pool.query('SELECT key, value, type, label, updated_at, updated_by FROM app_settings WHERE key = ANY($1)', [FINANCE_CONTROL_KEYS])).rows;
+  const byKey = new Map(rows.map((r) => [r.key, r]));
+  const canChange = hasPermission(user, FINANCE_CONTROL_PERMISSION);
+  return FINANCE_CONTROL_KEYS.filter((k) => byKey.has(k)).map((k) => {
+    const r = byKey.get(k);
+    return { key: k, label: r.label, type: r.type, value: r.value, updatedAt: r.updated_at, updatedBy: r.updated_by, canChange };
+  });
+};
+define({
+  method: 'GET', path: '/finance-controls', summary: 'The finance control settings (maker-checker and posting controls of Finance) with their values; only a holder of approve:period-end changes them',
+  screen: `${S} > Period Management > Finance Controls`, middleware: read,
+  response: { success: true, data: [{ key: 'finance.maker_checker_enabled', label: 'Finance maker-checker', type: 'boolean', value: true, canChange: true }] },
+  handler: async (req, res) => ok(res, await controlRows(req.user)),
+});
+define({
+  method: 'PUT', path: '/finance-controls', summary: 'Change finance control settings ({ settings: { key: value } }); keys other than the finance controls are refused; the change is audited',
+  screen: `${S} > Period Management > Finance Controls`, middleware: [...approve, validate(z.object({ settings: z.record(z.any()) }))],
+  request: { settings: { 'accounting.reopen_closed_periods': false } }, response: { success: true, data: [{ key: 'accounting.reopen_closed_periods', value: false }] },
+  handler: async (req, res) => {
+    const other = Object.keys(req.body.settings).filter((k) => !FINANCE_CONTROL_KEYS.includes(k));
+    if (other.length) throw badRequest('Validation failed', other.map((k) => ({ path: k, message: `${k} is not a finance control; change it on Master > Configuration` })));
+    const { updateConfiguration } = await import('../system-settings/service.js');
+    const { before, after } = await updateConfiguration(req.body.settings, req.user.id, req.user);
+    await audit(req, { entity: 'settings', action: 'update', before, after });
+    ok(res, await controlRows(req.user), 'Finance controls saved');
   },
 });
 
@@ -588,6 +621,27 @@ define({
     const r = await tx((db) => tax.issueAll2307(db, req.body, req.user));
     for (const c of r.issued) await audit(req, { entity: 'bir_2307', entityId: c.certificateId, action: 'issue', after: { certificateNumber: c.certificateNumber, payeeKey: c.payeeKey, totalTax: c.totalTax } });
     ok(res, r, `${r.issued.length} certificate(s) issued`);
+  },
+});
+define({
+  method: 'GET', path: '/bir/2307/batches', summary: 'Batches of BIR Form 2307 (each issue-all run of a quarter) with their certificate count, income and tax (filter year, quarter)',
+  screen: 'Accounts > Tax > BIR Form 2307', middleware: read, query: { year: 2026, quarter: 3 },
+  response: { success: true, data: [{ batchNumber: 'CWB-2026Q3-001', certificates: 12, totalIncome: 250000, totalTax: 12500 }] },
+  handler: async (req, res) => ok(res, await tax.list2307Batches(pool, req.query)),
+});
+define({
+  method: 'GET', path: '/bir/2307/batches/:id', summary: 'A BIR Form 2307 batch with its EWT detail per certificate and ATC (format=xlsx for Excel)',
+  screen: 'Accounts > Tax > BIR Form 2307', middleware: read, query: { format: 'xlsx' },
+  response: { success: true, data: { batchNumber: 'CWB-2026Q3-001', detail: [{ certificateNumber: 'CWT-2026-00007', payeeName: 'Makati Office Supplies Inc.', atc: 'WC158', income: 9000, tax: 450 }] } },
+  handler: async (req, res) => {
+    const b = await tax.batch2307(pool, req.params.id);
+    if (req.query.format !== 'xlsx') return ok(res, b);
+    const cols = [['certificateNumber', 'Certificate No.'], ['payeeName', 'Payee'], ['payeeTin', 'TIN'], ['atc', 'ATC'], ['nature', 'Nature of payment'], ['month1', 'Month 1'],
+      ['month2', 'Month 2'], ['month3', 'Month 3'], ['income', 'Total income'], ['tax', 'Tax withheld'], ['status', 'Status']];
+    res.setHeader('Content-Type', XLSX);
+    res.setHeader('Content-Disposition', `attachment; filename="${b.batchNumber}.xlsx"`);
+    return res.send(writeXlsx({ title: `BIR Form 2307 batch ${b.batchNumber}`, sheets: [{ name: b.batchNumber,
+      columns: cols.map(([, h]) => ({ header: h, width: Math.max(12, h.length + 6) })), rows: b.detail.map((d) => cols.map(([k]) => d[k])) }] }));
   },
 });
 define({

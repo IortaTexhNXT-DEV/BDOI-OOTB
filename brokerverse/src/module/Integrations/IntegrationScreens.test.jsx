@@ -49,7 +49,7 @@ describe("integration screens", () => {
   it("the CTPL screen counts the covers by status", async () => {
     show(<CtplAuthentication />);
     expect(await screen.findByText("5")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Unauthenticated CTPL report/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Unauthenticated CTPL Report/ })).toBeInTheDocument();
   });
   it("the bank file layouts mark the starter layouts", async () => {
     show(<BankFileLayouts />);

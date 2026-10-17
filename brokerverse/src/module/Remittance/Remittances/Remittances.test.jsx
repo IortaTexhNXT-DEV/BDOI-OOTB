@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
 import { ConfirmDialogHost } from "../../../components/ConfirmDialog";
 import { remittanceService, masterService } from "../../../services/remittanceService";
+import opsAccountingService from "../../../services/opsAccountingService";
 import { setDateFormat, setTimeZone } from "../../../utility/dateFormat";
 import Remittances from ".";
 import { mondayOf, recentWeeks, segmentOf, sortOf, sortParam, submittable, weekParam, weekText } from "./worklist";
@@ -12,6 +13,7 @@ jest.mock("../../../services/remittanceService", () => ({
   __esModule: true,
   remittanceService: {
     listRegister: jest.fn(), summary: jest.fn(), listSchedules: jest.fn(), submitRemittances: jest.fn(), download: jest.fn(),
+    withdrawRemittance: jest.fn(), cancelRemittance: jest.fn(), revokeRemittance: jest.fn(), sendRemittance: jest.fn(),
     exportRegisterPath: jest.fn(() => "/remittance/remittances/export.xlsx"), listImports: jest.fn(), importLimits: jest.fn(), getImport: jest.fn(),
   },
   masterService: { options: jest.fn() },
@@ -93,7 +95,7 @@ describe("Remittances worklist", () => {
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select every draft on this page" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit for approval (3)" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("Submit 3 remittances totalling PHP 600,000.00 for approval? Another user with remittance authority approves them.")).toBeInTheDocument();
+    expect(within(dialog).getByText("Submit 3 remittances totalling ₱600,000.00 for approval? Another user with remittance authority approves them.")).toBeInTheDocument();
     expect(remittanceService.submitRemittances).not.toHaveBeenCalled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Submit 3 remittances" }));
     await waitFor(() => expect(remittanceService.submitRemittances).toHaveBeenCalledWith([{ id: "rm_1", version: 2 }, { id: "rm_2", version: 2 }, { id: "rm_3", version: 2 }]));
@@ -114,6 +116,40 @@ describe("Remittances worklist", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Submit for approval" }));
     fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Submit 1 remittance" }));
     expect(await screen.findAllByText("REM-2026-00021 was submitted by J. Cruz at 10:12.")).not.toHaveLength(0);
+  });
+
+  it("cancels a draft from its row menu with a coded reason, then reloads the list", async () => {
+    opsAccountingService.masterRecords.mockResolvedValue({ rows: [{ code: "RCN-DUPLICATE", name: "Duplicate of another remittance", context: "remittance_cancel", requiresNote: false, sortOrder: 1, status: "Active" }] });
+    const CANCEL = { code: "cancel", label: "Cancel remittance", allowed: true, reasonContext: "remittance_cancel" };
+    remittanceService.listRegister.mockResolvedValue(page([row(31, { actions: [VIEW, CANCEL, ...DOWNLOADS] })]));
+    remittanceService.cancelRemittance.mockResolvedValue({ status: "Cancelled" });
+    show();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for REM-2026-00031" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Cancel remittance" }));
+    const dialog = within(await screen.findByRole("dialog"));
+    expect(dialog.getByText("Cancel REM-2026-00031")).toBeInTheDocument();
+    // no reason, no call
+    fireEvent.click(dialog.getByRole("button", { name: "Cancel remittance" }));
+    expect(await screen.findByText("Choose the reason")).toBeInTheDocument();
+    expect(remittanceService.cancelRemittance).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByLabelText(/Reason/), { key: "ArrowDown", code: "ArrowDown", keyCode: 40, which: 40, altKey: true });
+    fireEvent.click(await screen.findByRole("option", { name: /Duplicate of another remittance/, hidden: true }));
+    const calls = remittanceService.listRegister.mock.calls.length;
+    fireEvent.click(dialog.getByRole("button", { name: "Cancel remittance" }));
+    await waitFor(() => expect(remittanceService.cancelRemittance).toHaveBeenCalledWith("rm_31", { reasonCode: "RCN-DUPLICATE", note: undefined }));
+    await waitFor(() => expect(remittanceService.listRegister.mock.calls.length).toBeGreaterThan(calls));
+  });
+
+  it("sends an approved remittance to the insurer from its row menu", async () => {
+    const SEND = { code: "send", label: "Send to insurer", allowed: true };
+    remittanceService.listRegister.mockResolvedValue(page([row(41, { status: "approved", statusLabel: "Approved", actions: [VIEW, SEND, ...DOWNLOADS] })]));
+    remittanceService.sendRemittance.mockResolvedValue({});
+    show();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for REM-2026-00041" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Send to insurer" }));
+    const dialog = within(await screen.findByRole("dialog"));
+    fireEvent.click(dialog.getByRole("button", { name: "Send to insurer" }));
+    await waitFor(() => expect(remittanceService.sendRemittance).toHaveBeenCalledWith("rm_41", undefined));
   });
 
   it("a General Manager views only: no tick box, primary button, Run now or Import; the row menu has View and downloads", async () => {
@@ -138,8 +174,8 @@ describe("Remittances worklist", () => {
   it("takes the KPI figures and the total from the server; a card filters the list over the same filters", async () => {
     remittanceService.listRegister.mockResolvedValue(page([row(1)]));
     show();
-    expect(await screen.findByText("PHP 1,234,567.89")).toBeInTheDocument();
-    expect(screen.getByText("PHP 600,000.00")).toBeInTheDocument();
+    expect(await screen.findByText("₱1,234,567.89")).toBeInTheDocument();
+    expect(screen.getByText("₱600,000.00")).toBeInTheDocument();
     expect(screen.getByText("oldest 4 days")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Awaiting approval/ }));
     await waitFor(() => expect(lastParams()).toMatchObject({ segment: "all", kpi: "awaiting-approval", week: undefined }));

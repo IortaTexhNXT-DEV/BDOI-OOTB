@@ -195,7 +195,7 @@ export async function createLead(body, userId, db = null) {
       lob: cols.lob || null, lead_category: cols.lead_category || 'Retail', created_by: userId, owner_user_id: userId, assigned_at: new Date() };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO leads(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
-    // lead assignment rules (Operations > Sales & Marketing > Lead Assignment) choose the account executive
+    // lead assignment rules (Sales & Placement > Lead Assignment) choose the account executive
     await assignNewLead(c, r.rows[0].id, userId);
     return r.rows[0].id;
   };

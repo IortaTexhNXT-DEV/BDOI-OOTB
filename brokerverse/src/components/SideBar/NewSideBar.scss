@@ -189,13 +189,17 @@ $label-3: $label-x + 18px; // x where third-level labels start
     }
   }
 
+  // a long name ("Dealer & Bank Programmes") wraps to a second line instead of being cut; a third line is cut
   .bv-nav__label {
-    display: block;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
   }
 
   .bv-nav__icon {

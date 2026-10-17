@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "../AddDataTabel/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import SvgEditIcon from "../../../../assets/icons/SvgEditicons";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch } from "react-redux";
@@ -38,34 +37,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       <SvgTable />
     </div>
   );
-
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div style={{ width: "46%" }} className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              Row count :{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
 
   const handleEdit = (rowData) => {
     setEditID(rowData?.id);
@@ -235,12 +206,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
         paginatorLeft
         rows={20}
         rowsPerPageOptions={[20, 50, 100]}
-        currentPageReportTemplate="{first} - {last} of {totalRecords}"
-        paginatorTemplate={template2}
         onPage={onPageChange}
         emptyMessage={isEmpty ? emptyTableIcon : null}
         scrollable={true}
-        scrollHeight="40vh"
       >
         <Column
           field="mainAccount"

@@ -1,5 +1,5 @@
 /**
- * Talkbot call lists (Operations > Renewals > Talkbot Calls, FRS LEAD-09). read:talkbot-calls opens the lists and the
+ * Talkbot call lists (Policy Servicing > Renewals > Talkbot Calls, FRS LEAD-09). read:talkbot-calls opens the lists and the
  * Talkbot outcome of renewals; write:talkbot-calls creates, downloads, sends, cancels and closes lists, uploads the call
  * results and records outcomes; Create renewal batch also needs write:renewals. A record-scoped user sees the lines of
  * the policies of their own book only. Mobile numbers are masked on screen; the full number is only in the downloaded file.
@@ -17,7 +17,7 @@ import * as svc from './service.js';
 import * as results from './results.js';
 
 const { router, define } = moduleRouter('Talkbot calls', '/talkbot');
-const SCREEN = 'Operations > Renewals > Talkbot Calls';
+const SCREEN = 'Policy Servicing > Renewals > Talkbot Calls';
 const read = [requireAuth, requirePermission('read:talkbot-calls')];
 const write = [requireAuth, requirePermission('write:talkbot-calls')];
 const batchWrite = [requireAuth, requirePermission('read:talkbot-calls'), requirePermission('write:renewals')];

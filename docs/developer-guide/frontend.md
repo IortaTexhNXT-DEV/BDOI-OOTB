@@ -20,7 +20,7 @@ forms and i18next for text. It talks only to the BrokerVerse API (`backend/`, se
 | `components/` | Shared UI pieces (error boundary, dialogs host, notification drawer, file upload, status badge, stats cards) |
 | `hooks/` | `useFormatCurrency`, `useNotifications` |
 | `redux/` | Store and the list of reducers |
-| `locales/` | `en.json` (complete) and `th.json` |
+| `locales/` | `en.json`, the one language of the interface |
 | `theme/bdoi/` | PrimeReact theme and application styles (generated theme: `scripts/build-bdoi-theme.js`) |
 
 ### Why two source trees
@@ -170,7 +170,7 @@ acceptable for data no other screen needs.
 | Charts, KPI cards and dashboards | `components/Dashboard` (toolbar with period, comparison and data as of; `ChartCard` with its table view and export; `ThemedChart`; `ShareChart`; drill-down) and the data colours of `useChartTheme()`; the rules are in [dashboards.md](dashboards.md) |
 | Buttons | the primary button, `outlined` or `text` for secondary actions, `severity="danger"` / `"warning"` only for destructive or cautionary actions; no `info` / `help` / `success` buttons |
 | Form fields and pickers | label above the field (`agentModule/component` fields and `components/LabelWrapper` follow `theme/bdoi/_fields.scss`); roles: `components/RoleChecklist`; shared patterns in `theme/bdoi/consistency.scss` |
-| Masked identifiers (package B) | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
+| Masked identifiers | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
 | Diagnostics | `utility/logger` (silent in production, see section 8) |
 
 The display currency and the date format come from the configuration (Master > Configuration, served by GET
@@ -180,15 +180,13 @@ dates with `toLocaleDateString` or amounts with a fixed currency symbol.
 
 ## 7. Translations
 
-Text is in `src/locales/en.json` and `th.json`, loaded by `src/i18n.js`, and read with
-`const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The
-language pickers offer the languages configured in Master > Configuration that have a bundled translation
-(`utility/languages.js`).
+Text is in `src/locales/en.json`, loaded by `src/i18n.js`, and read with
+`const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The interface is in
+English only (TISPH decision): there is no other bundle and no language picker.
 
-- Add every new key to `en.json`; add the Thai text to `th.json` when known (English is shown
-  otherwise).
+- Add every new key to `en.json`.
 - `t("key", "Default")` shows the default when the key is missing, but the key still belongs in
-  `en.json` so that it can be translated.
+  `en.json`.
 - `npm run check:i18n` (`scripts/check-translations.js`) lists keys used in code and missing from
   `en.json`.
 
@@ -221,7 +219,7 @@ Buttons that open another screen should check `canOpen(path)`.
 **Add a menu entry for an existing screen.** Add it to `list.js` and to the roles that need it. An
 entry without a role grant is visible only to the administrator.
 
-**Add a translation.** Add the key to `en.json` (and `th.json`), use `t("area.key")`, run
+**Add a translation.** Add the key to `en.json`, use `t("area.key")`, run
 `npm run check:i18n`.
 
 **Add a report.** Standard reports are defined in the backend report catalogue and appear under
@@ -254,8 +252,8 @@ tab title. The Docker images (`brokerverse/Dockerfile`, `Dockerfile.railway`) se
 `index.html` so that deep links work, and adds the cache and Content-Security-Policy headers
 (`scripts/nginx-snippets.sh`). `.env.production` keeps the webpack runtime out of `index.html`
 (`INLINE_RUNTIME_CHUNK=false`) so the policy needs no inline script. Build warnings come from ESLint
-(`react-app` rules plus `no-console`); keep the count from growing. Deployment:
-[deploy/RELEASE_PIPELINE.md](../../deploy/RELEASE_PIPELINE.md).
+(`react-app` rules plus `no-console`); keep the count from growing. Deployment for TISPH:
+[deploy/README.md](../../deploy/README.md) (DEV on Railway today, Azure once provisioned).
 
 Tests live next to the code they test (`*.test.js`, 31 suites, 162 tests on 04 October 2026): formatting
 helpers, menu tree, permissions and route guard, help routes, the theme engine, the Philippine address

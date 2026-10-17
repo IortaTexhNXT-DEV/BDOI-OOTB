@@ -42,7 +42,7 @@ const RISK = {
     { code: "firstRenewal", factor: "First Renewal", value: "First renewal with the broker", weight: 15, points: 15 },
     { code: "increase", factor: "Premium Increase", value: "Premium up 33.3% on the renewal quote", weight: 20, points: 20 },
   ],
-  recommendedActions: ["Prepare an alternative quote", "Escalate to the unit head"], nextAction: null, lastContactDate: null, assignedAgent: "Ana Reyes",
+  recommendedActions: ["Prepare an alternative quote", "Escalate to the Unit Head"], nextAction: null, lastContactDate: null, assignedAgent: "Ana Reyes",
 };
 
 beforeEach(() => {
@@ -72,7 +72,7 @@ describe("At-Risk Policies", () => {
     fireEvent.click(await screen.findByRole("button", { name: "POL-2025-00014" }));
     const item = await actionItem("Prepare an alternative quote");
     fireEvent.click(within(item).getByRole("button", { name: "Create task" }));
-    const dialog = await screen.findByRole("dialog", { name: "New task" });
+    const dialog = await screen.findByRole("dialog", { name: "New Task" });
     expect(within(dialog).getByDisplayValue("Prepare an alternative quote")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Create task" }));
     await waitFor(() => expect(myWorkService.createTask).toHaveBeenCalled());
@@ -83,9 +83,9 @@ describe("At-Risk Policies", () => {
     service.escalate.mockResolvedValue({ escalatedTo: [{ id: "usr_9", name: "Carlo Mendoza" }] });
     wrap(<AtRiskAnalysis />);
     fireEvent.click(await screen.findByRole("button", { name: "POL-2025-00014" }));
-    const item = await actionItem("Escalate to the unit head");
+    const item = await actionItem("Escalate to the Unit Head");
     fireEvent.click(within(item).getByRole("button", { name: "Escalate" }));
-    const dialog = await screen.findByRole("dialog", { name: "Escalate to the unit head" });
+    const dialog = await screen.findByRole("dialog", { name: "Escalate to the Unit Head" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Escalate" }));
     await waitFor(() => expect(service.escalate).toHaveBeenCalledWith("rnw_1", undefined));
   });

@@ -47,7 +47,7 @@ Shared code in `src/lib`:
 | `settingOwners.js` | Keys owned by one screen (branding, company identity, premium taxes); the generic endpoints refuse them. |
 | `currency.js`, `address.js` | Base currency and dated exchange rates; Philippine address format (region from city or province). |
 | `environment.js`, `goLiveLock.js` | Environment marker and go-live lock, read by the data tools. |
-| `pii.js`, `piiPolicy.js` (package B) | Encryption of TIN, ID and bank account numbers; masking by role (`view:pii`). |
+| `pii.js`, `piiPolicy.js` | Encryption of TIN, ID and bank account numbers; masking by role (`view:pii`). |
 
 Shared engines inside modules: the posting engine (`modules/accounting/lib/posting.js`), the premium tax engine
 (`modules/premium-charges/calculator.js`, `chargesFor()`), the branding and e-mail layout (`modules/branding`), the
@@ -108,7 +108,7 @@ ones where they are used). The important ones:
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection. |
 | `JWT_SECRET`, `DATA_ENCRYPTION_KEY` | Token signing and encryption at rest (two-factor secrets). Required in production. |
-| `PII_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY_PREVIOUS` (package B) | Encryption of TIN, government ID and bank account numbers; the previous key only during a rotation (`npm run pii:rotate`). Required in production, at least 32 characters, different from the other two keys. |
+| `PII_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY_PREVIOUS` | Encryption of TIN, government ID and bank account numbers; the previous key only during a rotation (`npm run pii:rotate`). Required in production, at least 32 characters, different from the other two keys. |
 | `APP_ENVIRONMENT` | Environment of the deployment (dev, sit, uat, preprod, production). Shown in Help > About in place of the setting `release.environment_label` (Master > Configuration > Release). |
 | Connector credential variables | Named in each integration connector (`credential_env`); never stored in the database. |
 | `CORS_ORIGINS`, `PUBLIC_BASE_URL` | The web address. Required in production; file links are built from `PUBLIC_BASE_URL`. |

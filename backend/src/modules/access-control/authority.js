@@ -35,18 +35,20 @@ export const UPLOAD_FOLDER = 'authority-matrix';
  * underwriting.js assertMayDecide). A type missing here is not checked by any step: its limits have no effect.
  */
 export const AUTHORITY_STEPS = {
-  claim_settlement: { step: 'Operations > Claims > Settlement approval', permissions: ['write:claims', 'approve:claims'] },
+  claim_settlement: { step: 'Policy Servicing > Claims > Settlement approval', permissions: ['write:claims', 'approve:claims'] },
   payment_voucher: { step: 'Accounts > Disbursements > Cheque approval, and bank payment batch approval', permissions: ['write:disbursements'] },
   journal_voucher: { step: 'Accounts > Journal Vouchers > Approve', permissions: ['write:journal-vouchers'] },
+  // the residual written off when open items are matched (Pre-BSM M32 controls: write-off authority per DOA)
+  write_off: { step: 'Accounts > Open Entry Matching > Write-off', permissions: ['write:journal-vouchers'] },
   remittance: { step: 'Accounts > Remittance > Approvals', permissions: ['approve:remittance'] },
   remittance_settlement: { step: 'Accounts > Remittance > Approvals (settlement, adjustment, transfer)', permissions: ['approve:remittance'] },
-  underwriting_referral: { step: 'Operations > Sales & Marketing > Quotations > Underwriting referral', permissions: ['write:quotations'], ruleRoles: true },
+  underwriting_referral: { step: 'Sales & Placement > Quotations > Underwriting referral', permissions: ['write:quotations'], ruleRoles: true },
   // the discount of a promotion above the maker's limit, decided on the underwriting referral (PROD-15)
-  quotation_discount: { step: 'Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)', permissions: ['approve:quotations'] },
+  quotation_discount: { step: 'Sales & Placement > Quotations > Underwriting referral (promotion discount)', permissions: ['approve:quotations'] },
   // the check of the e-policy against the placement slip, by sum insured (ISSUE-04)
-  policy_issue: { step: 'Operations > Sales & Marketing > Placement Slips > Check against slip', permissions: ['approve:policies'] },
+  policy_issue: { step: 'Sales & Placement > Placement Slips > Check against slip', permissions: ['approve:policies'] },
   // the approval or booking of an endorsement or cancellation that returns premium (ENDT-02, CANC-03)
-  return_premium: { step: 'Operations > Policy > Endorsement approval and booking', permissions: ['write:endorsements', 'approve:policies'] },
+  return_premium: { step: 'Policy Servicing > Policy > Endorsement approval and booking', permissions: ['write:endorsements', 'approve:policies'] },
 };
 
 const money = (v) => (v === null || v === undefined || v === '' ? null : Math.round(Number(v) * 100) / 100);

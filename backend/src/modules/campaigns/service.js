@@ -1,5 +1,5 @@
 /**
- * Marketing campaigns to consenting clients and prospects (Operations > Sales & Marketing > Campaigns).
+ * Marketing campaigns to consenting clients and prospects (Sales & Placement > Campaigns).
  *
  * A campaign sends an e-mail template to a segment. Only a party whose latest marketing consent in the consent
  * register (privacy_consents, purpose 'marketing') is granted and not withdrawn, with an e-mail address and not
@@ -77,7 +77,7 @@ export async function segmentParties(criteria) {
       const d = p(await today());
       w.push(`EXISTS (SELECT 1 FROM policies pl WHERE pl.client_id = c.id AND pl.status IN ('active', 'issued') AND pl.expiry_date BETWEEN ${d}::date AND ${d}::date + ${p(c.expiringWithinDays)}::int)`);
     }
-    parts.push(`SELECT 'client'::text AS party_type, c.id, c.display_name AS name, c.first_name, c.email FROM clients c WHERE ${w.join(' AND ')}`);
+    parts.push(`SELECT 'client'::text AS party_type, c.id, c.display_name AS name, c.first_name, c.email, c.email_opt_out AS opt_out FROM clients c WHERE ${w.join(' AND ')}`);
   }
   if (c.partyType !== 'client' && !c.hasActivePolicy && !c.expiringWithinDays && !c.clientType) {
     const w = ['l.deleted_at IS NULL', 'l.anonymised_at IS NULL', 'l.client_id IS NULL'];
@@ -87,7 +87,7 @@ export async function segmentParties(criteria) {
     if (c.productId) w.push(`l.product_id = ${p(c.productId)}`);
     if (c.channelId) w.push(`l.channel_id = ${p(c.channelId)}`);
     if (c.leadStatus) w.push(`l.status = ${p(c.leadStatus)}`);
-    parts.push(`SELECT 'lead'::text, l.id, l.display_name, l.first_name, l.email FROM leads l WHERE ${w.join(' AND ')}`);
+    parts.push(`SELECT 'lead'::text, l.id, l.display_name, l.first_name, l.email, false FROM leads l WHERE ${w.join(' AND ')}`);
   }
   if (!parts.length) return [];
   return many(`SELECT x.*, ${CONSENT} AS consent FROM (${parts.join(' UNION ALL ')}) x ORDER BY x.name`, params);
@@ -95,6 +95,8 @@ export async function segmentParties(criteria) {
 
 /** Why a party is not sent the campaign (null when it is). */
 const exclusion = (x) => {
+  // NFR-17.1: the client opted out of marketing and other non-transactional e-mail (client record)
+  if (x.opt_out) return 'Opted out of marketing e-mail';
   if (x.consent === null) return 'No marketing consent recorded';
   if (x.consent === false) return 'Marketing consent refused or withdrawn';
   if (!x.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x.email)) return 'No valid e-mail address';
@@ -163,6 +165,7 @@ export async function recordMarketingConsent(b, userId) {
       VALUES ($1,$2,'marketing',$3,$4,$5,$6,$7) RETURNING id`, [b.partyType, party.id, b.granted, b.channel, String(version), b.evidence || null, userId])).rows[0];
     await db.query(`UPDATE privacy_consents SET withdrawn_at = now(), withdrawn_by = $4, withdrawal_reason = 'Superseded by a later record'
       WHERE party_type = $1 AND party_id = $2 AND purpose = 'marketing' AND granted AND withdrawn_at IS NULL AND id <> $3`, [b.partyType, party.id, r.id, userId]);
+    if (b.partyType !== 'lead') await db.query('UPDATE clients SET marketing_consent = $2, marketing_consent_at = now() WHERE id = $1', [party.id, b.granted === true]);
     return r.id;
   });
   const [out] = await marketingConsents({ partyType: b.partyType, partyId: party.id });
@@ -301,6 +304,12 @@ export async function dispatchCampaign(id, userId = null) {
       if (why) { excluded += 1; continue; }
       const msg = await renderMessage(template, x, await optOutLink(r.id));
       const outboxId = await queueEmail({ to: x.email, subject: msg.subject, html: msg.html, template: `campaign:${template.code}`, entity: 'campaign', entityId: c.id, db });
+      if (!outboxId) {
+        // the address belongs to a client who opted out of non-transactional e-mail (lib/mailer.js)
+        await db.query("UPDATE campaign_recipients SET status = 'excluded', excluded_reason = 'Opted out of marketing e-mail' WHERE id = $1", [r.id]);
+        excluded += 1;
+        continue;
+      }
       await db.query('UPDATE campaign_recipients SET outbox_id = $2 WHERE id = $1', [r.id, outboxId]);
       queued += 1;
     }
@@ -351,6 +360,11 @@ export async function optOut(token) {
     await db.query(`UPDATE privacy_consents SET withdrawn_at = now(), withdrawal_reason = 'Opted out from a campaign e-mail' WHERE party_type = $1 AND party_id = $2 AND purpose = 'marketing'
       AND granted AND withdrawn_at IS NULL AND id <> $3`, [r.party_type, r.party_id, rec.id]);
     await db.query("UPDATE campaign_recipients SET status = 'opted-out', opted_out_at = now() WHERE id = $1", [r.id]);
+    // NFR-17.1: the client record keeps the opt-out (no marketing or other non-transactional e-mail from now on)
+    if (r.party_type === 'client') {
+      await db.query(`UPDATE clients SET email_opt_out = true, email_opt_out_at = COALESCE(email_opt_out_at, now()), marketing_consent = false, marketing_consent_at = now()
+        WHERE id = $1`, [r.party_id]);
+    }
   });
   return { already: false, partyName: r.party_name, recipientId: Number(r.id), campaignNumber: r.campaign_number };
 }

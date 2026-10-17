@@ -17,9 +17,11 @@ import useOpenItemAccounts from "./useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
-import { hasPermission } from "../../../utils/canOpen";
+import { canOpen, hasPermission } from "../../../utils/canOpen";
+import { useNavigate } from "react-router-dom";
 
 const OpenEntryMatching = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [filters, setFilters] = useState({
@@ -202,7 +204,6 @@ const OpenEntryMatching = () => {
             onSelectionChange={(e) => setSelectedDebits(e.value)}
             dataKey="id"
             scrollable
-            scrollHeight="300px"
             className="entry__table__open__entry__matching"
           >
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
@@ -289,7 +290,6 @@ const OpenEntryMatching = () => {
             onSelectionChange={(e) => setSelectedCredits(e.value)}
             dataKey="id"
             scrollable
-            scrollHeight="300px"
             className="entry__table__open__entry__matching"
           >
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
@@ -470,6 +470,14 @@ const OpenEntryMatching = () => {
               </div>
             </div>
             <div className="action__row__open__entry__matching">
+              {canOpen("/accounts/open-entry-unmatching") && (
+                <Button
+                  label={t("openEntryActions.unmatchScreen")}
+                  onClick={() => navigate("/accounts/open-entry-unmatching")}
+                  outlined
+                  className="action__button__open__entry__matching"
+                />
+              )}
               <Button
                 label={t("openEntryActions.pull")}
                 onClick={handlePull}

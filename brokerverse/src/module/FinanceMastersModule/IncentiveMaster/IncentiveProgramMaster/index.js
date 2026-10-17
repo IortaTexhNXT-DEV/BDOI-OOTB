@@ -31,9 +31,13 @@ import { loadSettings, showError, showSuccess } from "../../../Remittance/shared
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 import TierEditor, { bandKind, tierProblem } from "./TierEditor";
+import TelesalesProgramDialog from "./TelesalesProgramDialog";
 import "./index.scss";
 import RowActions, { actionsColumn } from "../../../../components/RowActions";
 import PageActions from "../../../../components/PageActions";
+
+/** The program type with its own dialog: versions, callers and the ANC tier table (FRS COMM-08). */
+const TELESALES = "Telesales";
 
 const IncentiveProgramMaster = () => {
   const { t } = useTranslation();
@@ -52,6 +56,8 @@ const IncentiveProgramMaster = () => {
 
   // Form state
   const [showDialog, setShowDialog] = useState(false);
+  // Telesales program dialog: { programId, initial } (programId null for a new program)
+  const [telesales, setTelesales] = useState(null);
   const [viewed, setViewed] = useState(null);
   const [mode, setMode] = useState("add"); // add, edit, view
   const [currentProgram, setCurrentProgram] = useState(null);
@@ -195,6 +201,10 @@ const IncentiveProgramMaster = () => {
   };
 
   const handleEdit = (rowData) => {
+    if (rowData.programType === TELESALES) {
+      setTelesales({ programId: rowData.id, initial: null });
+      return;
+    }
     setMode("edit");
     setCurrentProgram(rowData);
     setFormData({
@@ -205,7 +215,7 @@ const IncentiveProgramMaster = () => {
     setShowDialog(true);
   };
 
-  const handleView = (rowData) => setViewed(rowData);
+  const handleView = (rowData) => (rowData.programType === TELESALES ? setTelesales({ programId: rowData.id, initial: null }) : setViewed(rowData));
 
   const handleSave = async () => {
     const found = requiredErrors(formData, [
@@ -396,6 +406,8 @@ const IncentiveProgramMaster = () => {
               style={{ width: "10%", textAlign: "right" }}
             />
             <Column field="calculationFrequency" header="Frequency" style={{ width: "10%" }} />
+            <Column header={k("telesales.minPoliciesColumn")} body={(data) => (data.isTelesales ? data.minPolicies ?? "-" : "-")} style={{ width: "7%" }} />
+            <Column header={k("telesales.versionColumn")} body={(data) => (data.isTelesales ? data.versionLabel || "-" : "-")} style={{ width: "10%" }} />
             <Column
               body={(data) => dateBodyTemplate(data, 'startDate')}
               header="Start Date"
@@ -469,7 +481,15 @@ const IncentiveProgramMaster = () => {
                 <Dropdown
                   value={formData.programType}
                   options={programTypeOptions}
-                  onChange={(e) => setFormData({...formData, programType: e.value})}
+                  onChange={(e) => {
+                    // a Telesales program has its own tabs: the dialog changes with the values typed so far
+                    if (e.value === TELESALES && mode === "add") {
+                      setShowDialog(false);
+                      setTelesales({ programId: null, initial: { programCode: formData.programCode, programName: formData.programName, description: formData.description } });
+                      return;
+                    }
+                    setFormData({...formData, programType: e.value});
+                  }}
                 />
                 <FieldError error={errors.programType} />
               </div>
@@ -584,6 +604,14 @@ const IncentiveProgramMaster = () => {
         </div>
       </Dialog>
 
+      {telesales ? (
+        <TelesalesProgramDialog visible programId={telesales.programId} initial={telesales.initial} onHide={() => setTelesales(null)}
+          onSaved={(p, message) => {
+            if (p?.id && !telesales.programId) setTelesales({ programId: p.id, initial: null });
+            if (message) showSuccess(toast, message);
+            loadPrograms();
+          }} />
+      ) : null}
       {viewed ? (
         <DetailDialog visible onHide={() => setViewed(null)} header={t("incentiveProgramMaster.viewIncentiveProgram")} size="lg"
           footer={(

@@ -38,7 +38,7 @@ const event = {
   id: '812', at: '2026-10-02T01:49:37.774Z', day: '2026-10-02', date: '02/10/2026', time: '09:49', atText: '02/10/2026 09:49',
   entity: 'claim', entityLabel: 'Claim', entityId: 'clm_0123456789abcdef', reference: 'CLM-2026-00012', action: 'Settlement Submitted',
   title: 'Settlement submitted', note: null, user: { username: 'j.claims', displayName: 'Jasmine Cruz', roles: ['Claims Officer'] },
-  source: { channel: 'screen', label: 'Screen', name: 'Operations > Claims > Request approval' },
+  source: { channel: 'screen', label: 'Screen', name: 'Policy Servicing > Claims > Request approval' },
   changes: [{ key: 'claimStatus', label: 'Claim status', from: 'Processing', to: 'Pending approval' },
     { key: 'settlement.settlementAmount', label: 'Settlement amount', from: null, to: 'PHP 85,000.00' }],
 };

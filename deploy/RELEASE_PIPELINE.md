@@ -1,9 +1,17 @@
-# BrokerVerse release pipeline
+# BrokerVerse release pipeline (product pipeline, not used for TISPH)
 
-How a change travels from a pull request to Production: one build, promoted unchanged through the environments,
-with approvals, backups, forward-only migrations, smoke tests and rollback. For the iorta TechNXT DevOps team and the
-release manager. The runtime settings of each environment are in [REFERENCE.md](REFERENCE.md); the first set-up of a
-server in [README.md](README.md) (AWS) and [RAILWAY.md](RAILWAY.md).
+> **TISPH.** This document describes the product's own pipeline (`ci.yml` deploy jobs, `deploy.yml`, `rollback.yml`)
+> for EC2 and container hosts. Its triggers name the product's integration branch `brokerverse-platform`, which is
+> **not** the TISPH branch: TISPH work is merged into `TISPH-DEV`, and this pipeline deploys nothing from it. TISPH
+> DEV runs on Railway, deployed by Railway from `TISPH-DEV` ([RAILWAY.md](RAILWAY.md)); SIT, UAT and PROD go to
+> Microsoft Azure through `azure-deploy.yml` ([AZURE.md](AZURE.md); TISPH pack:
+> `docs/TISPH/pack/TISPH_Environments_and_Release.docx`). UAT is set up only after TISPH confirms. What applies to
+> TISPH from this document: the migrations policy (section 8) and the configuration comparison and data masking
+> (section 12). The workflows stay in the repository unchanged.
+
+How a change travels from a pull request to Production in the product pipeline: one build, promoted unchanged
+through the environments, with approvals, backups, forward-only migrations, smoke tests and rollback. The runtime
+settings of each environment are in [REFERENCE.md](REFERENCE.md).
 
 | File | Role |
 |---|---|
@@ -74,7 +82,7 @@ Pre-Prod lifecycle:
 |---|---|---|---|
 | `feature/<ticket>-<name>`, `fix/<ticket>-<name>` | Work in progress | Lint, tests, audit, build | None |
 | Pull request into `brokerverse-platform` | Review | Same, required to pass (branch protection) | None |
-| `brokerverse-platform` | Integration branch (trunk) | Same, artefacts kept 90 days | **dev**, automatically |
+| `brokerverse-platform` | Product integration branch (not the TISPH branch; TISPH uses `TISPH-DEV`) | Same, artefacts kept 90 days | **dev**, automatically |
 | `vX.Y.Z-rc.N` tag | Release candidate | Same | **uat**, automatically, after approval; **sit** by hand (large brokers) |
 | `vX.Y.Z` tag | Release approved by the CAB | Same | **production**, automatically, after approval; **preprod** by hand before it |
 | `hotfix/vX.Y.Z+1` branch | Production fix (section 10) | Same | Tags from it follow the rows above |
@@ -234,7 +242,7 @@ Done once in **Settings** of `IortaTexhNXT-DEV/BDOI-OOTB`; none of it is in the 
   newest ten kept on the server, a copy in `BACKUP_S3_URI` (server-side encryption) when set. The server needs
   `postgresql-client-16` and, for the copy, the AWS CLI with an instance role allowed to write to that prefix.
 - These are restore points for a release, not the backup plan: daily RDS snapshots (30 days), the upload volume and
-  `DATA_ENCRYPTION_KEY` remain as in [README.md](README.md) section 2.
+  `DATA_ENCRYPTION_KEY` are part of the host's own backup plan (for TISPH on Azure: [AZURE.md](AZURE.md)).
 
 ## 12. Configuration comparison and data masking in the pipeline
 

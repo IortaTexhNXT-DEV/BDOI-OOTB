@@ -1,7 +1,8 @@
 # BrokerVerse for TISPH: documents
 
 Documents written for Toyota Insurance Services Philippines (TISPH). They describe the system built on this
-branch line (`TISPH-DEV`) and take precedence over the generic BrokerVerse product documents elsewhere under `docs/`.
+branch line (`TISPH-DEV`) and take precedence over the few product files still kept elsewhere under `docs/` (templates
+and sources used by the code, listed in `docs/package/README.md` and `docs/architecture/README.md`).
 Classification: Confidential, TISPH and iorta TechNXT.
 
 Start with the Document Register (`pack/TISPH_Document_Register.docx`): it lists every document TISPH requires,
@@ -12,7 +13,6 @@ where it is held, its owner, its approver and its status.
 | [`frs/`](frs/) | Functional Requirement Specifications, one per BRD build item (the TISPH SRS): personas, functional requirements with acceptance criteria, traceability to test cases |
 | [`pack/`](pack/) | Non-functional, technical, operational and governance documents (list below) |
 | [`testing/`](testing/) | Test strategy and test pack |
-| [`proposals/`](proposals/) | Design proposals and answers awaiting TISPH decisions |
 | [`manual/`](manual/) | Source of the TISPH user manual: chapters, generated role facts and screenshots; the Word and PDF are published in `brokerverse/public/help` (see its README) |
 | [`tools/`](tools/) | `md2docx.py` and the document template the Word documents are built with |
 
@@ -44,31 +44,22 @@ where it is held, its owner, its approver and its status.
 | `TISPH_Data_Migration_and_Cutover.docx` | Data Migration and Cutover Plan |
 | `TISPH_Operations_and_Support.docx` | Operations, Support Model, Runbooks, DR/BCP and Service Levels |
 | `TISPH_Delivery_Governance.docx` | Delivery Governance, RACI, Risks, ADRs, Production Readiness, Go-Live and Hypercare |
-| `TISPH_Documentation_Cleanup.docx` | Documentation clean-up: generic documents retired from this repository and their replacements |
+| `TISPH_Documentation_Cleanup.docx` | Documentation clean-up: generic documents retired from this repository, their replacements and the status of each item |
 
 ## `testing/`: test strategy and test pack
 
 | File | Contents |
 |---|---|
-| `TISPH_Test_Strategy.docx` | Test strategy: scope, test levels, environments, entry and exit criteria, roles, tools |
-| [`TISPH_Test_Pack.xlsx`](testing/TISPH_Test_Pack.xlsx) | Requirements, scenarios, positive and negative conditions and gaps, traced to the BRD and FRS identifiers |
+| `TISPH_Test_Strategy.docx` | Test strategy: scope, test levels (including the performance test method), environments, entry and exit criteria, roles, tools |
 
-## `proposals/`: design proposals
-
-| File | Contents |
-|---|---|
-| `TISPH_Remittance_Redesign_Specification.docx` | Remittance redesign: menu, status model, controls, screens, flows and phased build plan |
-| `TISPH_Agents_Referrer_Commission_and_Reports.docx` | Agents and referrer commission process, Reports screen and overriding commission panel |
-| `TISPH_Platform_Features_Proposal.docx` | Environment promotion, copy of transactions, master uploads, TISPH manual, risk details and personal data |
-| `TISPH_Feature_Catalogue_and_Release_Tiers.docx` | Every function of the platform with its release tier (Phase 1, platform, Phase 2, future release), requirement IDs, dependencies and the decisions open for TISPH |
-
-All documents use the iorta TechNXT document template and are issued as Word files.
 
 ## Related folders
 
-* `docs/onboarding/`: procedures used by the code (data masking, go-live data set-up, smoke test and reset, support).
-* `docs/developer-guide/`, `backend/docs/`, `deploy/AZURE.md`, `deploy/REFERENCE.md`: developer and runtime reference.
-* `docs/archive/`: generic product documents retired from this repository, with what replaced each one.
+* `docs/onboarding/`: getting started, go-live data set-up, smoke test and reset, data masking, support and
+  escalation, UAT scripts per TISPH role.
+* `deploy/README.md`: where each TISPH environment runs (DEV on Railway, `deploy/RAILWAY.md`; Azure,
+  `deploy/AZURE.md`) and the runtime reference (`deploy/REFERENCE.md`).
+* `docs/developer-guide/`, `backend/docs/`: developer and production support reference.
 
 Client source documents (the signed BRD and the discovery and gap-analysis material) are not held in this
 repository.

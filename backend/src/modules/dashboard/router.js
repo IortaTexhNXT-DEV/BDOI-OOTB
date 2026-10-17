@@ -20,7 +20,7 @@ const compareOf = (v) => (v === 'lastYear' ? 'lastYear' : 'previous');
 define({
   method: 'GET', path: '/dashboard/settings', summary: 'Dashboard defaults for the signed-in user: the business counted when the user has not chosen (defaultOrigin issued = Issued since go-live, all = All business) and the cutover date',
   screen: 'Dashboard > Executive Dashboard; Sales Dashboard', middleware: [requireAuth],
-  response: { success: true, data: { defaultOrigin: 'issued', cutoverDate: '2026-11-01' } },
+  response: { success: true, data: { defaultOrigin: 'all', configuredOrigin: 'auto', cutoverDate: '2026-11-01', issuedPolicies: 0 } },
   handler: async (_req, res) => send(res, await svc.dashboardSettings()),
 });
 define({

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import PageHeader from "../../../components/PageHeader";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -7,7 +8,6 @@ import { AuditTimeline } from "../../../components/AuditTrail";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "primereact/button";
 import { Skeleton } from "primereact/skeleton";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Galleria } from "primereact/galleria";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
@@ -15,9 +15,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import StatusBadge from "../../../components/StatusBadge";
 import { policyDetailsDataMiddleWare } from "../store/policyMiddleWare";
-import SvgDot from "../../../assets/agentIcon/SvgDots";
 import { isFireLob, isOtherLob } from "../../endorsementModule/constants/endorsementCategories";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import s3Service, { browserFileUrl } from "../../../services/s3Service";
 import billingService from "../../../services/billingService";
 import BatchRenewalService from "../../../services/batchRenewalService";
@@ -32,6 +30,7 @@ import logger from "../../../utility/logger";
 import NextStep from "../../../components/NextStep";
 import OriginChip, { isMigrated } from "../../../components/OriginChip";
 import PromotionPanel from "../../quoteModule/promotion/PromotionPanel";
+import SchemeLockInPanel from "../SchemeLockInPanel";
 import PolicyCorrectionsPanel from "../policyCorrections/PolicyCorrectionsPanel";
 import { hasPermission } from "../../../utils/canOpen";
 import { openConfirm } from "../../../components/ConfirmDialog";
@@ -218,6 +217,9 @@ const SidebarSection = ({ title, icon, actions, children, className }) => (
 
 // a field with no value (blank, N/A or a zero amount) is left out of a detail grid rather than shown as a long list
 // of N/A; an item marked `always` (a total) is kept
+/** A date of the period of insurance with its cover time ("15/11/2026 12:00 noon"); the date alone when either is missing. */
+const withCoverTime = (date, time) => (date && time && date !== "-" && date !== "N/A" ? `${date} ${time}` : date);
+
 const isBlankValue = (v, empty) =>
   v === null || v === undefined || v === "" || v === "N/A" || v === empty || /^[^\d-]*0(\.0+)?$/.test(String(v).replace(/,/g, "").trim());
 const recordedItems = (items, empty) => (items || []).filter((item) => item.always || !isBlankValue(item.value, empty));
@@ -1079,7 +1081,7 @@ const PolicyDetailView = () => {
     {
       key: "policy-expiry",
       icon: "pi pi-calendar",
-      text: formatDate(policyDetails.PolicyExpiry),
+      text: withCoverTime(formatDate(policyDetails.PolicyExpiry), rawPolicyData?.coverEndLabel),
     },
     {
       key: "payment-status",
@@ -1251,7 +1253,14 @@ const PolicyDetailView = () => {
     {
       key: "inceptionDate",
       label: t("policyDetail.inceptionDate"),
-      value: formatDate(rawPolicyData?.inception),
+      // PROD-05: cover starts at the cover start time (12:00 noon) on the inception date
+      value: withCoverTime(formatDate(rawPolicyData?.inception), rawPolicyData?.coverStartLabel),
+    },
+    {
+      key: "expiryDate",
+      label: t("policyDetail.expiryDate"),
+      // and ends at the cover end time (11:59 PM) on the expiry date
+      value: withCoverTime(formatDate(rawPolicyData?.expiry), rawPolicyData?.coverEndLabel),
     },
   ];
 
@@ -1655,16 +1664,9 @@ const PolicyDetailView = () => {
     <div className="policy-detail-container">
       <Toast ref={toast} />
       <div className="policy-detail-view">
-        <div className="policy-header">
-          <div className="header-left">
-            <button type="button" className="header-back" onClick={handleBack}>
-              <SvgLeftArrow />
-              <span>{t("policyDetail.backToPolicies")}</span>
-            </button>
-            <div className="header-title">
-              <h1>{t("policyDetail.title")}</h1>
-              <p>{t("policyDetail.policyLabel")} {policyDetails.policyNumber || t("policyDetail.nA")}</p>
-            </div>
+        <PageHeader className="policy-header" title={policyDetails.policyNumber || t("policyDetail.title")} onBack={handleBack}
+          home={breadcrumbHome.label} trail={[...breadcrumbItems.map((i) => (i.command ? { label: i.label, onClick: i.command } : i.label)), policyDetails.policyNumber || t("policyDetail.title")]}
+          meta={(
             <div className="header-meta">
               {headerMetaItems.map((item) => (
                 <div
@@ -1687,13 +1689,8 @@ const PolicyDetailView = () => {
                 </div>
               ))}
             </div>
-            <BreadCrumb
-              model={breadcrumbItems}
-              home={breadcrumbHome}
-              className="breadcrumb"
-              separatorIcon={<SvgDot color="#000" />}
-            />
-          </div>
+          )}
+          actions={(
           <div className="header-actions">
             {moves.map((move) => (
               <Button
@@ -1754,7 +1751,7 @@ const PolicyDetailView = () => {
               />
             )}
           </div>
-        </div>
+          )} />
         {rawPolicyData?.renewedTo && (
           <NextStep title={t("policyDetail.renewedTitle")} text={t("policyDetail.renewedText")}
             actions={[{ key: "renewal", label: t("policyDetail.openRenewalTerm"), to: `/agent/policydetail/${rawPolicyData.renewedTo}` }]} />
@@ -1793,6 +1790,7 @@ const PolicyDetailView = () => {
               </SectionCard>
               <PolicyCorrectionsPanel policy={rawPolicyData} onChanged={() => dispatch(policyDetailsDataMiddleWare({ policyId }))} />
               <PromotionPanel quotation={rawPolicyData} readOnly />
+              <SchemeLockInPanel policyId={policyId} />
 
               {showCoInsuranceSection && (
                 <SectionCard

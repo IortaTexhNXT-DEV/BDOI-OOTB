@@ -11,7 +11,7 @@ the base edition for other clients; `brokerverse/help.config.json` names the edi
 | `generated/role-facts.json`, `generated/roles/` | Per role: menus, access, approvals, limits, segregation of duties. Written by `npm run manual:role-facts` in `backend/`, never by hand |
 | `generated/TISPH_User_Manual.md` | The assembled source of the Word file, written by `npm run help:build` |
 | `images/<chapter>/` | Screenshots, taken from a local system of the TISPH build with fictional sample data |
-| `brokerverse/public/help/TISPH_User_Manual.docx`, `.pdf` | Word and PDF, written by `npm run help:word` with `../tools/md2docx.py` and the document template, in the manual layout and the Toyota Insurance Services brand pack (cover, header, footer, colours and font of the pack; no template artwork). They are kept in `public/help` only, where the Help panel and the help page download them |
+| `brokerverse/public/help/TISPH_User_Manual.docx`, `.pdf` | Word and PDF, written by `npm run help:word` with `../tools/md2docx.py` and the document template, in the manual layout and the Toyota Insurance Services brand pack (cover, header, footer, colours and font of the pack; no template artwork). They are regenerated after the Phase 1 build (the earlier edition was removed on 12 October 2026) and kept in `public/help` only, where the Help panel and the help page download them |
 
 ## Build
 

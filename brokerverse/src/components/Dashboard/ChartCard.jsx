@@ -8,6 +8,8 @@ import { downloadCsv } from "../../utility/csvExport";
 import { businessDate } from "../../utility/dateFormat";
 import { formatValue } from "./format";
 import { usePatterns } from "./usePatterns";
+import ViewState from "../LoadState/ViewState";
+import { ChartSkeleton } from "../Skeletons";
 
 const PLUGINS = [referenceLinePlugin, directLabelPlugin];
 const ROUND = new Set(["pie", "doughnut"]);
@@ -76,7 +78,7 @@ export const ThemedChart = ({ type, data, options, height, format, reference, di
 
   if (!hasChartData(data)) {
     return (
-      <div className="bv-viz-empty" style={{ minHeight: height }}>
+      <div className="bv-viz-empty" style={{ minHeight: height }} data-testid="chart-empty">
         <i className="pi pi-chart-bar" aria-hidden="true" />
         <span>{emptyText || t("dashboards.noData", "No data for this period")}</span>
       </div>
@@ -117,8 +119,12 @@ export const tableOf = (data, format) => {
  * The frame of every dashboard chart: title, a Chart / Table switch (the table is the accessible twin of the chart and
  * is printed with it), the pattern switch and a CSV export of the figures. `table` = { columns: [{ field, header,
  * format }], rows }; tableOf(data, format) builds it from the chart data.
+ *
+ * `state` (from useStableLoad) gives the body its four states: a chart skeleton of `height` before the first answer
+ * only, the reason with Retry when the request failed, the chart (with its own empty message inside the chart area)
+ * once answered, kept under a light veil while a refresh runs. The body keeps `height`, so nothing jumps.
  */
-const ChartCard = ({ title, subtitle, actions, table, exportName, className, children }) => {
+const ChartCard = ({ title, subtitle, actions, table, exportName, className, state, height, children }) => {
   const { t } = useTranslation();
   const [view, setView] = useState("chart");
   const [patterns, togglePatterns] = usePatterns();
@@ -166,7 +172,11 @@ const ChartCard = ({ title, subtitle, actions, table, exportName, className, chi
         </div>
       </header>
       <div className="bv-chart-card__body">
-        {view === "table" && table ? tableView : children}
+        {state ? (
+          <ViewState state={state} minHeight={height} skeleton={<ChartSkeleton height={typeof height === "number" ? `${height}px` : height} />}>
+            {view === "table" && table ? tableView : children}
+          </ViewState>
+        ) : view === "table" && table ? tableView : children}
       </div>
       {table && view === "chart" && rows.length ? <div className="bv-chart-card__print">{tableView}</div> : null}
     </section>
@@ -180,8 +190,12 @@ ChartCard.propTypes = {
   table: PropTypes.shape({ columns: PropTypes.array, rows: PropTypes.array }),
   exportName: PropTypes.string,
   className: PropTypes.string,
+  /** { status, refreshing, error, timedOut, reload } of useStableLoad */
+  state: PropTypes.shape({ status: PropTypes.string.isRequired, refreshing: PropTypes.bool, error: PropTypes.string, reload: PropTypes.func }),
+  /** height of the body (skeleton, chart), reserved so nothing jumps */
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   children: PropTypes.node,
 };
-ChartCard.defaultProps = { subtitle: null, actions: null, table: null, exportName: null, className: "", children: null };
+ChartCard.defaultProps = { subtitle: null, actions: null, table: null, exportName: null, className: "", state: null, height: 280, children: null };
 
 export default ChartCard;

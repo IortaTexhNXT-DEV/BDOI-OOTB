@@ -41,7 +41,7 @@ export const GO_LIVE_SETTINGS = [
   { key: 'migration.commission_include_migrated', field: 'commissionIncludeMigrated', label: 'Migrated policies in commission figures', type: 'boolean', fallback: false },
   { key: 'migration.incentive_include_migrated', field: 'incentiveIncludeMigrated', label: 'Migrated policies in incentives', type: 'boolean', fallback: false },
   { key: 'migration.sap_gl_include_opening', field: 'sapGlIncludeOpening', label: 'Opening balances sent to SAP once', type: 'boolean', fallback: false, beforeLock: true },
-  { key: 'dashboard.default_origin', field: 'dashboardDefaultOrigin', label: 'Business the dashboards open on', type: 'choice', choices: ['issued', 'all'], fallback: 'issued' },
+  { key: 'dashboard.default_origin', field: 'dashboardDefaultOrigin', label: 'Business the dashboards open on', type: 'choice', choices: ['auto', 'issued', 'all'], fallback: 'auto' },
   { key: 'migration.duplicate_rules', field: 'duplicateRules', label: 'Duplicate checks of each load', type: 'list', choices: DUPLICATE_RULES, fallback: DUPLICATE_RULES, beforeLock: true },
   { key: 'migration.unlock_max_hours', field: 'unlockMaxHours', label: 'Hours an unlock lasts at most', type: 'integer', min: 1, max: 24, fallback: 4 },
   { key: 'migration.unlock_window_days', field: 'unlockWindowDays', label: 'Days after the lock an unlock needs no steering committee decision', type: 'integer', min: 0, max: 90,

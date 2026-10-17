@@ -12,7 +12,9 @@
  *        reconciliationSchedule; the bank matching
  *        reports insufficientPayments and overpayments; commissionSharing (OPS-07: the share of each agent or dealer
  *        on the fully paid commission and what TISPH keeps)
- * CR-13  agentConversion (SR-03: the policies converted per agent per month with the tier level, premium and commission)
+ * CR-13  agentConversion (SR-03: the policies converted per agent per month with the tier level, premium and commission;
+ *        RPT-02: the agent's commission target and the variance), salesTargetVariance (RPT-02: commission of each sales
+ *        unit against its target)
  */
 import { FS_MAP } from '../accounting/fsVersions.js';
 import { FY_START, POSTED } from './periodEndQueries.js';
@@ -56,7 +58,7 @@ const RECEIPT_STATE = "CASE r.receipt_status WHEN 'Cancelled' THEN 'Reversed' WH
 const paymentSummary = `SELECT r.received_date AS "paymentDate", r.created_at::date AS "postingDate", r.receipt_number AS "receiptNumber",
     COALESCE(p.policy_number, r.policy_number) AS "policyNumber", r.reference_no AS "referenceNo", ${CLIENT_DIMS}, r.amount,
     COALESCE(bk.name, r.bank_account_code) AS bank, CASE WHEN r.payment_mode IN ('check', 'cheque', 'pdc') THEN r.reference_no END AS "chequeNumber",
-    r.payment_mode AS "paymentMethod", COALESCE(r.source, 'manual') AS channel, r.receipt_status AS status, cu.display_name AS "user", ${RECEIPT_STATE} AS "postingStatus"
+    bk.name AS "draweeBank", r.payment_mode AS "paymentMethod", COALESCE(r.source, 'manual') AS channel, r.receipt_status AS status, cu.display_name AS "user", ${RECEIPT_STATE} AS "postingStatus"
   FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
   LEFT JOIN banks bk ON bk.id = r.bank_id ${USER('r.created_by', 'cu')}
   WHERE r.received_date BETWEEN $1 AND $2`;
@@ -65,15 +67,15 @@ const reasonName = (code) => `(SELECT m.name FROM master_records m WHERE m.type_
 const dailyReversals = `SELECT 'Receipt reversal' AS kind, r.cancelled_at::date AS "reversalDate", r.received_date AS "actualDate", r.receipt_number AS reference,
     COALESCE(r.reversal_reason, r.cancel_reason) AS reason, COALESCE(p.policy_number, r.policy_number) AS "policyNumber", ${CLIENT_DIMS}, r.amount,
     COALESCE(r.bank_account_code, bk.name, 'Not recorded') AS "bankAccount", CASE WHEN r.payment_mode IN ('check', 'cheque', 'pdc') THEN r.reference_no END AS "chequeNumber",
-    r.payment_mode AS "paymentMethod", cu.display_name AS "user"
+    bk.name AS "draweeBank", r.payment_mode AS "paymentMethod", cu.display_name AS "user"
   FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
   LEFT JOIN banks bk ON bk.id = r.bank_id ${USER('r.cancelled_by', 'cu')}
   WHERE r.receipt_status = 'Cancelled' AND r.cancelled_at::date BETWEEN $1 AND $2
   UNION ALL
   SELECT 'Bounced cheque', d.bounced_on, d.cheque_date, d.pdc_number, COALESCE(${reasonName('d.bounce_reason_code')}, d.bounce_reason), p.policy_number, ${CLIENT_DIMS}, d.amount,
-    COALESCE(d.deposit_account, CASE WHEN d.payee = 'insurance-partner' THEN ic.name END, 'Not recorded'), d.cheque_number, 'check', du.display_name
+    COALESCE(d.deposit_account, CASE WHEN d.payee = 'insurance-partner' THEN ic.name END, 'Not recorded'), d.cheque_number, COALESCE(db.name, d.drawee_bank), 'check', du.display_name
   FROM post_dated_cheques d LEFT JOIN policies p ON p.id = d.policy_id LEFT JOIN clients c ON c.id = d.client_id
-  LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id ${USER('d.updated_by', 'du')}
+  LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id LEFT JOIN banks db ON db.id = d.bank_id ${USER('d.updated_by', 'du')}
   WHERE d.bounced_on BETWEEN $1 AND $2`;
 
 const PDC_STATUS = `CASE d.status WHEN 'on-hand' THEN 'Received at TIS' WHEN 'forwarded' THEN 'Forwarded' WHEN 'warehoused' THEN 'Warehoused' WHEN 'deposited' THEN 'Deposited'
@@ -104,7 +106,7 @@ const pdcHistory = `SELECT a.at AS "eventAt", d.pdc_number AS "pdcNumber", d.che
     COALESCE(a.after_data->>'remark', a.after_data->>'reason', a.after_data->>'receivedBy') AS detail, COALESCE(au.display_name, a.username) AS "user", d.amount
   FROM audit_log a JOIN post_dated_cheques d ON d.id = a.entity_id LEFT JOIN policies p ON p.id = d.policy_id LEFT JOIN clients c ON c.id = d.client_id
   LEFT JOIN insurance_companies ic ON ic.id = COALESCE(d.insurance_company_id, p.insurance_company_id) LEFT JOIN banks bk ON bk.id = d.bank_id ${USER('a.user_id', 'au')}
-  WHERE a.entity = 'post_dated_cheque' AND a.at::date BETWEEN $1 AND $2`;
+  WHERE a.entity = 'post_dated_cheque' AND (a.at AT TIME ZONE $3)::date BETWEEN $1 AND $2`;
 const pdcAcknowledgements = `SELECT s.set_number AS "setNumber", s.received_date AS "receivedDate", p.policy_number AS "policyNumber", ${CLIENT_DIMS}, ${INSURER_DIMS},
     CASE s.payee WHEN 'insurance-partner' THEN 'Insurance Partner' ELSE 'TISPH' END AS "payableTo",
     (SELECT count(*) FROM post_dated_cheques x WHERE x.set_id = s.id AND x.status NOT IN ('cancelled', 'replaced', 'returned')) AS cheques,
@@ -147,11 +149,28 @@ const commissionSharing = `SELECT r.id AS _agent_id, r.id AS _agent_username, r.
   LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id ${REMITTED}
   WHERE cm.cycle_date BETWEEN $1 AND $2`;
 // Agent policy conversion (RPT-SLS-03): the policies of each agent per month with the tier level, premium and
-// commission; the telesales incentive joins once COMM-08 is built (0 meanwhile)
+// commission; the telesales incentive joins once COMM-08 is built (0 meanwhile). RPT-02: the approved commission target
+// of the agent for the month (Sales Targets, migration 0689) as rows of their own, so Target and Variance (total
+// commission less total target) come out of the same grouping.
+const TARGET_MONTHS = "st.status = 'approved' AND st.period BETWEEN to_char($1::date, 'YYYY-MM') AND to_char($2::date, 'YYYY-MM')";
 const agentConversion = `SELECT r.id AS _agent_id, r.id AS _agent_username, r.name AS agent, r.referrer_type AS "payeeType", COALESCE(r.level, '-') AS "tierLevel",
-    to_char(cm.cycle_date, 'YYYY-MM') AS month, cm.policy_id AS _policy_id, cm.net_premium AS premium, cm.amount AS commission, 0::numeric AS incentives
+    to_char(cm.cycle_date, 'YYYY-MM') AS month, cm.policy_id AS _policy_id, cm.net_premium AS premium, cm.amount AS commission, 0::numeric AS incentives, 0::numeric AS target
   FROM commissions cm JOIN commission_referrers r ON r.id = cm.referrer_id
-  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2`;
+  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2
+  UNION ALL
+  SELECT r.id, r.id, r.name, r.referrer_type, COALESCE(r.level, '-'), st.period, NULL, 0, 0, 0, st.target_amount
+  FROM sales_targets st JOIN commission_referrers r ON r.id = st.referrer_id
+  WHERE st.scope = 'agent' AND ${TARGET_MONTHS}`;
+// Sales target variance (RPT-02): the commission of each sales unit (the branch of the user linked to the payee) per
+// month against the unit's approved target; payees without a branch are under "No sales unit"
+const salesTargetVariance = `SELECT COALESCE(b.code, '-') AS _branch_code, COALESCE(b.name, 'No sales unit') AS branch, to_char(cm.cycle_date, 'YYYY-MM') AS month,
+    cm.policy_id AS _policy_id, cm.referrer_id AS _agent_id, cm.amount AS commission, 0::numeric AS target
+  FROM commissions cm JOIN commission_referrers r ON r.id = cm.referrer_id LEFT JOIN users u ON u.id = r.user_id LEFT JOIN branches b ON b.code = u.branch_code
+  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2
+  UNION ALL
+  SELECT b.code, b.name, st.period, NULL, NULL, 0, st.target_amount
+  FROM sales_targets st JOIN branches b ON b.id = st.branch_id
+  WHERE st.scope = 'unit' AND ${TARGET_MONTHS}`;
 const premiumPaymentStatus = `SELECT p.policy_number AS "policyNumber", p.inception_date AS "inceptionDate", ${CLIENT_DIMS}, ${INSURER_DIMS}, pr.name AS product,
     pr.id::text AS _product_id, pr.code AS _product_code, p.premium_total AS premium, COALESCE(pos.paid, 0) AS paid, COALESCE(pos.outstanding, p.premium_total) AS outstanding,
     CASE WHEN p.status IN ('cancelled', 'Cancelled') THEN 'Cancelled' WHEN pos.policy_id IS NULL OR COALESCE(pos.paid, 0) <= 0 THEN 'Pending'
@@ -210,7 +229,83 @@ const reconciliationSchedule = `SELECT ${INSURER_DIMS}, s.statement_number AS "s
   FROM insurer_statement_lines l JOIN insurer_statements s ON s.id = l.statement_id LEFT JOIN insurance_companies ic ON ic.id = s.insurance_company_id
   WHERE COALESCE(s.period_to, s.created_at::date) BETWEEN $1 AND $2`;
 
+
+// ------------------------------------------------------------------ CR-11 BIR books of accounts (TIS-BRD-TAX-02)
+// The same entries as the CAS loose-leaf books (bir/cas.js), as catalogue reports for any date range in Excel / CSV / PDF
+const BOOK_POSTED = "j.status IN ('posted', 'reversed')";
+const BOOK_CASH = "(SELECT code FROM gl_accounts WHERE category = 'Cash and Cash Equivalents')";
+const generalJournal = `SELECT j.jv_date AS date, j.jv_number AS "journalNumber", COALESCE(j.transaction_code, '') AS reference,
+    COALESCE(NULLIF(l.memo, ''), j.description, '') AS particulars, l.account_code AS "accountCode", a.name AS "accountName", l.debit, l.credit, l.line_no AS _line
+  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
+  WHERE ${BOOK_POSTED} AND j.jv_date BETWEEN $1 AND $2`;
+const cashBook = (cash, other) => `SELECT j.jv_date AS date, j.jv_number AS "journalNumber", COALESCE(j.transaction_code, j.reference_id, '') AS reference,
+    COALESCE(j.description, '') AS particulars, string_agg(DISTINCT c.account_code, ', ') AS "cashAccount", sum(c.${cash} - c.${other}) AS amount,
+    (SELECT string_agg(o.account_code || ' ' || o.account_name || ' ' || to_char(o.${other}, 'FM999,999,999,990.00'), '; ' ORDER BY o.line_no) FROM journal_lines o
+      WHERE o.jv_id = j.id AND o.${other} > 0 AND o.account_code NOT IN ${BOOK_CASH}) AS accounts
+  FROM journal_vouchers j JOIN journal_lines c ON c.jv_id = j.id AND c.account_code IN ${BOOK_CASH}
+  WHERE ${BOOK_POSTED} AND j.jv_date BETWEEN $1 AND $2 GROUP BY j.id HAVING sum(c.${cash} - c.${other}) > 0`;
+const salesJournal = `SELECT s.invoice_date AS date, s.invoice_number AS "invoiceNumber", s.buyer_name AS buyer, COALESCE(s.buyer_tin, '') AS tin,
+    CASE WHEN s.status = 'issued' THEN s.vatable_sales ELSE 0 END AS "vatableSales", CASE WHEN s.status = 'issued' THEN s.vat_exempt_sales ELSE 0 END AS "exemptSales",
+    CASE WHEN s.status = 'issued' THEN s.zero_rated_sales ELSE 0 END AS "zeroRatedSales", CASE WHEN s.status = 'issued' THEN s.vat_amount ELSE 0 END AS vat,
+    CASE WHEN s.status = 'issued' THEN s.total_amount ELSE 0 END AS total, CASE WHEN s.status = 'issued' THEN 'Issued' ELSE 'Cancelled: ' || COALESCE(s.cancel_reason, '') END AS status
+  FROM sales_invoices s WHERE s.invoice_date BETWEEN $1 AND $2`;
+const purchaseJournal = `SELECT x.*, x.total - x."inputVat" AS "netPurchase" FROM (SELECT j.jv_date AS date, j.jv_number AS "journalNumber", COALESCE(d.voucher_number, j.transaction_code, '') AS reference,
+    COALESCE(d.payee_name, j.description, '') AS supplier, COALESCE(cr.tin, ic.tin, '') AS tin,
+    COALESCE((SELECT sum(v.debit - v.credit) FROM journal_lines v WHERE v.jv_id = j.id AND v.account_code = $3), 0) AS "inputVat",
+    COALESCE((SELECT sum(v.credit - v.debit) FROM journal_lines v WHERE v.jv_id = j.id AND v.account_code = $4), 0) AS withholding,
+    COALESCE(NULLIF(d.gross_amount, 0), d.amount + d.wht_amount, (SELECT sum(v.debit) FROM journal_lines v WHERE v.jv_id = j.id)) AS total
+  FROM journal_vouchers j LEFT JOIN disbursements d ON d.journal_id = j.id LEFT JOIN commission_referrers cr ON cr.id = d.referrer_id LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id
+  WHERE ${BOOK_POSTED} AND j.jv_date BETWEEN $1 AND $2 AND (d.payee_type = 'Supplier' OR EXISTS (SELECT 1 FROM journal_lines v WHERE v.jv_id = j.id AND v.account_code = $3 AND v.debit > 0))) x`;
+const BOOK_CRITERIA = { Overall: {}, Month: { groupBy: '_month' } };
+const withMonth = (sql) => `SELECT b.*, to_char(b.date, 'YYYY-MM') AS _month FROM (${sql}) b`;
+
+
+// ------------------------------------------------------------------ CR-16 GL schedules, journal entries, chart (RPT-FGA-05..07)
+// SAP-style: posting key 40 (debit) / 50 (credit) as in the SAP GL file (sap_gl.layout), profit centre = cost centre,
+// company code = BUKRS of the SAP GL file header
+const SAP_KEY = "CASE WHEN l.debit > 0 THEN COALESCE((SELECT value->>'debitKey' FROM app_settings WHERE key = 'sap_gl.layout'), '40') ELSE COALESCE((SELECT value->>'creditKey' FROM app_settings WHERE key = 'sap_gl.layout'), '50') END";
+const COMPANY_CODE = "COALESCE((SELECT f->>'value' FROM app_settings s, jsonb_array_elements(s.value->'header'->'fields') f WHERE s.key = 'sap_gl.layout' AND f->>'name' = 'BUKRS'), '')";
+const LIVE_MATCH = "m.unmatched_at IS NULL AND COALESCE(m.status, 'active') <> 'unmatched'";
+const glSchedule = `SELECT x.*, CASE WHEN x."openAmount" = 0 THEN 'Cleared' ELSE 'Open' END AS status,
+    CASE WHEN x."openAmount" = 0 THEN x._last_cleared END AS "clearingDate", CASE WHEN x."openAmount" = 0 THEN x._last_doc END AS "clearingDocument"
+  FROM (SELECT l.account_code AS "accountCode", a.name AS "accountName", l.account_code AS _account, j.jv_number AS "documentNumber", j.jv_date AS "postingDate",
+    ${SAP_KEY} AS "postingKey", COALESCE(c.display_name, ic.name, '') AS partner, COALESCE(j.policy_number, j.transaction_code, '') AS assignment, COALESCE(l.cost_centre, '') AS "profitCentre",
+    CASE WHEN l.debit > 0 THEN l.debit ELSE -l.credit END AS amount,
+    COALESCE((SELECT sum(m.matched_amount) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH}), 0) AS "clearedAmount",
+    (CASE WHEN l.debit > 0 THEN l.debit ELSE l.credit END) - COALESCE((SELECT sum(m.matched_amount) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH}), 0) AS "openAmount",
+    (SELECT max(m.matched_at)::date FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH}) AS _last_cleared,
+    (SELECT COALESCE(m.document_ref, m.id::text) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH} ORDER BY m.matched_at DESC LIMIT 1) AS _last_doc
+  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
+  LEFT JOIN clients c ON c.id = COALESCE(l.client_id, j.client_id) LEFT JOIN insurance_companies ic ON ic.id = l.insurance_company_id
+  WHERE j.status IN ('posted', 'reversed') AND a.is_open_item AND j.jv_date BETWEEN $1 AND $2) x`;
+const journalEntries = `SELECT ${COMPANY_CODE} AS "companyCode", COALESCE(p.fiscal_year, '') AS "fiscalYear", COALESCE(j.period, to_char(j.jv_date, 'YYYY-MM')) AS period,
+    j.jv_number AS "documentNumber", COALESCE(NULLIF(j.entry_type, ''), j.source, 'JOURNAL') AS "documentType", j.jv_date AS "postingDate", l.line_no AS "lineNo",
+    ${SAP_KEY} AS "postingKey", l.account_code AS "accountCode", a.name AS "accountName", l.account_code AS _account, l.debit, l.credit, COALESCE(l.cost_centre, '') AS "profitCentre",
+    COALESCE(NULLIF(l.memo, ''), j.description, '') AS text, COALESCE(j.policy_number, j.transaction_code, '') AS assignment,
+    (SELECT COALESCE(m.document_ref, m.id::text) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH} ORDER BY m.matched_at DESC LIMIT 1) AS "clearingReference",
+    COALESCE(j.created_by, '') AS "preparerId", COALESCE(j.approved_by, j.posted_by, '') AS "approverId"
+  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code LEFT JOIN accounting_periods p ON p.period = j.period
+  WHERE j.status IN ('posted', 'reversed') AND j.jv_date BETWEEN $1 AND $2`;
+const chartOfAccounts = `SELECT a.code AS "accountCode", a.name AS "accountName", a.code AS _account, initcap(a.account_type) AS "accountType", COALESCE(a.fs_group, '') AS "fsGroup",
+    COALESCE(a.category, '') AS category, COALESCE(a.parent_code, '') AS "mainAccount", initcap(COALESCE(a.normal_balance, '')) AS "normalBalance",
+    CASE WHEN a.is_open_item THEN 'Yes' ELSE 'No' END AS "openItem", CASE WHEN a.allow_manual THEN 'Yes' ELSE 'No' END AS "manualPosting", initcap(a.status) AS status
+  FROM gl_accounts a WHERE $1::date IS NOT NULL`;
+
 export const TISPH_QUERIES = {
+  glSchedule: { sql: glSchedule, filters: ['account', 'status'], criteria: { 'GL Account': { groupBy: 'accountCode' }, Status: { groupBy: 'status' }, Overall: {} },
+    orderBy: 'f."accountCode", f."postingDate", f."documentNumber"' },
+  journalEntries: { sql: journalEntries, filters: ['account'], criteria: { 'Document Type': { groupBy: 'documentType' }, Period: { groupBy: 'period' }, Overall: {} },
+    orderBy: 'f."postingDate", f."documentNumber", f."lineNo"' },
+  chartOfAccounts: { sql: chartOfAccounts, filters: ['account', 'status'], criteria: { Overall: {}, 'Account Type': { groupBy: 'accountType' }, 'FS Group': { groupBy: 'fsGroup' } },
+    orderBy: 'f."accountCode"' },
+  birGeneralJournal: { sql: withMonth(generalJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber", f._line' },
+  birCashReceiptsBook: { sql: withMonth(cashBook('debit', 'credit')), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"' },
+  birCashDisbursementsBook: { sql: withMonth(cashBook('credit', 'debit')), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"' },
+  birSalesJournal: { sql: withMonth(salesJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."invoiceNumber"' },
+  birPurchaseJournal: {
+    sql: withMonth(purchaseJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"',
+    extras: [setting('accounting.account.input_vat', '135000', 'text'), setting('accounting.account.wht_payable', '2204001', 'text')],
+  },
   fsByVersion: {
     sql: fsRows(`(LEAST($1::date, ${YS}) - interval '1 year')::date`), filters: ['account', 'fsVersion'], defaults: FS_VERSION,
     criteria: { 'FS Line': { dims: FS_DIMS, groupBy: 'section' }, 'GL Account': { dims: FS_ACCOUNT_DIMS, groupBy: 'caption' } },
@@ -248,7 +343,7 @@ export const TISPH_QUERIES = {
     aggregate: { cheques: 'count(*)', amount: 'sum(t.amount)', heldForCancellation: "count(*) FILTER (WHERE t.suspension <> '')" },
   },
   pdcHistory: {
-    sql: pdcHistory, filters: ['client', 'insurer'], criteria: { Overall: {}, Cheque: { groupBy: 'pdcNumber' }, Contract: { groupBy: 'policyNumber' } },
+    sql: pdcHistory, extras: [{ timeZone: true, type: 'text' }], filters: ['client', 'insurer'], criteria: { Overall: {}, Cheque: { groupBy: 'pdcNumber' }, Contract: { groupBy: 'policyNumber' } },
     orderBy: 'f."pdcNumber", f."eventAt"',
   },
   pdcAcknowledgements: {
@@ -291,9 +386,19 @@ export const TISPH_QUERIES = {
     criteria: { Payee: { groupBy: 'agent' }, 'Payee Type': { groupBy: 'payeeType' }, 'Principal Insurer': { groupBy: 'insurer' }, Overall: {} }, orderBy: 'f.agent, f."policyNumber"',
   },
   agentConversion: {
-    sql: agentConversion, filters: ['agent'], aggregate: { accounts: 'count(DISTINCT t._policy_id)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', incentives: 'sum(t.incentives)' },
+    sql: agentConversion, filters: ['agent'],
+    aggregate: { accounts: 'count(DISTINCT t._policy_id)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', incentives: 'sum(t.incentives)', target: 'sum(t.target)',
+      variance: 'sum(t.commission) - sum(t.target)' },
     criteria: { Agent: { dims: ['agent', 'payeeType', 'tierLevel', 'month'], groupBy: 'agent' }, Month: { dims: ['month', 'agent', 'payeeType', 'tierLevel'], groupBy: 'month' } },
     orderBy: 'f.agent, f.month',
+  },
+  salesTargetVariance: {
+    sql: salesTargetVariance, filters: ['branch'],
+    aggregate: { agents: 'count(DISTINCT t._agent_id)', accounts: 'count(DISTINCT t._policy_id)', commission: 'sum(t.commission)', target: 'sum(t.target)',
+      variance: 'sum(t.commission) - sum(t.target)', achievement: 'round(100.0 * sum(t.commission) / NULLIF(sum(t.target), 0), 2)' },
+    criteria: { 'Sales Unit': { dims: ['branch', 'month'], groupBy: 'branch' }, Month: { dims: ['month', 'branch'], groupBy: 'month' } },
+    summary: { achievement: 'round(100.0 * sum(f.commission) / NULLIF(sum(f.target), 0), 2)' },
+    orderBy: 'f.branch, f.month',
   },
   premiumPaymentStatus: {
     sql: premiumPaymentStatus, filters: ['insurer', 'client', 'product'],

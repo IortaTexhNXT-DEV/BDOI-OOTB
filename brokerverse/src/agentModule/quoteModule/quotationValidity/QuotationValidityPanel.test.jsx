@@ -34,14 +34,14 @@ describe("quotation validity and versions", () => {
     quotationService.getQuotationVersion.mockResolvedValue({ quotationNumber: "QT-2026-00031", version: 1, quotationStatus: "PendingCustomer", grossPremium: 22950,
       netPremium: 18000, discount: 500, currency: "PHP", readOnly: true, changeReason: "Higher discount" });
     render(<QuotationValidityPanel quotation={QUOTE} />);
-    expect(screen.getByText("Validity and versions")).toBeInTheDocument();
+    expect(screen.getByText("Validity and Versions")).toBeInTheDocument();
     expect(screen.getByText("30 days left")).toBeInTheDocument();
     expect(screen.getByText("09/11/2026")).toBeInTheDocument();
     expect(await screen.findByText("v2 (current)")).toBeInTheDocument();
     const row = screen.getAllByRole("row").find((r) => within(r).queryByText("v1"));
     expect(within(row).getByText("Maria Santos")).toBeInTheDocument();
     fireEvent.click(within(row).getByRole("button", { name: "View" }));
-    expect(await screen.findByText("Quotation QT-2026-00031 version 1")).toBeInTheDocument();
+    expect(await screen.findByText("Quotation QT-2026-00031 Version 1")).toBeInTheDocument();
     expect(quotationService.getQuotationVersion).toHaveBeenCalledWith("qt_1", 1);
   });
 

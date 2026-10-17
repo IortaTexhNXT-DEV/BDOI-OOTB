@@ -8,11 +8,8 @@ import CustomToast from "../../../components/Toast";
 import { InputText } from "primereact/inputtext";
 import authService from "../../../services/authService";
 import { useTranslation } from "react-i18next";
-import { Dropdown } from "primereact/dropdown";
 import { useSelector } from "react-redux";
-import i18n from "../../../i18n";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../../utility/systemCurrencies";
-import { showLanguagePicker, useLanguageOptions } from "../../../utility/languages";
 import TwoFactorCodeForm from "../security/TwoFactorCodeForm";
 import TwoFactorEnrolment from "../security/TwoFactorEnrolment";
 import ChangePasswordForm from "../security/ChangePasswordForm";
@@ -52,9 +49,6 @@ const Login = () => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [microsoftBusy, setMicrosoftBusy] = useState(false);
   const { t } = useTranslation();
-  const languageOptions = useLanguageOptions();
-  const currentLanguage =
-    languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value || "en";
   // Branding (GET /api/branding) first, then the loaded system settings; never the product's default name or logo
   const { branding } = useBranding();
   const login = branding?.theme?.login || {};
@@ -375,17 +369,6 @@ const Login = () => {
       <CustomToast ref={toastRef} message={t("login.loginSuccess")} />
       <LoginArt theme={branding?.theme} fallback={{ primaryColor, secondaryColor }} />
       <main className="bv-auth__panel">
-        {showLanguagePicker(languageOptions) && (
-          <div className="bv-auth__lang">
-            <Dropdown
-              value={currentLanguage}
-              options={languageOptions}
-              onChange={(e) => i18n.changeLanguage(e.value)}
-              className="login-language-dropdown"
-              aria-label={t("common.language")}
-            />
-          </div>
-        )}
         <div className="bv-auth__center">
           <div className="bv-auth__card" data-step={step}>
             <div className="bv-auth__brand">

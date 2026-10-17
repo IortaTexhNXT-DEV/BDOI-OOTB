@@ -5,13 +5,15 @@
 
 -- Motor policies are booked on the per-peril rates of the register; rules and schemes are approved on Configuration
 -- Approvals; a rate change, reversal or withholding tax change on a commission line waits for a second user; a
--- commission line becomes payable once the policy is fully paid and remitted to the insurer.
+-- commission line becomes payable once the policy is fully paid and remitted to the insurer; a new payee or a change of
+-- its payment details is verified by a second user (migration 0645, FGA EN-01).
 UPDATE app_settings s
    SET value = v.value, updated_at = now()
   FROM (VALUES ('commission.peril_based_motor', 'false'::jsonb, 'true'::jsonb),
                ('commission.rules_approval_required', 'false'::jsonb, 'true'::jsonb),
                ('commission.adjustment_approval_required', 'false'::jsonb, 'true'::jsonb),
-               ('commission.eligible_requires_remittance', 'false'::jsonb, 'true'::jsonb)) AS v(key, reference, value)
+               ('commission.eligible_requires_remittance', 'false'::jsonb, 'true'::jsonb),
+               ('commission.payee_verification_required', 'false'::jsonb, 'true'::jsonb)) AS v(key, reference, value)
  WHERE s.key = v.key AND s.updated_by IS NULL AND s.value = v.reference
    AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
 
@@ -32,9 +34,15 @@ INSERT INTO report_definitions(code, name, category, description, screen, query_
   '[{"key":"agent","label":"Payee","type":"text"},{"key":"payeeType","label":"Type","type":"text"},{"key":"policyNumber","label":"Policy No.","type":"text"},{"key":"client","label":"Client","type":"text"},{"key":"insurer","label":"Insurer","type":"text"},{"key":"product","label":"Product","type":"text"},{"key":"inceptionDate","label":"Inception","type":"date"},{"key":"netPremium","label":"Net Premium","type":"money"},{"key":"totalCommission","label":"Total Commission","type":"money"},{"key":"scheme","label":"Scheme","type":"text"},{"key":"sharing","label":"Sharing","type":"text"},{"key":"sharedAmount","label":"Shared Amount","type":"money"},{"key":"wht","label":"WHT","type":"money"},{"key":"netToPayee","label":"Net to Payee","type":"money"},{"key":"retainedBalance","label":"Retained Balance","type":"money"},{"key":"status","label":"Payment Status","type":"text"},{"key":"voucher","label":"Voucher","type":"text"},{"key":"paidDate","label":"Paid","type":"date"},{"key":"remittanceNumber","label":"Remittance No.","type":"text"}]'::jsonb,
   ARRAY['operations', 'accounting', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-ccd-pdu', 'tis-ccd-recon', 'tis-finance', 'tis-general-manager', 'tis-it-admin']::text[], 'read:reports', 780),
  -- CR-13 (TIS-BRD-RPT-SLS-03, FGA-SRPT-03)
- ('tisph-agent-conversion', 'Agent Policy Conversion', 'operational', 'The policies converted per agent per month with the number of accounts, the tier level, the total premium, the commission and the incentives.',
+ ('tisph-agent-conversion', 'Agent Policy Conversion', 'operational', 'The policies converted per agent per month with the number of accounts, the tier level, the total premium, the commission, the incentives, the approved target and the variance (commission less target).',
   'Reports > All Reports > Agent Policy Conversion', 'agentConversion',
   '{"type":"object","required":["ReportCriteria"],"properties":{"ReportCriteria":{"type":"string","title":"Report Criteria","enum":["Agent","Month"],"default":"Agent"},"FromDate":{"type":"string","format":"date","title":"From Date"},"ToDate":{"type":"string","format":"date","title":"To Date"},"Agent":{"type":"string","title":"Agent","description":"id or name"},"format":{"type":"string","enum":["csv","xlsx","pdf"],"default":"xlsx","title":"File format (generate only)"},"period":{"type":"string","enum":["today","yesterday","last-7-days","last-30-days","month-to-date","previous-month","year-to-date"],"title":"Relative period (schedules; used when no dates are given)"}}}'::jsonb,
-  '[{"key":"agent","label":"Agent","type":"text"},{"key":"payeeType","label":"Type","type":"text"},{"key":"tierLevel","label":"Tier Level","type":"text"},{"key":"month","label":"Month","type":"text"},{"key":"accounts","label":"No. of Accounts","type":"number"},{"key":"premium","label":"Total Premium","type":"money"},{"key":"commission","label":"Commission","type":"money"},{"key":"incentives","label":"Incentives","type":"money"}]'::jsonb,
-  ARRAY['sales', 'operations', 'accounting', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-finance', 'tis-general-manager', 'tis-it-admin']::text[], 'read:reports', 790)
+  '[{"key":"agent","label":"Agent","type":"text"},{"key":"payeeType","label":"Type","type":"text"},{"key":"tierLevel","label":"Tier Level","type":"text"},{"key":"month","label":"Month","type":"text"},{"key":"accounts","label":"No. of Accounts","type":"number"},{"key":"premium","label":"Total Premium","type":"money"},{"key":"commission","label":"Commission","type":"money"},{"key":"incentives","label":"Incentives","type":"money"},{"key":"target","label":"Target","type":"money"},{"key":"variance","label":"Variance","type":"money"}]'::jsonb,
+  ARRAY['sales', 'operations', 'accounting', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-finance', 'tis-general-manager', 'tis-it-admin']::text[], 'read:reports', 790),
+ -- RPT-02 (TISPH remark: Total Comm vs Total Target = Variance)
+ ('tisph-sales-target-variance', 'Sales Target Variance', 'operational', 'The commission of each sales unit per month against its approved target (Master > Finance > Sales Targets): number of agents and accounts, total commission, total target, the variance (commission less target) and the achievement.',
+  'Reports > All Reports > Sales Target Variance', 'salesTargetVariance',
+  '{"type":"object","required":["ReportCriteria"],"properties":{"ReportCriteria":{"type":"string","title":"Report Criteria","enum":["Sales Unit","Month"],"default":"Sales Unit"},"FromDate":{"type":"string","format":"date","title":"From Date"},"ToDate":{"type":"string","format":"date","title":"To Date"},"Branch":{"type":"string","title":"Sales Unit","description":"branch code or name"},"format":{"type":"string","enum":["csv","xlsx","pdf"],"default":"xlsx","title":"File format (generate only)"},"period":{"type":"string","enum":["today","yesterday","last-7-days","last-30-days","month-to-date","previous-month","year-to-date"],"title":"Relative period (schedules; used when no dates are given)"}}}'::jsonb,
+  '[{"key":"branch","label":"Sales Unit","type":"text"},{"key":"month","label":"Month","type":"text"},{"key":"agents","label":"No. of Agents","type":"integer","total":false},{"key":"accounts","label":"No. of Accounts","type":"integer"},{"key":"commission","label":"Total Commission","type":"money"},{"key":"target","label":"Total Target","type":"money"},{"key":"variance","label":"Variance","type":"money"},{"key":"achievement","label":"Achievement %","type":"number","total":false}]'::jsonb,
+  ARRAY['sales', 'operations', 'accounting', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-finance', 'tis-general-manager', 'tis-it-admin']::text[], 'read:reports', 795)
 ON CONFLICT (code) DO NOTHING;

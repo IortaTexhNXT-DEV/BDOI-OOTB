@@ -26,11 +26,15 @@ import { prepareTable, allocateWidths } from './table.js';
 export { toWinAnsi, textWidth, wrapText } from './fonts.js';
 export { formatAmount, formatDate, formatDateTime, humanize, amountInWords, numberToWords } from './format.js';
 
-/** Render one or more specs into one PDF; each spec is its own page group (its own "Page X of Y"). */
-export function buildPdfBatch(specs, { title } = {}) {
+/**
+ * Render one or more specs into one PDF; each spec is its own page group (its own "Page X of Y"). `password` (or the
+ * first spec's `password`) encrypts the file: it opens only with that password (lib/pdf/security.js).
+ */
+export function buildPdfBatch(specs, { title, password = null } = {}) {
   const list = specs.filter(Boolean);
   const first = list[0] || {};
-  const writer = new PdfWriter({ title: title || [first.title, first.number].filter(Boolean).join(' '), author: first.letterhead?.name || '', subject: first.title || '' });
+  const writer = new PdfWriter({ title: title || [first.title, first.number].filter(Boolean).join(' '), author: first.letterhead?.name || '', subject: first.title || '',
+    password: password || first.password || null });
   // personal identifiers encrypted at rest are printed in full on documents (lib/pii.js)
   for (const spec of list) revealInPlace(spec);
   for (const spec of list.length ? list : [{ title: 'Document' }]) new DocRenderer(writer, spec, spec.render || {}).render();
@@ -42,7 +46,7 @@ export function buildPdf(spec) {
   if (Array.isArray(spec?.documents)) {
     const shared = { ...spec };
     delete shared.documents;
-    return buildPdfBatch(spec.documents.map((d) => ({ ...shared, ...d })), { title: spec.title });
+    return buildPdfBatch(spec.documents.map((d) => ({ ...shared, ...d })), { title: spec.title, password: spec.password });
   }
   return buildPdfBatch([spec]);
 }
@@ -95,7 +99,7 @@ export async function renderPdf(spec, opts = {}) {
 /** printContext + buildPdfBatch (bulk prints: one receipt / voucher per page group). */
 export async function renderPdfBatch(specs, opts = {}) {
   const ctx = await printContext(opts);
-  return buildPdfBatch(specs.map((s) => ({ ...ctx, ...stripUndefined(s) })), { title: opts.title });
+  return buildPdfBatch(specs.map((s) => ({ ...ctx, ...stripUndefined(s) })), { title: opts.title, password: opts.password });
 }
 
 const stripUndefined = (o) => Object.fromEntries(Object.entries(o || {}).filter(([, v]) => v !== undefined));

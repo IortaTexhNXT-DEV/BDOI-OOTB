@@ -11,7 +11,7 @@ describe("activity log adapters", () => {
   it("takes the audit events of a record, the status change becoming the status line", () => {
     const [e] = fromAuditEvents([{ id: "812", at: "2026-10-02T01:49:37Z", day: "2026-10-02", date: "02/10/2026", time: "09:49", action: "Settlement Submitted",
       title: "Settlement submitted", note: "Month end", user: { username: "j.claims", displayName: "Jasmine Cruz", roles: ["Claims Officer", "Viewer"] },
-      source: { channel: "screen", label: "Screen", name: "Operations > Claims" },
+      source: { channel: "screen", label: "Screen", name: "Policy Servicing > Claims" },
       changes: [{ key: "claimStatus", label: "Claim status", from: "Processing", to: "Pending approval" }, { key: "status", label: "Status", from: "Open", to: "Pending" },
         { key: "tin", label: "TIN", from: null, to: "***", masked: true }] }]);
     expect(e).toMatchObject({ id: "812", actionCode: "Settlement Submitted", actionLabel: "Settlement submitted", date: "02/10/2026", time: "09:49",

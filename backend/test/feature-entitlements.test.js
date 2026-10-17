@@ -147,7 +147,7 @@ describe('enabling with maker-checker', () => {
     const p = await admins.maker.api('post', '/platform/features/preview').send({ action: 'enable', features: ['comparison-reports'] });
     expect(p.status).toBe(200);
     expect(p.body.data.features.map((f) => [f.key, f.reason])).toEqual([['comparison-reports', 'requested'], ['rfq-multi-insurer', 'dependency']]);
-    expect(p.body.data.menus).toEqual(['Operations > Sales & Marketing > Comparison Reports']);
+    expect(p.body.data.menus).toEqual(['Sales & Placement > Comparison Reports']);
     expect(p.body.data.roles.map((r) => r.code)).toContain('tis-sales-officer');
     const bundle = await admins.maker.api('post', '/platform/features/preview').send({ action: 'enable', tier: 'PHASE_2' });
     expect(bundle.body.data.features.map((f) => f.key).sort()).toEqual(FEATURES.filter((f) => f.tier === 'PHASE_2').map((f) => f.key).sort());

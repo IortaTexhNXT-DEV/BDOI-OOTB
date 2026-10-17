@@ -1,5 +1,5 @@
 /**
- * Motor claim repairs (Operations > Motor Claim Repairs): repair estimates of accredited shops (Repair Shop master),
+ * Motor claim repairs (Policy Servicing > Motor Claim Repairs): repair estimates of accredited shops (Repair Shop master),
  * the insurer adjuster's decision as recorded by the claims officer, supplementary estimates, the letter of authority
  * (LOA) with the insured's participation, and the release of the vehicle. read:claims to view, write:claims to act.
  */
@@ -17,7 +17,7 @@ import { loaPdf, releasePdf } from './print.js';
 const { router, define } = moduleRouter('Motor Claim Repairs', '/motor-claims');
 const read = [requireAuth, requirePermission('read:claims')];
 const write = [requireAuth, requirePermission('write:claims')];
-const S = 'Operations > Motor Claim Repairs';
+const S = 'Policy Servicing > Motor Claim Repairs';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const tx = (fn) => withTransaction(fn);
 const estimate = { id: 'cre_1', kind: 'initial', seq: 1, repairShopName: 'Sample Auto Body Works', parts: 32000, labour: 9500, paint: 6000, other: 0, vat: 5700, total: 53200, status: 'approved', approvedAmount: 48000, adjusterName: 'R. Dizon' };

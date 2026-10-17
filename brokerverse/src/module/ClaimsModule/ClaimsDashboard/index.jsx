@@ -13,7 +13,8 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import StatCards from "../../../components/StatCards";
 import RowActions, { actionsColumn } from "../../../components/RowActions";
-import { ChartCard, DashboardToolbar, LISTS, ShareChart, ThemedChart, changeOf, drillDown, formatValue, periodRange } from "../../../components/Dashboard";
+import { ChartCard, DashboardToolbar, LISTS, ShareChart, ThemedChart, ViewState, changeOf, drillDown, formatValue, periodRange } from "../../../components/Dashboard";
+import { useStableLoad } from "../../../hooks/useStableLoad";
 import { useChartTheme } from "../../../theme/chartTheme";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
 import "./index.scss";
@@ -54,30 +55,27 @@ const ClaimsDashboard = () => {
   const toast = useRef(null);
   const [period, setPeriod] = useState("year");
   const [compare, setCompare] = useState("previous");
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
-  const [previous, setPrevious] = useState(null);
-  const [asOf, setAsOf] = useState(null);
   const range = periodRange(period, compare);
 
-  const load = useCallback(async () => {
+  // four states (hooks/useStableLoad): a skeleton on the first load only, the figures kept under a veil while a
+  // refresh runs, the reason with Retry when the first load failed; the spinner stops when the request settles
+  const view = useStableLoad(useCallback(async () => {
     const r = periodRange(period, compare);
-    setLoading(true);
-    try {
-      const [current, before] = await Promise.all([
-        fetchReport(r, true),
-        fetchReport({ from: r.previousFrom, to: r.previousTo }, false),
-      ]);
-      setData(current);
-      setPrevious(before);
-      setAsOf(new Date());
-    } catch {
-      toast.current?.show({ severity: "error", summary: t("claimsDashboard.error"), detail: t("claimsDashboard.failedToLoad") });
-    } finally {
-      setLoading(false);
-    }
-  }, [period, compare, t]);
-  useEffect(() => { load(); }, [load]);
+    const [current, before] = await Promise.all([
+      fetchReport(r, true),
+      fetchReport({ from: r.previousFrom, to: r.previousTo }, false),
+    ]);
+    return { current, before, asOf: new Date() };
+  }, [period, compare]), { isEmpty: (d) => !d });
+  const data = view.data?.current || null;
+  const previous = view.data?.before || null;
+  const asOf = view.data?.asOf || null;
+  const loading = view.loading || view.refreshing;
+  const load = view.reload;
+  const refreshFailed = view.status === "loaded" && !!view.error;
+  useEffect(() => {
+    if (refreshFailed) toast.current?.show({ severity: "error", summary: t("claimsDashboard.error"), detail: t("claimsDashboard.failedToLoad") });
+  }, [refreshFailed, t]);
 
   const handleExportReport = async () => {
     try {
@@ -182,32 +180,34 @@ const ClaimsDashboard = () => {
         asOf={asOf} onRefresh={load} loading={loading}
         actions={<Button label={t("claimsDashboard.exportReport")} icon="pi pi-download" onClick={handleExportReport} />} />
 
-      <StatCards items={kpis} className="bv-stat-cards--wide claims-dashboard__kpis" />
+      <ViewState state={view} skeleton={<StatCards items={kpis} loading className="bv-stat-cards--wide claims-dashboard__kpis" />}>
+        <StatCards items={kpis} refreshing={view.refreshing} className="bv-stat-cards--wide claims-dashboard__kpis" />
+      </ViewState>
 
       <div className="bv-dash-grid">
         <ChartCard className="bv-dash-grid__wide" title={t("claimsDashboard.claimsTrendAnalysis")} subtitle={t("claimsDashboard.byReportedMonth")}
           table={{ columns: [{ field: "month", header: t("claimsDashboard.month") }, { field: "submitted", header: t("claimsDashboard.claimsSubmitted"), format: "count" },
             { field: "approved", header: t("claimsDashboard.claimsApproved"), format: "count" }, { field: "rejected", header: t("claimsDashboard.claimsRejected"), format: "count" }], rows: trend }}
-          exportName="claims-by-month">
+          exportName="claims-by-month" state={view} height={260}>
           <ThemedChart type="line" data={trendData} height={260} />
         </ChartCard>
 
         <ChartCard title={t("claimsDashboard.claimsByLob")}
-          table={{ columns: [{ field: "lob", header: t("claimsDashboard.lob") }, { field: "count", header: t("claimsDashboard.claimsCount"), format: "count" }], rows: byLob }} exportName="claims-by-lob">
+          table={{ columns: [{ field: "lob", header: t("claimsDashboard.lob") }, { field: "count", header: t("claimsDashboard.claimsCount"), format: "count" }], rows: byLob }} exportName="claims-by-lob" state={view} height={220}>
           <ShareChart items={byLob.map((r) => ({ label: r.lob, amount: r.count }))} dimension="lob" label={t("claimsDashboard.claimsCount")} format="count" />
         </ChartCard>
 
         <ChartCard title={t("claimsDashboard.ageingOfOpenClaims")} subtitle={t("claimsDashboard.ageingHint")}
-          table={{ columns: [{ field: "label", header: t("claimsDashboard.age") }, { field: "count", header: t("claimsDashboard.openClaims"), format: "count" }], rows: ageingRows }} exportName="claims-ageing">
+          table={{ columns: [{ field: "label", header: t("claimsDashboard.age") }, { field: "count", header: t("claimsDashboard.openClaims"), format: "count" }], rows: ageingRows }} exportName="claims-ageing" state={view} height={220}>
           <ThemedChart type="bar" data={ageingData} height={220} />
         </ChartCard>
 
         <ChartCard title={t("claimsDashboard.claimsByStage")}
-          table={{ columns: [{ field: "status", header: t("claimsDashboard.status") }, { field: "count", header: t("claimsDashboard.claimsCount"), format: "count" }], rows: byStatus }} exportName="claims-by-stage">
+          table={{ columns: [{ field: "status", header: t("claimsDashboard.status") }, { field: "count", header: t("claimsDashboard.claimsCount"), format: "count" }], rows: byStatus }} exportName="claims-by-stage" state={view} height={Math.max(160, byStatus.length * 34 + 40)}>
           <ThemedChart type="bar" data={statusData} options={{ indexAxis: "y" }} height={Math.max(160, byStatus.length * 34 + 40)} />
         </ChartCard>
 
-        <ChartCard title={t("claimsDashboard.claimsByState")}>
+        <ChartCard title={t("claimsDashboard.claimsByState")} state={view} height={160}>
           {claimsByState.length ? claimsByState.map((st) => (
             <div key={st.state} className="state-item">
               <div className="state-info">
@@ -223,7 +223,8 @@ const ClaimsDashboard = () => {
         </ChartCard>
 
         <ChartCard className="bv-dash-grid__wide" title={t("claimsDashboard.recentClaims")}>
-          <DataTable value={recentClaims} loading={loading && !data} className="claims-table" size="small" emptyMessage={t("dashboards.noData")}>
+          <DataTable value={recentClaims} loading={loading} className="claims-table" size="small"
+            emptyMessage={view.status === "error" ? t("claimsDashboard.failedToLoad") : t("dashboards.noData")}>
             <Column field="claimId" header={t("claimsDashboard.claimId")} />
             <Column field="lob" header={t("claimsDashboard.lob")} />
             <Column field="customer" header={t("claimsDashboard.customer")} />

@@ -1,5 +1,5 @@
 /**
- * Sharing schemes (Commission > Sharing Schemes; sharing_schemes; TIS-BRD-PROD-16, COMM-05; FRS FR-CMR-010 to 015).
+ * Sharing schemes (Accounts > Commission > Sharing Schemes; sharing_schemes; TIS-BRD-PROD-16, COMM-05; FRS FR-CMR-010 to 015).
  *
  * A scheme says who is paid what of the commission of a policy: split lines paid to the referrer of the policy, the
  * parent of the referrer (agent hierarchy) or the dealer / partner of the channel, on a share basis (the variance to

@@ -20,6 +20,11 @@ const MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0348_tisph_roles
 const REMITTANCE_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0400_remittance_approval_authority.sql', import.meta.url), 'utf8');
 // 0531 narrows the receipting rights 0348 gave the Cash Control personas: it follows 0348 whenever 0348 runs
 const RECEIPTING_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0531_tisph_receipting_grants.sql', import.meta.url), 'utf8');
+// 0675 takes write:marine from the TIS Sales personas that 0348 gave it (they keep write:parcel-certificates): it follows 0348 whenever 0348 runs
+const PARCEL_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0675_parcel_open_covers.sql', import.meta.url), 'utf8');
+// the TISPH decision that takes journal vouchers, disbursements and the incentive approval off the front office: run again
+// after the earlier grants, it takes them off again
+const FINANCE_ONLY_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0691_tisph_finance_only_jv_disbursement.sql', import.meta.url), 'utf8');
 
 let ctx;
 const as = {};
@@ -193,11 +198,17 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     // later migrations that grant to the holders of a module permission (0387: approve:incentive, 0500: assign:renewals)
     // or to the TISPH roles (0460-0461: Talkbot call lists and TFS accounts, 0480: extend:quotations, 0485: promotions, 0502: claim
     // settlement cash, 0504: claim processing, 0520: the post-dated cheque log, 0522: the insurer billing approval, 0524: the receipt
-    // reversal, 0531: the receipting grants, 0570-0572: the commission rules, schemes, line approvals and incentive approvers) run again after it
+    // reversal, 0531: the receipting grants, 0570-0572: the commission rules, schemes, line approvals and incentive approvers, 0597: the
+    // enabling of Phase 2 by SUPERID, 0600-0602: the dealer schemes, scheme issuance and lock-in, 0610: call-out endorsement, 0615: the motor rating rights,
+    // 0660: the product template approvers, 0675: the parcel certificates and open cover approvals, 0680: the Credit Life batches,
+    // 0687: the KYC, scheme and promotion grants of the TISPH decisions of 11 Oct 2026) run again after it
     await q(`DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0460_talkbot_calls.sql', '0461_lead_tfs_accounts.sql',
       '0480_quotation_validity_versions.sql', '0485_promotions.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql',
       '0520_pdc_lifecycle.sql', '0522_insurer_billing_run.sql', '0524_receipt_reversal.sql', '0531_tisph_receipting_grants.sql',
-      '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql', '0593_payment_verification_nonpayment_cadence.sql', '0595_environment_promotion.sql')`);
+      '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql', '0593_payment_verification_nonpayment_cadence.sql', '0595_environment_promotion.sql',
+      '0597_tenant_phase2_enabling.sql', '0600_scheme_master.sql', '0601_scheme_issuance.sql', '0602_lock_in_review.sql', '0610_telesales_incentive.sql',
+      '0615_motor_rating_controls.sql', '0660_product_template_approval.sql', '0675_parcel_open_covers.sql', '0680_credit_life_batches.sql',
+      '0687_tisph_decisions_grants.sql', '0691_tisph_finance_only_jv_disbursement.sql')`);
     // and the Data Migration & Go-Live grants and the auditor role (0440), the finance and audit grants of 0445
     await q("DELETE FROM schema_migrations WHERE name IN ('0440_migration_origin.sql', '0445_migration_controls.sql')");
     await migrate({ log: () => {} });
@@ -207,6 +218,8 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await pool.query(MIGRATION);
     await pool.query(REMITTANCE_MIGRATION);
     await pool.query(RECEIPTING_MIGRATION);
+    await pool.query(PARCEL_MIGRATION);
+    await pool.query(FINANCE_ONLY_MIGRATION);
     expect(await grants()).toEqual(migrated);
   });
 });

@@ -1,6 +1,7 @@
 # Endorsements
 
-Mid-term changes and cancellations of a policy (Operations > Policy > Endorsement), routes under `/endorsements`.
+Mid-term changes and cancellations of a policy, raised from the policy (Policy Servicing > Policy) and worked from the
+work list Policy Servicing > Endorsements; routes under `/endorsements`.
 Access: `read:endorsements`, `write:endorsements`; approving, and booking money going back, need `approve:policies`.
 
 ## Files
@@ -39,3 +40,11 @@ the effective date; `premiumChange.prorata` keeps the days, the factor and the a
 note (`endorsements.cancellation_note_required`); TISPH returns pro-rata whoever cancels
 (`endorsements.short_period_for_insured` off) and takes back no commission
 (`endorsements.cancellation_reverses_commission` off, CANC-03).
+
+## Insurer commission (TIS-BRD-COMM-07, migration 0649)
+
+The commission / service fee the insurer calculated on an endorsement is recorded before booking, on one endorsement
+(`PUT /endorsements/:id/insurer-commission`) or by a bulk CSV / XLSX file with the columns Endorsement No and Commission
+(`POST /endorsements/insurer-commission/upload`, a result per row). Booking takes it as the commission of the premium
+change instead of the policy commission ratio; with `endorsements.insurer_commission_required` (off) a financial
+endorsement is not booked without it.

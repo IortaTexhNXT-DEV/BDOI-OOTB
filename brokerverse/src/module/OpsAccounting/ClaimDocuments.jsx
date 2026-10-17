@@ -19,9 +19,10 @@ const STAGES = ["missing", "ready", "all"];
 /**
  * Operations > Claims Awaiting Documents: the work queue of open claims whose file has not gone to the insurer yet,
  * with how many required documents are in and what is missing. A row opens the claim's Documents step, where the
- * documents are received, waived or reminded and the claim file is submitted to the insurer.
+ * documents are received, waived or reminded and the claim file is submitted to the insurer. A tab of Claims
+ * (`embedded`: the Claims page draws the header).
  */
-const ClaimDocuments = () => {
+const ClaimDocuments = ({ embedded = false }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const toast = useRef(null);
@@ -68,7 +69,7 @@ const ClaimDocuments = () => {
   return (
     <div className="bv-ops-page claim-docs-queue">
       <Toast ref={toast} />
-      <PageHeader title={t("claimDocs.queue.title")} crumbs={[{ label: t("sidebar.Operations", "Operations") }, { label: t("claimDocs.queue.title") }]} />
+      {!embedded && <PageHeader title={t("claimDocs.queue.title")} crumbs={[{ label: t("sidebar.Operations", "Operations") }, { label: t("claimDocs.queue.title") }]} />}
       <StatCards items={[
         { key: "missing", label: t("claimDocs.queue.kpi.missing"), value: s ? s.missing : null, onClick: () => setStage("missing"), active: stage === "missing" },
         { key: "ready", label: t("claimDocs.queue.kpi.ready"), value: s ? s.ready : null, onClick: () => setStage("ready"), active: stage === "ready" },

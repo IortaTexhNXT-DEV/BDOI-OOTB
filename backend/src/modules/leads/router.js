@@ -6,7 +6,7 @@ import { paging } from '../../lib/respond.js';
 import { withTransaction } from '../../db/pool.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows, sendTable, columnMessage, uploadResult } from '../documents/tabular.js';
-import { sendTemplate } from '../documents/uploadTemplates.js';
+import { sendTemplate, sendWorkbook, staticUploads } from '../documents/uploadTemplates.js';
 import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 import { today } from '../../lib/dates.js';
@@ -15,7 +15,7 @@ import * as tfs from './tfsImport.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
 const legacy = moduleRouter('Leads', '/lead');
-const SCREEN = 'Operations > Sales & Marketing > Prospects';
+const SCREEN = 'Sales & Placement > Prospects';
 const canRead = [requireAuth, requirePermission('read:leads')];
 const canWrite = [requireAuth, requirePermission('write:leads')];
 const canDelete = [requireAuth, requirePermission('delete:leads')];
@@ -113,8 +113,9 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/tfs-import/template', summary: 'TFS account file template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk Upload > TFS accounts > Download template`,
-  middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'tfs-accounts'),
+  method: 'GET', path: '/tfs-import/template', summary: 'TFS account file template (XLSX: Data, Columns and Instructions sheets) with the column headers in force (leads.tfs_column_map)', screen: `${SCREEN} > Bulk Upload > TFS accounts > Download template`,
+  middleware: canRead, response: '(xlsx file)',
+  handler: async (_req, res) => sendWorkbook(res, { ...staticUploads().find((d) => d.id === 'tfs-accounts'), columns: await tfs.tfsColumns() }),
 });
 define({
   method: 'POST', path: '/tfs-import', summary: 'Load the TFS account file (multipart field "file", XLSX or CSV): one prospect per Loan ID with the TFS detail set, source TFS, Customer Type TFS; a Loan ID already loaded updates its prospect; an account without a policy expiry date or with an unknown insurer is refused; the upload is stamped LIB-yyyy-nnnnn',

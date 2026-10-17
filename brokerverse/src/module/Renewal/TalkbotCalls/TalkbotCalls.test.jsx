@@ -47,7 +47,7 @@ beforeEach(() => {
   distributionService.channelOptions.mockResolvedValue([]);
 });
 
-describe("Talkbot Calls", () => {
+describe("Talkbot calls", () => {
   it("lists the call lists with their task name, counts, batch and status", async () => {
     grant("read:talkbot-calls", "write:talkbot-calls");
     render(<MemoryRouter><TalkbotCalls /></MemoryRouter>);
@@ -77,7 +77,7 @@ describe("New call list", () => {
     expect(await screen.findByText("41 accounts")).toBeInTheDocument();
     expect(screen.getByText("4 accounts left out: 4 No mobile number")).toBeInTheDocument();
     expect(talkbotService.preview).toHaveBeenCalledWith({ expiryFrom: "2026-10-12", expiryTo: "2026-10-14", includeExpired: false, includeCallBack: false });
-    expect(screen.getByText("Motor Vehicle Insurance")).toBeInTheDocument();
+    expect(screen.getByText("Motor vehicle Insurance")).toBeInTheDocument();
   });
   it("sends only the criteria chosen", () => {
     expect(criteriaOf({ expiryFrom: "2026-10-10", insurerId: null, recallOf: "", includeExpired: true })).toEqual({ expiryFrom: "2026-10-10", includeExpired: true });

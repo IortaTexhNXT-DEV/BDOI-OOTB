@@ -160,7 +160,7 @@ const ComparisonReports = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.cr.title", "Comparison Reports")}
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("distribution.cr.title", "Comparison Reports")}
         subtitle={t("distribution.cr.subtitle", "The client's comparison of the insurers' offers with the broker's recommendation and reasons, printed on the letterhead.")}>
         {write ? <Button label={t("distribution.cr.new", "New report")} icon="pi pi-plus" onClick={() => setCreate({ source: "broker_slip", slipId: null, quotes: [] })} /> : null}
       </PageHeader>

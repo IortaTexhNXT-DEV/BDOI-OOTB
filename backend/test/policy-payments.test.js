@@ -155,8 +155,13 @@ describe('commission accrues only to producers (Sales & Marketing) and referrers
     expect(gp.body.message).toContain('no bank account');
     const [lineId] = (await q('SELECT id FROM commissions WHERE referrer_id = $1', [ref])).map((x) => x.id);
     expect((await ctx.as('maker')('post', `/commission/referrer-accounts/${ref}/pay-lines`).send({ lineIds: [lineId] })).status).toBe(409);
-    // once the bank account is on file the payout proceeds
+    // once the bank account is on file, and (TISPH, commission.payee_verification_required) verified by a second user,
+    // the payout proceeds
     await ctx.as('maker')('put', `/commission/referrer-accounts/${ref}`).send({ bankName: 'BPI', bankAccountNo: '3179000011' });
+    const unverified = await ctx.as('maker')('post', `/commission/referrer-accounts/${ref}/generate-payout`);
+    expect(unverified.status).toBe(409);
+    expect(unverified.body.message).toContain('awaits verification');
+    expect((await ctx.api('post', `/commission/referrer-accounts/${ref}/verify`).send({ note: 'Bank details checked' })).status).toBe(200);
     expect((await ctx.as('maker')('post', `/commission/referrer-accounts/${ref}/generate-payout`)).status).toBe(200);
   });
 });

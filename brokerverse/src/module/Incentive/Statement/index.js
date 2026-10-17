@@ -24,6 +24,18 @@ import { hasPermission } from "../../../utils/canOpen";
 import { downloadCsv, showError } from "../../Remittance/shared";
 import { IncentiveHeader, formatMeasure, monthOptions } from "../common";
 
+/** The telesales line of a month (FRS COMM-08 FR-TSI-042): counted (NB / renewal), ANC, level, base, additional, adjustment, recovery, tax. */
+export const telesalesLine = (r, t) => [
+  `${t("incentive.telesales.counted")}: ${r.counted} (${r.nbCount ?? 0} / ${r.renewalCount ?? 0})`,
+  `${t("incentive.telesales.anc")}: ${formatCurrency(r.anc)}`,
+  `${t("incentive.telesales.level")}: ${r.level || "-"}`,
+  `${t("incentive.telesales.base")}: ${formatCurrency(r.baseAmount)}`,
+  Number(r.additionalAmount) ? `${t("incentive.telesales.additional")}: ${formatCurrency(r.additionalAmount)}` : null,
+  Number(r.adjustments) ? `${t("incentive.batch.adjustment")}: ${formatCurrency(r.adjustments)}` : null,
+  Number(r.recoveryAmount) ? `${t("incentive.telesales.recovery")}: ${formatCurrency(r.recoveryAmount)}` : null,
+  `${t("incentive.telesales.tax", { pct: Number(r.whtPct || 0).toFixed(2) })}: ${formatCurrency(r.taxAmount)}`,
+].filter(Boolean).join(" · ");
+
 /** Facts at the head of a statement. */
 const statementFacts = (s, t) => [
   { label: t("incentive.stmt.agent"), value: s.agentName },
@@ -65,13 +77,13 @@ export const PrintedStatement = ({ statement: s }) => {
           ) : null}
           {s.programBreakdown.map((r) => (
             <tr key={`${r.program}-${r.status}`}>
-              <td>{r.program}</td>
+              <td>{r.program}{r.isTelesales ? <div className="inc-muted">{telesalesLine(r, t)}</div> : null}</td>
               <td className="inc-num">{formatMeasure(r.target, r.metric)}</td>
               <td className="inc-num">{formatMeasure(r.achievement, r.metric)}</td>
               <td className="inc-num">{formatPercent(r.achievementPercent, { decimals: 2 })}</td>
               <td>{r.rate}</td>
               <td className="inc-num">{formatCurrency(r.earnedAmount)}</td>
-              <td>{r.status}</td>
+              <td>{r.notApproved ? t("incentive.telesales.notApproved") : r.status}</td>
             </tr>
           ))}
           <tr>

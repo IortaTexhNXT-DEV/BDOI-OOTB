@@ -47,6 +47,8 @@ const periodEndService = {
   statusPreview: (period, status) => request(`/period-end/periods/${period}/status-preview${qs({ status })}`),
   periodHistory: (period) => request(`/period-end/periods/${period}/history`),
   periodChecks: (period) => request(`/period-end/periods/${period}/checks`),
+  financeControls: () => request("/period-end/finance-controls"),
+  saveFinanceControls: (settings) => put("/period-end/finance-controls", { settings }),
 
   // month-end close
   closeRuns: (params) => request(`/period-end/close-runs${qs(params)}`),
@@ -109,6 +111,9 @@ const periodEndService = {
   issue2307: (body) => post("/period-end/bir/2307/issue", body),
   issueAll2307: (body) => post("/period-end/bir/2307/issue-all", body),
   certificates2307: (params) => request(`/period-end/bir/2307/certificates${qs(params)}`),
+  batches2307: (params) => request(`/period-end/bir/2307/batches${qs(params)}`),
+  batch2307: (id) => request(`/period-end/bir/2307/batches/${id}`),
+  batch2307File: (id) => file(`/period-end/bir/2307/batches/${id}?format=xlsx`),
   cancel2307: (id, reason) => post(`/period-end/bir/2307/certificates/${id}/cancel`, { reason }),
 };
 

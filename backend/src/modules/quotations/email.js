@@ -15,7 +15,7 @@ import { ownRecord } from '../../lib/scope.js';
 import { companyName } from '../../lib/letterhead.js';
 
 const { router, define } = moduleRouter('E-mail', '/email');
-const SCREEN = 'Operations > Quotation > Quote detail > Share';
+const SCREEN = 'Policy Servicing > Quotation > Quote detail > Share';
 const canSend = [requireAuth, requirePermission('write:quotations')];
 
 async function quoteVars(q, extra = {}) {

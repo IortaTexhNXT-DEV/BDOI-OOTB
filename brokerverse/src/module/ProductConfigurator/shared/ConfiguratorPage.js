@@ -5,16 +5,15 @@
  * app's status colours, template / product cells (codes with names), paging only when there is more than one page,
  * the confirmation of activating or deactivating a record, the record view and the change-history dialog.
  */
+import PageHeader from "../../../components/PageHeader";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
-import SvgDot from "../../../assets/agentIcon/SvgDots";
 import { statusSeverity, statusLabel } from "../../../utils/statusSeverity";
 import { PAGE_SIZE, clientPaging } from "../../../hooks/useServerList";
 import productConfiguratorService from "../../../services/productConfiguratorService";
@@ -100,33 +99,15 @@ export const RowActions = ({ row, onView, onEdit, onToggle, onHistory, extra = n
 RowActions.propTypes = { row: PropTypes.object, onView: PropTypes.func, onEdit: PropTypes.func, onToggle: PropTypes.func, onHistory: PropTypes.func, extra: PropTypes.node };
 
 /**
- * Page frame: title, breadcrumb "Product Configurator • <screen>", actions on the right, the note on how the screen's
- * configuration is used by the business flow, then the content card.
+ * Page frame: the shared page header (title, breadcrumb "Product Configurator • <screen>", actions on the right) with
+ * the note on how the screen's configuration is used behind the info icon of the title, then the content card.
  */
 export const ConfiguratorPage = ({ screen, actions = null, usage = null, children, className = "" }) => {
   const { t } = useTranslation();
   const title = t(`productConfigurator.screens.${screen}`);
   return (
     <div className={`pc-page ${className}`}>
-      <div className="pc-page__head">
-        <div>
-          <h1 className="pc-page__title">{title}</h1>
-          <BreadCrumb
-            model={[{ label: title }]}
-            home={{ label: t("productConfigurator.title") }}
-            separatorIcon={<SvgDot color="#000" />}
-            className="pc-page__crumbs"
-            aria-label={t("productConfigurator.breadcrumb")}
-          />
-        </div>
-        {actions && <div className="pc-page__actions">{actions}</div>}
-      </div>
-      {usage && (
-        <div className="pc-usage" role="note">
-          <i className="pi pi-info-circle" aria-hidden="true" />
-          <span>{usage}</span>
-        </div>
-      )}
+      <PageHeader home={t("productConfigurator.title")} trail={[title]} title={title} help={usage} actions={actions} />
       <Card className="pc-page__card">{children}</Card>
     </div>
   );

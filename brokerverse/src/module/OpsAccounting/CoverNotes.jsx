@@ -147,7 +147,7 @@ const CoverNotes = () => {
               <Button icon="pi pi-search" onClick={() => openIssue(issue.search)} aria-label={t("opsAcc.search")} />
             </div>
             <DataTable value={issue.sources} dataKey="id" size="small" selectionMode="single" selection={issue.source} onSelectionChange={(e) => setIssue({ ...issue, source: e.value })}
-              scrollable scrollHeight="220px" emptyMessage={t("opsAcc.coverNotes.noSources")}>
+              scrollable emptyMessage={t("opsAcc.coverNotes.noSources")}>
               <Column header={t("opsAcc.coverNotes.sourceKind")} body={(r) => t(`opsAcc.coverNotes.kind.${r.kind}`)} />
               <Column field="reference" header={t("opsAcc.reference")} />
               <Column field="clientName" header={t("opsAcc.client")} />

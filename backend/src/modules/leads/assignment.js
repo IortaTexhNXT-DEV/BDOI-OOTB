@@ -1,5 +1,5 @@
 /**
- * Lead assignment (Operations > Sales & Marketing > Lead Assignment): rules that give each new prospect an account
+ * Lead assignment (Sales & Placement > Lead Assignment): rules that give each new prospect an account
  * executive, the reassignment queue, single and bulk reassignment, and the team view by reporting line.
  *
  * A rule matches on the prospect's branch, line of business, product, source, category, distribution channel and
@@ -21,6 +21,7 @@ import { lobOf } from '../documents/common.js';
 import { notify } from '../notifications/service.js';
 import { decisionReason } from '../ops-masters/records.js';
 import { workingHoursBetween } from '../../lib/workingCalendar.js';
+import { CALLOUT_COLUMN, calloutCounts, onReassign, onRuleAssign } from './callout.js';
 
 export const METHODS = ['round_robin', 'load', 'fixed'];
 export const CONDITION_KEYS = ['branchCode', 'lob', 'productId', 'source', 'leadCategory', 'channelId', 'province', 'city', 'insuranceProviderId', 'customerType'];
@@ -39,6 +40,8 @@ const norm = (v) => String(v ?? '').trim().toLowerCase();
 export const ruleOut = (r) => ({
   id: r.id, name: r.name, priority: r.priority, method: r.method, conditions: r.conditions || {}, assignees: r.assignees || [],
   assigneeNames: r.assignee_names || [], lastAssignedUserId: r.last_assigned_user_id, status: r.status, description: r.description, maxOpen: r.max_open ?? null,
+  // call-out rule (telesales, FR-TSI-010): every prospect it assigns to a caller is endorsed as a call-out lead
+  callout: r.callout === true,
   insuranceProviderName: r.insurance_provider_name ?? null,
   createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
 });
@@ -81,9 +84,9 @@ async function checkAssignees(ids) {
 
 export async function createRule(b, userId) {
   const assignees = await checkAssignees(b.assignees);
-  const r = await one(`INSERT INTO lead_assignment_rules(name, priority, method, conditions, assignees, status, description, max_open, created_by, updated_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING id`, [b.name.trim(), Number(b.priority ?? 100), b.method || 'round_robin', JSON.stringify(cleanConditions(b.conditions)),
-    assignees, b.status || 'active', b.description || null, b.maxOpen || null, userId]);
+  const r = await one(`INSERT INTO lead_assignment_rules(name, priority, method, conditions, assignees, status, description, max_open, created_by, updated_by, callout)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9,$10) RETURNING id`, [b.name.trim(), Number(b.priority ?? 100), b.method || 'round_robin', JSON.stringify(cleanConditions(b.conditions)),
+    assignees, b.status || 'active', b.description || null, b.maxOpen || null, userId, b.callout === true]);
   return ruleOut(await getRule(r.id));
 }
 
@@ -91,10 +94,11 @@ export async function updateRule(id, b, userId) {
   const before = await getRule(id);
   const assignees = b.assignees !== undefined ? await checkAssignees(b.assignees) : before.assignees;
   await query(`UPDATE lead_assignment_rules SET name = $2, priority = $3, method = $4, conditions = $5, assignees = $6, status = $7, description = $8,
-      last_assigned_user_id = CASE WHEN last_assigned_user_id = ANY($6) THEN last_assigned_user_id END, updated_by = $9, updated_at = now(), max_open = $10 WHERE id = $1`,
+      last_assigned_user_id = CASE WHEN last_assigned_user_id = ANY($6) THEN last_assigned_user_id END, updated_by = $9, updated_at = now(), max_open = $10, callout = $11 WHERE id = $1`,
   [before.id, (b.name ?? before.name).trim(), Number(b.priority ?? before.priority), b.method || before.method,
     JSON.stringify(b.conditions !== undefined ? cleanConditions(b.conditions) : before.conditions), assignees, b.status || before.status,
-    b.description !== undefined ? b.description : before.description, userId, b.maxOpen !== undefined ? b.maxOpen || null : before.max_open]);
+    b.description !== undefined ? b.description : before.description, userId, b.maxOpen !== undefined ? b.maxOpen || null : before.max_open,
+    b.callout !== undefined ? b.callout === true : before.callout === true]);
   return { before: ruleOut(before), after: ruleOut(await getRule(before.id)) };
 }
 
@@ -199,6 +203,9 @@ async function applyRule(db, lead, rule, by, why = `Rule "${rule.name}"`) {
       queue_reason_code = NULL, queued_at = NULL WHERE id = $1`, [lead.id, userId, rule.id]);
   await db.query('UPDATE lead_assignment_rules SET last_assigned_user_id = $2 WHERE id = $1', [rule.id, userId]);
   await history(db, { leadId: lead.id, from: lead.owner_user_id, to: userId, ruleId: rule.id, action: 'auto', reason: why, by });
+  // a call-out rule endorses the prospect for the caller; another rule ends an endorsement of another caller
+  if (locked.callout) await onRuleAssign(db, lead, locked, userId);
+  else await onReassign(db, lead, userId, by);
   if (userId !== by) await tellAssignee(userId, lead, `rule ${rule.name}`);
   return userId;
 }
@@ -277,6 +284,8 @@ export async function reassign(leadIds, toUserId, { reasonCode = null, reason = 
       await db.query(`UPDATE leads SET owner_user_id = $2, assignment_status = 'assigned', assigned_at = now(), queue_reason = NULL, queue_reason_code = NULL, queued_at = NULL,
           updated_by = $3, updated_at = now() WHERE id = $1`, [l.id, to.id, by]);
       await history(db, { leadId: l.id, from: l.owner_user_id, to: to.id, action, reason: why.text, reasonCode: why.code, by });
+      // a call-out endorsement moves with a reassignment by the caller's Team Leader, else it ends (FR-TSI-010)
+      await onReassign(db, l, to.id, by);
     }
     for (const l of leads) if (to.id !== by) await tellAssignee(to.id, l, why.text);
     return { reassigned: leads.length, toUserId: to.id, toName: to.display_name, reason: why.text, reasonCode: why.code,
@@ -339,7 +348,7 @@ export async function runQueue({ dryRun = false } = {}, by = null) {
 const LEAD_ROW = `l.id, l.lead_number AS "leadNumber", l.display_name AS name, l.status, l.lob, l.product_id AS "productId", p.name AS "productName", l.source,
   l.lead_category AS "leadCategory", l.state AS province, l.city, l.branch_code AS "branchCode", l.channel_id AS "channelId", ch.name AS "channelName",
   l.owner_user_id AS "ownerUserId", u.display_name AS "ownerName", l.assignment_status AS "assignmentStatus", l.queue_reason AS "queueReason",
-  l.queue_reason_code AS "queueReasonCode", l.queued_at AS "queuedAt", l.assigned_at AS "assignedAt", l.created_at AS "createdAt"`;
+  l.queue_reason_code AS "queueReasonCode", l.queued_at AS "queuedAt", l.assigned_at AS "assignedAt", l.created_at AS "createdAt", ${CALLOUT_COLUMN}`;
 const LEAD_FROM = `FROM leads l LEFT JOIN users u ON u.id = l.owner_user_id LEFT JOIN distribution_channels ch ON ch.id = l.channel_id
   LEFT JOIN products p ON p.id = l.product_id`;
 
@@ -412,7 +421,8 @@ export async function teamView(user, { managerId = null, memberId = null, status
       count(*) FILTER (WHERE created_at >= now() - interval '30 days')::int AS last30
     FROM leads WHERE owner_user_id = ANY($1) AND deleted_at IS NULL GROUP BY 1`, [ids, CLOSED]);
   const zero = { total: 0, open: 0, new: 0, converted: 0, lost: 0, queued: 0, last30: 0 };
-  const out = members.map((m) => ({ ...m, ...zero, ...(counts.find((c) => c.id === m.id) || {}), id: m.id }));
+  const callouts = await calloutCounts(ids);
+  const out = members.map((m) => ({ ...m, ...zero, ...(counts.find((c) => c.id === m.id) || {}), id: m.id, callout: callouts.get(m.id) || 0 }));
   const scope = memberId && ids.includes(memberId) ? [memberId] : ids;
   const leads = await many(`SELECT ${LEAD_ROW} ${LEAD_FROM} WHERE l.deleted_at IS NULL AND l.owner_user_id = ANY($1) AND ($2::text IS NULL OR l.status = $2)
     ORDER BY l.created_at DESC LIMIT 500`, [scope, status || null]);

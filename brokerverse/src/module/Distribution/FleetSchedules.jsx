@@ -18,6 +18,7 @@ import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
 import { RecordActivityLog } from "../../components/ActivityLog";
+import { PeriodCell } from "../../components/TableCells";
 import { ClientPicker, Field, PageHeader, StatusTag, date, fieldErrors, fromIsoDay, isoDay, money, printFile, showError, showSuccess, useInsurers } from "./common";
 
 const BASE = "/operations/fleet-schedules";
@@ -87,7 +88,7 @@ const FleetList = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} title={t("distribution.fl.title", "Fleet Schedules")}>
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} title={t("distribution.fl.title", "Fleet Schedules")}>
         {write ? <Button label={t("distribution.fl.new", "New fleet schedule")} icon="pi pi-plus" onClick={open} /> : null}
       </PageHeader>
       <div className="pe-card">
@@ -103,7 +104,7 @@ const FleetList = () => {
           <Column field="clientName" header={t("distribution.fl.client", "Client")} />
           <Column field="insurerName" header={t("distribution.fl.insurer", "Insurer")} />
           <Column field="policyNumber" header={t("distribution.fl.policy", "Policy")} />
-          <Column header={t("distribution.fl.period", "Period")} body={(r) => `${date(r.inceptionDate)} to ${date(r.expiryDate)}`} />
+          <Column header={t("distribution.fl.period", "Period")} body={(r) => <PeriodCell from={r.inceptionDate} to={r.expiryDate} />} />
           <Column field="activeVehicles" header={t("distribution.fl.vehicles", "Vehicles on cover")} className="bv-num" headerClassName="bv-num" />
           <Column header={t("distribution.fl.sumInsured", "Sum insured")} body={(r) => money(r.sumInsured)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("distribution.fl.annualPremium", "Annual premium")} body={(r) => money(r.grossPremium)} className="bv-num" headerClassName="bv-num" />
@@ -228,7 +229,7 @@ const FleetDetail = ({ id }) => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.fl.title", "Fleet Schedules")} title={`${fleet.fleetNumber} · ${fleet.clientName}`}
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} section={t("distribution.fl.title", "Fleet Schedules")} title={`${fleet.fleetNumber} · ${fleet.clientName}`}
         subtitle={`${fleet.insurerName || t("distribution.fl.noInsurer", "Insurer not chosen")} · ${date(fleet.inceptionDate)} to ${date(fleet.expiryDate)}${fleet.policyNumber ? ` · ${t("distribution.fl.policy", "Policy")} ${fleet.policyNumber}` : ""}`}>
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
         <Button label={t("distribution.fl.printSchedule", "Print schedule")} icon="pi pi-print" outlined

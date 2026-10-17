@@ -5,6 +5,7 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { one } from '../../db/pool.js';
+import { coverTimes } from '../../lib/policyTerm.js';
 import { printContext } from '../../lib/pdf/index.js';
 import { amountInWords, formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { round2 } from '../../lib/money.js';
@@ -148,6 +149,20 @@ export function coverageSection(x, f) {
   return { heading: `Coverage (${x.currency || f.currency || 'PHP'})`, table: { columns: ['Cover', { label: 'Sum insured', type: 'money' }, { label: 'Premium', type: 'money' }], widths: [255, 130, 130], rows } };
 }
 
+/** Motor terms of a quotation (motorRating, PROD-12 / PROD-10): the FMV and its basis, the excess; null without them. */
+export function motorTermsSection(x, f) {
+  const m = x.motorRating;
+  if (!m || lineOf(x) !== 'MOTOR') return null;
+  const basis = { 'previous-fmv': 'FMV of the expiring term', srp: 'Suggested retail price', reference: 'Reference value' };
+  const excess = m.excess ? (m.excess.basis === 'loss' ? `${m.excess.pct}% of each loss` : m.excess.amount !== null && m.excess.amount !== undefined ? f.ccy(m.excess.amount, x.currency) : '') : '';
+  const rows = kv([
+    ['Fair market value', m.fmv ? f.ccy(m.fmv.fmv, x.currency) : ''],
+    ['Basis', m.fmv ? `${basis[m.fmv.referenceBasis] || m.fmv.referenceBasis} ${f.ccy(m.fmv.referenceValue, x.currency)} less ${m.fmv.depreciationPct}% depreciation` : ''],
+    ['Excess (deductible)', excess],
+  ]);
+  return rows.length ? { heading: 'Motor terms', rows } : null;
+}
+
 const customerOf = (lead = {}) => [lead.firstName, lead.lastName].filter(Boolean).join(' ') || lead.companyName;
 const pct = (v) => `${Number(num(v).toFixed(4))}%`;
 const brokerName = (h) => String(h.letterhead?.name || '').replace(/\.$/, '');
@@ -191,7 +206,7 @@ export async function standardQuoteDoc(q) {
   return { ...h, watermark: sig.watermark, meta: kv([['Date', f.date(q.createdAt)], ['Valid until', f.date(q.validUntil)], ['Customer', customerOf(q.lead || {})], ['Status', q.quotationStatus],
     ['Product', q.productType], ['Policy type', await policyTypeLabel(q.insurancePolicyType)], ['Insurer', q.insuranceCompanyName], ['Currency', q.currency],
     ['Broker slip', q.brokerSlipNumber]]),
-  sections: [riskSection(q, f), coverageSection(q, f), premiumTable(q, q.currency), await coverTerms(q), ...security, ...market,
+  sections: [riskSection(q, f), coverageSection(q, f), motorTermsSection(q, f), premiumTable(q, q.currency), await coverTerms(q), ...security, ...market,
     { heading: 'Remarks', text: q.remarks || 'This quotation is subject to the insurer\'s terms, conditions and final underwriting approval.' },
     sig.section] };
 }
@@ -265,11 +280,14 @@ export async function standardPolicyScheduleDoc(p) {
   const pr = p.id ? await one('SELECT created_by, status FROM policies WHERE id::text = $1', [String(p.id)]).catch(() => null) : null;
   const sig = await signatures(h, 'policy-schedule', { status: pr?.status || p.status, date: p.issuedDate || p.inception, issuedBy: pr?.created_by },
     { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
-  return { ...h, watermark: sig.watermark, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', f.date(p.inception)], ['Period to', f.date(p.expiry)],
+  // PROD-05: the period of insurance runs from the cover start time on the inception date to the cover end time on the expiry date
+  const times = await coverTimes();
+  const at = (d, label) => (f.date(d) ? `${f.date(d)} ${label}` : '');
+  return { ...h, watermark: sig.watermark, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', at(p.inception, times.startLabel)], ['Period to', at(p.expiry, times.endLabel)],
     ['Date issued', f.date(p.issuedDate)], ['Product', p.productName || p.productType], ['Policy type', p.policyTypeName || await policyTypeLabel(p.insurancePolicyType)],
     ['Sum insured', num(p.sumInsured) ? f.ccy(p.sumInsured, p.currency) : ''],
     ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency],
-    // CTPL certificate of cover and its authentication code (Operations > CTPL Authentication)
+    // CTPL certificate of cover and its authentication code (Policy Servicing > CTPL Authentication)
     ['COC no.', p.cocNumber], ['CTPL authentication code', p.ctplAuthenticationCode], ['Insurer policy no.', p.insurerPolicyNumber]]),
   sections: [riskSection(x, f), coverageSection(x, f), premiumTable(x, p.currency), await coverTerms(x),
     { heading: 'Declaration', text: 'Subject to the terms, conditions, clauses and warranties of the policy wording of the insurer.' }, sig.section] };
@@ -477,7 +495,7 @@ async function remittanceAdviceLetter(rem, a) {
 }
 
 /**
- * Endorsement (Operations > Endorsement > Print): the policy, the type and effective date, the premium change, every
+ * Endorsement (Policy Servicing > Endorsement > Print): the policy, the type and effective date, the premium change, every
  * change group recorded on the endorsement (personal details, vehicle, coverage, extension ...) and the authorised
  * signature once issued. `e` is endorsements/service.js#toEndorsement, `row` its endorsements row.
  */

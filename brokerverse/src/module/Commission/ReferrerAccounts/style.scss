@@ -121,3 +121,29 @@
     }
   }
 }
+
+// Add / Edit payee (PayeeDialog, rendered outside the page)
+.payee-dialog {
+  .payee-note {
+    margin: 0 0 0.75rem;
+    color: var(--color-heading);
+  }
+
+  .payee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .payee-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+}

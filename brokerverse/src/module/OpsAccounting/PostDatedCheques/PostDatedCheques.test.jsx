@@ -17,7 +17,7 @@ jest.mock("../../../services/opsAccountingService", () => ({
 
 const cheque = (over = {}) => ({
   id: "pdc_1", pdcNumber: "PDC-2026-00121", setId: "pds_1", setNumber: "PCS-2026-00031", clientName: "Andrea Villanueva", policyNumber: "POL-2026-90004", instalmentSeq: 1, instalmentCount: 4, instalmentText: "1 of 4",
-  payee: "insurance-partner", payeeText: "Insurance Partner", insurerId: 3, insurerName: "Standard Insurance Co., Inc.", insurerShortName: "Standard",
+  payee: "insurance-partner", payeeText: "Insurance partner", insurerId: 3, insurerName: "Standard Insurance Co., Inc.", insurerShortName: "Standard",
   bankName: "Bank of the Philippine Islands", bankShortName: "BPI", chequeNumber: "0045121", chequeDate: "2026-10-15", amount: 12787.5,
   custody: "tis-vault", custodyText: "TIS vault, Vault A-12", custodyShort: "TIS vault", status: "on-hand", statusText: "Received at TIS",
   ageing: { code: "current", label: "Current" }, receiptNumber: null, ...over,
@@ -79,8 +79,8 @@ describe("post-dated cheque log", () => {
     expect(screen.getAllByText("–")).toHaveLength(4);
     fireEvent.click(screen.getByRole("button", { name: "₱25,575.00" }));
     expect(screen.getByRole("button", { name: "₱25,575.00" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("tab", { name: "All open (2)" })).toBeInTheDocument();
-    const forward = screen.getByRole("button", { name: "Forward to Insurance Partner" });
+    expect(screen.getByRole("tab", { name: "All Open (2)" })).toBeInTheDocument();
+    const forward = screen.getByRole("button", { name: "Forward to Insurance partner" });
     expect(forward).toBeDisabled();
     const boxes = screen.getAllByRole("checkbox");
     fireEvent.click(boxes[1]);
@@ -97,7 +97,7 @@ describe("post-dated cheque log", () => {
     render(<MemoryRouter initialEntries={["/accounts/post-dated-cheques"]}><PostDatedCheques /></MemoryRouter>);
     expect(await screen.findByText("PDC-2026-00121")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Encode PDCs" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Forward to Insurance Partner" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Forward to Insurance partner" })).not.toBeInTheDocument();
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
   });
 });

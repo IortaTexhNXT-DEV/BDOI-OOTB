@@ -32,10 +32,10 @@ const pending = (over = {}) => ({ source: "change", changeId: 7, ref: "CFG-7", l
 const notSet = { set: false, maxAmount: null, unlimited: false, pending: null, scheduled: null };
 const matrix = (over = {}) => ({
   asOf: "2026-10-10", withoutLimit: "allow", referenceRequired: true, pendingCount: 1, userLimits: [], abilities: { edit: true, approve: true },
-  departments: [{ name: "Sales", order: 1 }, { name: "Finance and Accounting", order: 4 }],
+  departments: [{ name: "Sales", order: 1 }, { name: "Finance and accounting", order: 4 }],
   roles: [
     { code: "tis-sales-officer", name: "TIS Sales Officer", department: "Sales", platform: false, fullAccess: false, approves: [] },
-    { code: "tis-finance", name: "TIS Finance", department: "Finance and Accounting", platform: false, fullAccess: false, approves: ["journal_voucher", "payment_voucher"] },
+    { code: "tis-finance", name: "TIS Finance", department: "Finance and accounting", platform: false, fullAccess: false, approves: ["journal_voucher", "payment_voucher"] },
     { code: "accounting", name: "Accounting", department: null, platform: true, fullAccess: false, approves: ["journal_voucher", "payment_voucher"] },
   ],
   rows: [
@@ -75,10 +75,10 @@ beforeEach(() => {
   accessControlService.proposeAuthorityChange.mockResolvedValue({ message: "Change CFG-8 sent for approval", data: { id: 8 } });
 });
 
-describe("Authority Matrix", () => {
+describe("Authority matrix", () => {
   it("groups the TISPH roles by department and adds the base platform roles only when asked", async () => {
     renderAt();
-    expect(await screen.findByRole("columnheader", { name: "Finance and Accounting" })).toBeInTheDocument();
+    expect(await screen.findByRole("columnheader", { name: "Finance and accounting" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "TIS Finance" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Accounting" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "TIS Sales Officer" })).not.toBeInTheDocument();

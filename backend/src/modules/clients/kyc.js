@@ -1,5 +1,5 @@
 /**
- * Client due diligence records of the onboarding screen (Operations > Clients > Onboard client): authorised signatories
+ * Client due diligence records of the onboarding screen (Policy Servicing > Clients > Onboard client): authorised signatories
  * and beneficial owners of juridical clients, KYC documents, the identification still missing and the KYC status.
  */
 import { query } from '../../db/pool.js';

@@ -209,6 +209,6 @@ export async function reminderJob(db) {
     await remind(db, c.id, {}, null, { automatic: true });
     sent += 1;
   }
-  if (sent) await notify({ type: 'info', title: `${sent} missing-document reminder(s) sent`, message: `Claimants of ${sent} open claim(s) were reminded of the documents still missing.`, audience: 'write:claims', link: '/operations/claim-documents' });
+  if (sent) await notify({ type: 'info', title: `${sent} missing-document reminder(s) sent`, message: `Claimants of ${sent} open claim(s) were reminded of the documents still missing.`, audience: 'write:claims', link: '/agent/claim/documents' });
   return { reminders: sent };
 }

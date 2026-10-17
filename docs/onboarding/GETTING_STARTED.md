@@ -1,19 +1,19 @@
-# Getting started with BrokerVerse
+# Getting started with BrokerVerse for TISPH
 
-Version 1.1, 04 October 2026, iorta TechNXT. Changes: the Compliance Officer role, My Work, the Help panel, the
-enterprise side menu and the masking of personal identifiers.
+Version 1.2, 11 October 2026, iorta TechNXT. Changes: the TISPH roles replace the generic broker roles; the modules
+removed from the TISPH build (reinsurance, compliance and AML, complaints, data privacy registers) are no longer
+described; two-step verification set-up by QR code.
 
-This guide is for everyone who uses BrokerVerse day to day. It explains how to sign in the first time, what you see
-after signing in, which menus your role opens and how to ask for help. The user manual
-(`docs/package/05_Delivery/BrokerVerse_User_Manual.pdf`) describes every screen in detail.
-
-For TISPH: the menus per role below are those of the generic roles (including the Compliance Officer). The TISPH
-personas are listed in `docs/TISPH/pack/TISPH_Delivery_Governance.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md));
-the TISPH edition of this guide and of the manual follows with work packages MAN-A and MAN-B.
+This guide is for everyone at Toyota Insurance Services Philippines (TISPH) who uses BrokerVerse day to day. It
+explains how to sign in the first time, what you see after signing in, which roles exist and how to ask for help. The
+TISPH user manual describes every screen and, in one chapter per role, the exact menus, access, approvals and
+segregation of duties of each role. It opens from the Help panel (F1) and is also available as Word and PDF
+(`TISPH_User_Manual.docx`, `.pdf`, downloaded from the Help panel once regenerated after the build; source `docs/TISPH/manual/`). The other TISPH
+documents are indexed in [`docs/TISPH/README.md`](../TISPH/README.md).
 
 ## 1. Signing in the first time
 
-Your System Administrator creates your user and gives you three things privately: the BrokerVerse web address, your
+TISPH IT AppSupport creates your user and gives you three things privately: the BrokerVerse web address, your
 username and a temporary password. Nobody else should see the temporary password, and nobody from support will ever
 ask you for your password.
 
@@ -33,7 +33,7 @@ system, a password must:
 
 A password expires after 90 days. When it has expired, BrokerVerse asks you to choose a new one at sign-in.
 
-After 5 wrong passwords in a row your user is locked. Ask your System Administrator to unlock it or to reset your
+After 5 wrong passwords in a row your user is locked. Ask TISPH IT AppSupport to unlock it or to reset your
 password. You are signed out after 30 minutes without activity.
 
 ### Forgotten password
@@ -43,69 +43,59 @@ the address on your user. Enter the code and choose a new password. The code is 
 
 ### Two-step verification
 
-Your System Administrator decides which roles must use two-step verification (setting `security.require_2fa_roles`;
-it is recommended for System Administrators and Accounting). Anyone can also turn it on for themselves from the
+TISPH IT AppSupport decides which roles must use two-step verification (setting `security.require_2fa_roles`;
+it is recommended for TIS IT AppSupport / Admin, Finance and CCD-Recon). Anyone can also turn it on for themselves from the
 profile menu.
 
 1. Install an authenticator app on your phone (Google Authenticator, Microsoft Authenticator or similar).
-2. When BrokerVerse shows the set-up screen, add a new account in the app and type in the key shown on the screen, or
-   open the link on your phone.
+2. When BrokerVerse shows the set-up screen, scan the QR code with the app (or add the account by typing in the key
+   shown on the screen).
 3. Enter the 6-digit code the app shows to confirm.
 4. From then on, BrokerVerse asks for the current code from the app after your password at every sign-in.
 
-If you lose your phone, ask your System Administrator to turn two-step verification off for your user. You then set
+If you lose your phone, ask TISPH IT AppSupport to turn two-step verification off for your user. You then set
 it up again at the next sign-in.
 
 ## 2. The home screen and the menu
 
-After signing in you land on the first dashboard your role may open. The menu on the left lists only the screens your
-role may use, in business order (Home, Dashboard, Operations, Accounts, Commission, Reinsurance, Compliance, Reports,
-Master, Product Configurator). Master lists its screens under headings (Organization, Insurance, Location, Employees,
-Users and Access, Finance, System, Data Privacy, Go-Live and Data). Type part of a screen name in **Search menu...**
+After signing in you land on the first screen your role may open. The menu on the left lists only the screens your
+role may use, in business order (My Work, Dashboard, Operations, Accounts, Commission, Reports, Master, Product
+Configurator). Master lists its screens under headings (for example Organization, Insurance, Location, Employees,
+Users and Access, Finance, System). Type part of a screen name in **Search menu...**
 (or press **/**) to jump to it. Your initials at the top right open the account menu (Profile, Change password,
 Two-step verification, Help, Sign out). The bell shows notifications, for example a payment waiting for verification,
 a task reminder or a claim document received.
 
-**My Work** (Operations > My Work) is where you find what is waiting for you: your open items by category (quotations,
+**My Work** is where you find what is waiting for you: your open items by category (quotations,
 renewals, premiums due, claims, approvals, missing documents), your team's items if you manage people, your tasks with
 reminders, and a calendar of what falls due. Start your day there.
 
-The menus below are those granted to each role in BrokerVerse. A user may hold more than one role and then sees the
-menus of all of them. The server checks the same permissions on every action, so a button you cannot use is either
-hidden or refused with a message.
+The roles below are those delivered for TISPH (migration `0348_tisph_roles.sql`, seed `82_tisph_roles.sql`). A user
+may hold more than one role and then sees the menus of all of them. The server checks the same permissions on every
+action, so a button you cannot use is either hidden or refused with a message. The exact menus of each role are in
+its chapter of the user manual.
 
-| Role | Menus |
+| Role | What it does |
 |---|---|
-| System Administrator (Super Admin) | Every menu, including Master (Configuration, E-mail Layout, Documents and Reports Layout, Document Numbering, Schedules, Audit Trail, all masters, User Management) |
-| Sales & Marketing (Account Executive) | Dashboard: Executive Dashboard, Sales Dashboard. Product Configurator: Dashboard, Product Templates. Operations: Home, Leads/Prospects, Clients, Quotation, Broker Slips, Placement Slips, Policy, Claims, Renewals, Open Items, Payments. Commission: Commission Dashboard. Reports: All Reports, Operational Reports |
-| Processing Team (Placement & Policy Processing) | Dashboard: Processing Dashboard, Executive Dashboard. Product Configurator: all items (Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics). Operations: all items as for Sales & Marketing. Reinsurance: Treaty Dashboard, Cession Tracking, Claims Recovery, Reconciliation, Analytics. Reports: All Reports, Operational Reports |
-| Operations (Client Servicing) | Dashboard: Executive Dashboard. Product Configurator: Dashboard, Product Templates. Operations: all items as for Sales & Marketing. Reports: All Reports, Operational Reports |
-| Claims | Dashboard: Claims Dashboard. Operations: Home, Clients, Policy, Claims. Reinsurance: Claims Recovery. Reports: All Reports, Operational Reports |
-| Accounting | Dashboard: Executive Dashboard. Operations: Open Items, Payments. Accounts: Receipts, Collections, Accounting Query, All Clients Accounting, Open Entry Matching, Open Entry Un-Matching, Disbursement, Petty Cash, Journal Voucher, Correction JV, Reversal JV, Remittance, Incentive, Period End, Tax, Bank Reconciliation. Master: Finance > Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types. Commission: Commission Dashboard, Agents/Referrer Accounts. Reinsurance: Reconciliation. Reports: All Reports, Financial Reports, Operational Reports > Remittance and Broker Commission |
-| Accounting Manager | Everything Accounting has, plus the approvals: month-end and year-end close, reopening a period, posting into a soft-closed period, bank reconciliation approval |
-| Compliance Officer (AML/CFT) | Home. Operations: Clients (with Onboard client), Policy, Claims (read). Compliance: AML Dashboard, Client Due Diligence, EDD Reviews, KYC Refresh, Screening Hits, Screening Lists, Transaction Alerts, AML Cases, AMLC Reports, AML Settings. Reports: All Reports, Operational Reports |
-
-What each role mainly does:
-
-- **Sales & Marketing** records prospects and leads, requests quotations, follows up renewals and sees its own
-  production.
-- **Processing Team** prepares broker slips and placement slips, compares insurer offers, issues and checks policies,
-  processes endorsements and maintains product templates.
-- **Operations** services clients: endorsement requests, renewals, open items, documents.
-- **Claims** registers claims, collects documents, follows up insurers and records settlements.
-- **Accounting** bills and collects premium, issues official receipts, remits to insurers, pays commission and
-  incentives, reconciles banks and prepares the month-end and year-end close and BIR reports.
-- **Accounting Manager** approves what Accounting prepares.
-- **Compliance Officer** runs the anti-money laundering programme: client risk ratings and enhanced due diligence,
-  screening hits, transaction alerts, cases and the report files filed with the AMLC.
-
-The registers of the Insurance Commission and the National Privacy Commission (licences, fit and proper, insurer
-authority, complaints, breach register) are under Compliance for the roles that hold the compliance, complaints or
-privacy permissions. Your System Administrator can tell you which you hold.
+| TIS Sales Associate | Leads, clients, quotations, placements, policies, endorsements and renewals (maker, no approval); reads claims, billing, receipting and commission |
+| TIS Sales Officer | As the Sales Associate, plus lead allocation, campaigns and approving the quotations, placement checks and renewals of another user |
+| TIS Sales Unit Head | As the Sales Officer, plus telesales incentives and approving supplier invoices; reads disbursements and payables |
+| TIS Operations Associate | Placements, policies, endorsements, renewals and claims (maker, no approval); reads leads, clients and billing |
+| TIS Operations Officer | As the Operations Associate, plus reading journal vouchers and fixed assets |
+| TIS Operations Unit Head | As the Operations Officer, plus approving the quotations, placement checks, renewals, claim decisions and supplier invoices of another user |
+| CCD-PDU (Post-Dated Cheques) | Post-dated cheque encoding, acknowledgement, deposit and cancellation (Cash Control) |
+| CCD-PDC / CCD-ADA | Post-dated cheques and auto-debit arrangements; reads billing, receipting and reconciliations (Cash Control) |
+| CCD-BP / QRPh (Receipting) | Official and acknowledgement receipts over the counter, bills payment and QRPh, posting of collections; no reversals (Cash Control) |
+| CCD-Recon (Reconciliation and Reversals) | Daily payment reconciliation, reversals and adjustments, bank and insurer statement reconciliation (Cash Control) |
+| TIS Finance & General Accounting | Disbursements, journal vouchers, payables, fixed assets, commission and remittance, period end, bank reconciliation and posting rule approvals; reads the front office |
+| TIS IT AppSupport / Admin | Users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; reads business data, enters no business transactions |
+| TIS General Manager | Front office (leads to claims) with every front-office approval and supplier invoices; reads accounting, administration and the audit trail |
+| TIS Audit (read only) | Reads the Data Migration & Go-Live workspace and the audit trail; changes nothing |
+| SUPERID (UAT only) | User acceptance testing only; includes the System Administrator. Set Inactive before go-live |
 
 **Personal identifiers.** If your role does not hold the permission to view full personal identifiers, TIN, ID numbers,
 mobile numbers, e-mail addresses, bank account numbers and birth dates show partly masked on lists, screens and
-exports (for example j***@example.ph). This is intended; ask your System Administrator if your work needs the full value.
+exports (for example j***@example.ph). This is intended; ask TISPH IT AppSupport if your work needs the full value.
 
 ## 3. Everyday tips
 

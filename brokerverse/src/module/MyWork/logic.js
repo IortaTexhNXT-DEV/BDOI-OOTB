@@ -39,7 +39,7 @@ export const PRESET_ORDER = ["system-admin", "accounting-manager", "accounting",
 export const PRESETS = {
   sales: {
     categories: ["quotes", "renewals", "receivables", "documents", "endorsements"], scope: "me",
-    agenda: ["quotes", "renewals", "receivables", "endorsements", "approvals"], action: { key: "newQuote", path: "/sales/quick-quote" },
+    agenda: ["quotes", "renewals", "receivables", "endorsements", "approvals"], action: { key: "newQuote", path: "/agent/Quotation" },
   },
   processing: {
     categories: ["rfq", "placements", "quotes", "endorsements", "renewals", "approvals", "documents"], scope: "me",
