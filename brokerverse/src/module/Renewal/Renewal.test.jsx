@@ -121,7 +121,7 @@ describe("Negotiations", () => {
     wrap(<NegotiationWorkspace />);
     fireEvent.click(await screen.findByRole("button", { name: "POL-pending-approval" }));
     fireEvent.click(await screen.findByRole("button", { name: "Approve" }));
-    const dialog = await screen.findByRole("dialog", { name: "Approve renewal terms" });
+    const dialog = await screen.findByRole("dialog", { name: "Approve Renewal Terms" });
     expect(service.decide).not.toHaveBeenCalled();
     expect(within(dialog).getByText("Liza Mendoza")).toBeInTheDocument();
     fireEvent.change(within(dialog).getByRole("textbox"), { target: { value: "Within authority" } });
