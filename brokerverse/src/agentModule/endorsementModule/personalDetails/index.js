@@ -26,6 +26,9 @@ import endorsementService from "../../../services/endorsementService";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { notifyError } from "../../../utility/dialogs";
 
+/** The client number shown to users (CL-YYYY-NNNNN), never the internal client id. */
+const clientNumberOf = (policy) => policy?.client?.clientCode || policy?.client?.generatedClientId || "";
+
 const PersonalDetails = () => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -421,9 +424,7 @@ const PersonalDetails = () => {
                   endorsementId,
                   policyId: id,
                   clientId: clientId || policydetailedlist?.clientId,
-                  clientNumber:
-                    policydetailedlist?.ClientId ||
-                    policydetailedlist?.client?.clientId,
+                  clientNumber: clientNumberOf(policydetailedlist),
                   clientName,
                   endorsementData: response.data,
                 },
@@ -509,9 +510,7 @@ const PersonalDetails = () => {
                 endorsementId,
                 policyId: id,
                 clientId: clientId || policydetailedlist?.clientId,
-                clientNumber:
-                  policydetailedlist?.ClientId ||
-                  policydetailedlist?.client?.clientId,
+                clientNumber: clientNumberOf(policydetailedlist),
                 clientName,
                 endorsementData: response.data,
               },
@@ -621,8 +620,8 @@ const PersonalDetails = () => {
     if (clientName) {
       parts.push(clientName);
     }
-    if (policydetailedlist?.ClientId) {
-      parts.push(`Client ID : ${policydetailedlist?.client?.clientCode || policydetailedlist?.client?.generatedClientId || policydetailedlist?.ClientId}`);
+    if (clientNumberOf(policydetailedlist)) {
+      parts.push(`Client ID : ${clientNumberOf(policydetailedlist)}`);
     }
 
     return parts.join(" / ") || t("endorsement.client");

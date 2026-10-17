@@ -195,7 +195,7 @@ const EndorsementDetailedView = ({ action }) => {
             {state?.clientName || endorsementData?.clientName || t("endorsement.client")}
             {/* the client code (CL-...), never the internal endorsement id */}
             {(state?.clientNumber || endorsementData?.clientCode) && (
-              <> / {t("endorsement.clientIdColon")} {state?.clientNumber || endorsementData?.clientCode}</>
+              <> / {t("endorsement.clientIdColon")} {endorsementData?.clientCode || state?.clientNumber}</>
             )}
           </div>
         </div>
