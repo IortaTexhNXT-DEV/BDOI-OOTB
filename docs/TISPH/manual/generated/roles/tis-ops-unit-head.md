@@ -27,17 +27,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Policy Servicing | Endorsements | Create and edit |
 | Policy Servicing | Policy Cancellation | Create and edit |
 | Policy Servicing > Renewals | Renewal Queue | Create and edit |
-| Policy Servicing > Renewals | Renewal Policy | Approve |
 | Policy Servicing > Renewals | Renewal Batch | Create and edit |
 | Policy Servicing > Renewals | Lock-in Review | Create and edit |
 | Policy Servicing > Renewals | Talkbot Calls | View |
 | Policy Servicing > Renewals | Negotiations | Approve |
 | Policy Servicing > Renewals | Lapse Management | Create and edit |
 | Policy Servicing | Claims | Approve |
-| Policy Servicing > Claims | Awaiting Documents | Create and edit |
-| Policy Servicing > Claims | Motor Repairs | Create and edit |
 | Accounts | Receipts | View |
-| Accounts | Policy Payments to Verify | Create and edit |
 | Accounts | Post-Dated Cheques | View |
 | Accounts | Collections | View |
 | Accounts > Remittance | Insurer Billing | View |
@@ -50,17 +46,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Reports | View |
 | Accounts > Payables | Suppliers | View |
 | Reports | All Reports | View |
-| Reports > Operational Reports | Production | View |
-| Reports > Operational Reports | Claims | View |
-| Reports > Operational Reports | Renewal | View |
-| Reports > Operational Reports | Remittance | View |
-| Reports > Operational Reports | Broker Commission | View |
-| Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Pipeline | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
-| Reports > Operational Reports | CLI Generated Report | View |
 | Reports | Report Builder | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
@@ -96,12 +81,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Clients | Create and edit | Maintain the KYC of a client: identification, signatories, beneficial owners and KYC documents |  |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies, Cover Notes and Policy Payments to Verify |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies and Cover Notes |
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Endorsements and Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Policy, Renewal Batch, Negotiations and Lapse Management |
+| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Batch, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
 | Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
@@ -109,7 +94,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Lock-in review and TFS loan status | Create and edit | Record lock-in review decisions and request lock-in changes |  |
 | Operations | Lock-in review and TFS loan status | Special | Upload the TFS account status file and set the loan status of a policy by hand |  |
-| Operations | Claims | View | See claims | Claims, Awaiting Documents and Motor Repairs |
+| Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
@@ -132,7 +117,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report and Report Builder |
+| Reports | Reports | View | Run and download reports | All Reports and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Product Configurator | Products | Approve | Approve or return product templates submitted for review (never one you submitted or last changed) |  |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist, Scheme Document Checklist, Motor Issuance Checklist and Repair Shops |

@@ -209,15 +209,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -281,15 +272,6 @@
     },
     {
      "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
      "access": "View",
@@ -346,103 +328,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -1091,15 +976,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Approve",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -1163,15 +1039,6 @@
     },
     {
      "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
      "access": "View",
@@ -1228,103 +1095,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -2079,15 +1849,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Approve",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -2147,15 +1908,6 @@
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -2252,103 +2004,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -3249,15 +2904,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -3311,39 +2957,12 @@
      ]
     },
     {
-     "section": "Policy Servicing > Claims",
-     "screen": "Awaiting Documents",
-     "path": "/agent/claim/documents",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Claims",
-     "screen": "Motor Repairs",
-     "path": "/agent/claim/motor-repairs",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Receipts",
      "path": "/accounts/receipts",
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -3413,103 +3032,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -4256,15 +3778,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -4318,39 +3831,12 @@
      ]
     },
     {
-     "section": "Policy Servicing > Claims",
-     "screen": "Awaiting Documents",
-     "path": "/agent/claim/documents",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Claims",
-     "screen": "Motor Repairs",
-     "path": "/agent/claim/motor-repairs",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Receipts",
      "path": "/accounts/receipts",
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -4447,103 +3933,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -5344,15 +4733,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Approve",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -5406,39 +4786,12 @@
      ]
     },
     {
-     "section": "Policy Servicing > Claims",
-     "screen": "Awaiting Documents",
-     "path": "/agent/claim/documents",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Claims",
-     "screen": "Motor Repairs",
-     "path": "/agent/claim/motor-repairs",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Receipts",
      "path": "/accounts/receipts",
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -5544,103 +4897,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -6426,22 +5682,6 @@
      "screen": "All Reports",
      "path": "/reports/catalogue",
      "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
-     "access": "View",
      "modules": [
       "Reports"
      ]
@@ -6553,15 +5793,6 @@
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -6685,22 +5916,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
      "access": "View",
      "modules": [
       "Reports"
@@ -6861,15 +6076,6 @@
     },
     {
      "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
      "access": "View",
@@ -7025,22 +6231,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
      "access": "View",
      "modules": [
       "Reports"
@@ -7223,15 +6413,6 @@
      "access": "Create and edit",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -7428,22 +6609,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
      "access": "View",
      "modules": [
       "Reports"
@@ -7827,15 +6992,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "View",
@@ -7886,15 +7042,6 @@
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -8215,33 +7362,8 @@
     },
     {
      "section": "Accounts",
-     "screen": "Correction JV",
-     "path": "/accounts/correctionsjv/correctionsjvdetails",
-     "access": "Create and edit",
-     "modules": [
-      "Journal vouchers"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Reversal JV",
-     "path": "/accounts/reversaljv/reversaljvdetails",
-     "access": "Create and edit",
-     "modules": [
-      "Journal vouchers"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Open Entry Matching",
      "path": "/accounts/open-entry-matching",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Accounts",
-     "screen": "Open Entry Unmatching",
-     "path": "/accounts/open-entry-unmatching",
      "access": "View",
      "modules": []
     },
@@ -8380,175 +7502,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Payables",
-     "path": "/reports/financialreports/Payables",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Journal",
-     "path": "/reports/financialreports/journal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Trial Balance",
-     "path": "/reports/financialreports/trailbalance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Income Statement",
-     "path": "/reports/financialreports/pe/income-statement",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Balance Sheet",
-     "path": "/reports/financialreports/pe/balance-sheet",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Trial Balance Movement",
-     "path": "/reports/financialreports/pe/trial-balance-ocm",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "General Ledger Detail",
-     "path": "/reports/financialreports/pe/gl-detail",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Aged Payables to Insurers",
-     "path": "/reports/financialreports/pe/aged-payables-insurers",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Month-End Close Status",
-     "path": "/reports/financialreports/pe/month-end-close-status",
      "access": "View",
      "modules": [
       "Reports"
@@ -9535,15 +8488,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "View",
@@ -9594,15 +8538,6 @@
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -9781,202 +8716,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Payables",
-     "path": "/reports/financialreports/Payables",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Journal",
-     "path": "/reports/financialreports/journal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Trial Balance",
-     "path": "/reports/financialreports/trailbalance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Income Statement",
-     "path": "/reports/financialreports/pe/income-statement",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Balance Sheet",
-     "path": "/reports/financialreports/pe/balance-sheet",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Trial Balance Movement",
-     "path": "/reports/financialreports/pe/trial-balance-ocm",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "General Ledger Detail",
-     "path": "/reports/financialreports/pe/gl-detail",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Aged Payables to Insurers",
-     "path": "/reports/financialreports/pe/aged-payables-insurers",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Month-End Close Status",
-     "path": "/reports/financialreports/pe/month-end-close-status",
      "access": "View",
      "modules": [
       "Reports"
@@ -11176,15 +9915,6 @@
     },
     {
      "section": "Policy Servicing > Renewals",
-     "screen": "Renewal Policy",
-     "path": "/agent/expired-policies",
-     "access": "Approve",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Renewals",
      "screen": "Renewal Batch",
      "path": "/agent/renewal-batch",
      "access": "Create and edit",
@@ -11238,39 +9968,12 @@
      ]
     },
     {
-     "section": "Policy Servicing > Claims",
-     "screen": "Awaiting Documents",
-     "path": "/agent/claim/documents",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
-     "section": "Policy Servicing > Claims",
-     "screen": "Motor Repairs",
-     "path": "/agent/claim/motor-repairs",
-     "access": "Create and edit",
-     "modules": [
-      "Claims"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Receipts",
      "path": "/accounts/receipts",
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Policy Payments to Verify",
-     "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
      ]
     },
     {
@@ -11582,33 +10285,8 @@
     },
     {
      "section": "Accounts",
-     "screen": "Correction JV",
-     "path": "/accounts/correctionsjv/correctionsjvdetails",
-     "access": "View",
-     "modules": [
-      "Journal vouchers"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Reversal JV",
-     "path": "/accounts/reversaljv/reversaljvdetails",
-     "access": "View",
-     "modules": [
-      "Journal vouchers"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Open Entry Matching",
      "path": "/accounts/open-entry-matching",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Accounts",
-     "screen": "Open Entry Unmatching",
-     "path": "/accounts/open-entry-unmatching",
      "access": "View",
      "modules": []
     },
@@ -11747,202 +10425,6 @@
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
-     "access": "View",
-     "modules": []
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production",
-     "path": "/reports/operationalreports/production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Claims",
-     "path": "/reports/operationalreports/claims",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal",
-     "path": "/reports/operationalreports/renewal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Remittance",
-     "path": "/reports/operationalreports/remittance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Broker Commission",
-     "path": "/reports/operationalreports/brokercommision",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Dealer Production",
-     "path": "/reports/run/dealer-production",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "APR Operation Report",
-     "path": "/reports/run/apr-operation",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Production per Line",
-     "path": "/reports/run/production-by-line",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Agent Pipeline",
-     "path": "/reports/run/agent-pipeline",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "Renewal Notice Listing",
-     "path": "/reports/run/renewal-notice-listing",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Operational Reports",
-     "screen": "CLI Generated Report",
-     "path": "/reports/run/cli-generated",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "SOA/Premium Receivable",
-     "path": "/reports/financialreports/soapremiumreceivable",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Collection Report",
-     "path": "/reports/financialreports/collectionreport",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Payables",
-     "path": "/reports/financialreports/Payables",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Journal",
-     "path": "/reports/financialreports/journal",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Trial Balance",
-     "path": "/reports/financialreports/trailbalance",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Income Statement",
-     "path": "/reports/financialreports/pe/income-statement",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Balance Sheet",
-     "path": "/reports/financialreports/pe/balance-sheet",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Trial Balance Movement",
-     "path": "/reports/financialreports/pe/trial-balance-ocm",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "General Ledger Detail",
-     "path": "/reports/financialreports/pe/gl-detail",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Aged Payables to Insurers",
-     "path": "/reports/financialreports/pe/aged-payables-insurers",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Month-End Close Status",
-     "path": "/reports/financialreports/pe/month-end-close-status",
      "access": "View",
      "modules": [
       "Reports"
@@ -14008,7 +12490,7 @@
    ]
   },
   "/agent/expired-policies": {
-   "menu": "Policy Servicing > Renewals > Renewal Policy",
+   "menu": "Policy Servicing > Renewals > Renewal Queue > Renewal Policy",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -14382,7 +12864,7 @@
    ]
   },
   "/agent/payments": {
-   "menu": "Accounts > Policy Payments to Verify",
+   "menu": "Accounts > Receipts > Policy Payments to Verify",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15370,7 +13852,7 @@
    ]
   },
   "/accounts/correctionsjv/correctionsjvdetails": {
-   "menu": "Accounts > Correction JV",
+   "menu": "Accounts > Journal Voucher > Correction JV",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -15383,7 +13865,7 @@
    ]
   },
   "/accounts/reversaljv/reversaljvdetails": {
-   "menu": "Accounts > Reversal JV",
+   "menu": "Accounts > Journal Voucher > Reversal JV",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -15409,7 +13891,7 @@
    ]
   },
   "/accounts/open-entry-unmatching": {
-   "menu": "Accounts > Open Entry Unmatching",
+   "menu": "Accounts > Open Entry Matching > Open Entry Unmatching",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -15674,7 +14156,7 @@
    ]
   },
   "/reports/operationalreports/production": {
-   "menu": "Reports > Operational Reports > Production",
+   "menu": "Reports > All Reports > Production",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15711,7 +14193,7 @@
    ]
   },
   "/reports/operationalreports/claims": {
-   "menu": "Reports > Operational Reports > Claims",
+   "menu": "Reports > All Reports > Claims",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15748,7 +14230,7 @@
    ]
   },
   "/reports/operationalreports/renewal": {
-   "menu": "Reports > Operational Reports > Renewal",
+   "menu": "Reports > All Reports > Renewal",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15785,7 +14267,7 @@
    ]
   },
   "/reports/operationalreports/remittance": {
-   "menu": "Reports > Operational Reports > Remittance",
+   "menu": "Reports > All Reports > Remittance",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15826,7 +14308,7 @@
    ]
   },
   "/reports/operationalreports/brokercommision": {
-   "menu": "Reports > Operational Reports > Broker Commission",
+   "menu": "Reports > All Reports > Broker Commission",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15867,7 +14349,7 @@
    ]
   },
   "/reports/run/dealer-production": {
-   "menu": "Reports > Operational Reports > Dealer Production",
+   "menu": "Reports > All Reports > Dealer Production",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15908,7 +14390,7 @@
    ]
   },
   "/reports/run/apr-operation": {
-   "menu": "Reports > Operational Reports > APR Operation Report",
+   "menu": "Reports > All Reports > APR Operation Report",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15949,7 +14431,7 @@
    ]
   },
   "/reports/run/production-by-line": {
-   "menu": "Reports > Operational Reports > Production per Line",
+   "menu": "Reports > All Reports > Production per Line",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15990,7 +14472,7 @@
    ]
   },
   "/reports/run/agent-pipeline": {
-   "menu": "Reports > Operational Reports > Agent Pipeline",
+   "menu": "Reports > All Reports > Agent Pipeline",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -16031,7 +14513,7 @@
    ]
   },
   "/reports/run/renewal-notice-listing": {
-   "menu": "Reports > Operational Reports > Renewal Notice Listing",
+   "menu": "Reports > All Reports > Renewal Notice Listing",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -16072,7 +14554,7 @@
    ]
   },
   "/reports/run/cli-generated": {
-   "menu": "Reports > Operational Reports > CLI Generated Report",
+   "menu": "Reports > All Reports > CLI Generated Report",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -16113,7 +14595,7 @@
    ]
   },
   "/reports/financialreports/soapremiumreceivable": {
-   "menu": "Reports > Financial Reports > SOA/Premium Receivable",
+   "menu": "Reports > All Reports > SOA/Premium Receivable",
    "roles": [
     {
      "role": "CCD-PDU (Post-Dated Cheques)",
@@ -16146,7 +14628,7 @@
    ]
   },
   "/reports/financialreports/collectionreport": {
-   "menu": "Reports > Financial Reports > Collection Report",
+   "menu": "Reports > All Reports > Collection Report",
    "roles": [
     {
      "role": "CCD-PDU (Post-Dated Cheques)",
@@ -16179,7 +14661,7 @@
    ]
   },
   "/reports/financialreports/Payables": {
-   "menu": "Reports > Financial Reports > Payables",
+   "menu": "Reports > All Reports > Payables",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16196,7 +14678,7 @@
    ]
   },
   "/reports/financialreports/journal": {
-   "menu": "Reports > Financial Reports > Journal",
+   "menu": "Reports > All Reports > Journal",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16213,7 +14695,7 @@
    ]
   },
   "/reports/financialreports/trailbalance": {
-   "menu": "Reports > Financial Reports > Trial Balance",
+   "menu": "Reports > All Reports > Trial Balance",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16230,7 +14712,7 @@
    ]
   },
   "/reports/financialreports/pe/income-statement": {
-   "menu": "Reports > Financial Reports > Income Statement",
+   "menu": "Reports > All Reports > Income Statement",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16247,7 +14729,7 @@
    ]
   },
   "/reports/financialreports/pe/balance-sheet": {
-   "menu": "Reports > Financial Reports > Balance Sheet",
+   "menu": "Reports > All Reports > Balance Sheet",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16264,7 +14746,7 @@
    ]
   },
   "/reports/financialreports/pe/trial-balance-ocm": {
-   "menu": "Reports > Financial Reports > Trial Balance Movement",
+   "menu": "Reports > All Reports > Trial Balance Movement",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16281,7 +14763,7 @@
    ]
   },
   "/reports/financialreports/pe/gl-detail": {
-   "menu": "Reports > Financial Reports > General Ledger Detail",
+   "menu": "Reports > All Reports > General Ledger Detail",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16298,7 +14780,7 @@
    ]
   },
   "/reports/financialreports/pe/aged-payables-insurers": {
-   "menu": "Reports > Financial Reports > Aged Payables to Insurers",
+   "menu": "Reports > All Reports > Aged Payables to Insurers",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -16315,7 +14797,7 @@
    ]
   },
   "/reports/financialreports/pe/month-end-close-status": {
-   "menu": "Reports > Financial Reports > Month-End Close Status",
+   "menu": "Reports > All Reports > Month-End Close Status",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",

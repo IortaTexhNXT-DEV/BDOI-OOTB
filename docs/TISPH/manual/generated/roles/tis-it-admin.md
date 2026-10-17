@@ -20,14 +20,12 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Policy Servicing | Endorsements | View |
 | Policy Servicing | Policy Cancellation | View |
 | Policy Servicing > Renewals | Renewal Queue | View |
-| Policy Servicing > Renewals | Renewal Policy | View |
 | Policy Servicing > Renewals | Renewal Batch | View |
 | Policy Servicing > Renewals | Lock-in Review | View |
 | Policy Servicing > Renewals | Negotiations | View |
 | Policy Servicing > Renewals | Lapse Management | View |
 | Policy Servicing | Claims | View |
 | Accounts | Receipts | View |
-| Accounts | Policy Payments to Verify | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts | Collections | View |
 | Accounts > Remittance | Insurer Billing | View |
@@ -48,28 +46,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Payables | Supplier 2307 | View |
 | Accounts | Journal Voucher | View |
 | Reports | All Reports | View |
-| Reports > Operational Reports | Production | View |
-| Reports > Operational Reports | Claims | View |
-| Reports > Operational Reports | Renewal | View |
-| Reports > Operational Reports | Remittance | View |
-| Reports > Operational Reports | Broker Commission | View |
-| Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Pipeline | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
-| Reports > Operational Reports | CLI Generated Report | View |
-| Reports > Financial Reports | SOA/Premium Receivable | View |
-| Reports > Financial Reports | Collection Report | View |
-| Reports > Financial Reports | Payables | View |
-| Reports > Financial Reports | Journal | View |
-| Reports > Financial Reports | Trial Balance | View |
-| Reports > Financial Reports | Income Statement | View |
-| Reports > Financial Reports | Balance Sheet | View |
-| Reports > Financial Reports | Trial Balance Movement | View |
-| Reports > Financial Reports | General Ledger Detail | View |
-| Reports > Financial Reports | Aged Payables to Insurers | View |
-| Reports > Financial Reports | Month-End Close Status | View |
 | Product Configurator | Dashboard | Create and edit |
 | Product Configurator | Product Templates | Create and edit |
 | Product Configurator | Coverage Builder | Create and edit |
@@ -149,9 +125,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Scheme Master | Approve | Approve or return schemes; suspend, resume and withdraw them (never one you made or changed) |  |
 | Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Operations | Clients | View | See clients | Clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies, Cover Notes and Policy Payments to Verify |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies and Cover Notes |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Endorsements and Policy Cancellation |
-| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Policy, Renewal Batch, Negotiations and Lapse Management |
+| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Batch, Negotiations and Lapse Management |
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Claims | View | See claims | Claims |
 | Accounts | Receipts | View | See receipts | Receipts |
@@ -166,7 +142,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | All Reports |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager and Market Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
 | Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Endorsement Types, Claim Document Checklist, Scheme Document Checklist, Motor Issuance Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-Mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-Mail Outbox |

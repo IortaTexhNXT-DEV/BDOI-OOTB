@@ -20,14 +20,12 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Policy Servicing | Endorsements | View |
 | Policy Servicing | Policy Cancellation | View |
 | Policy Servicing > Renewals | Renewal Queue | View |
-| Policy Servicing > Renewals | Renewal Policy | View |
 | Policy Servicing > Renewals | Renewal Batch | View |
 | Policy Servicing > Renewals | Lock-in Review | View |
 | Policy Servicing > Renewals | Negotiations | View |
 | Policy Servicing > Renewals | Lapse Management | View |
 | Policy Servicing | Claims | View |
 | Accounts | Receipts | View |
-| Accounts | Policy Payments to Verify | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
@@ -63,10 +61,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Payables | Suppliers | Create and edit |
 | Accounts > Payables | Supplier 2307 | View |
 | Accounts | Journal Voucher | Create and edit |
-| Accounts | Correction JV | Create and edit |
-| Accounts | Reversal JV | Create and edit |
 | Accounts | Open Entry Matching | View |
-| Accounts | Open Entry Unmatching | View |
 | Accounts | Accounting Query | View |
 | Accounts | All Clients Accounting | View |
 | Accounts | SAP GL Export | Create and edit |
@@ -83,25 +78,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Tax | Sales Invoices | Create and edit |
 | Accounts > Tax | CAS Books and Documents | Approve |
 | Reports | All Reports | View |
-| Reports > Operational Reports | Remittance | View |
-| Reports > Operational Reports | Broker Commission | View |
-| Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Pipeline | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
-| Reports > Operational Reports | CLI Generated Report | View |
-| Reports > Financial Reports | SOA/Premium Receivable | View |
-| Reports > Financial Reports | Collection Report | View |
-| Reports > Financial Reports | Payables | View |
-| Reports > Financial Reports | Journal | View |
-| Reports > Financial Reports | Trial Balance | View |
-| Reports > Financial Reports | Income Statement | View |
-| Reports > Financial Reports | Balance Sheet | View |
-| Reports > Financial Reports | Trial Balance Movement | View |
-| Reports > Financial Reports | General Ledger Detail | View |
-| Reports > Financial Reports | Aged Payables to Insurers | View |
-| Reports > Financial Reports | Month-End Close Status | View |
 | Reports | Report Builder | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
@@ -136,9 +112,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Scheme Master | View | See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export | Scheme Master |
 | Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Operations | Clients | View | See clients | Clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies, Cover Notes and Policy Payments to Verify |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies and Cover Notes |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Endorsements and Policy Cancellation |
-| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Policy, Renewal Batch, Negotiations and Lapse Management |
+| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Batch, Negotiations and Lapse Management |
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
@@ -156,7 +132,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Fixed assets | Create and edit | Register assets and run the monthly depreciation |  |
-| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, Correction JV, Reversal JV, SAP GL Export and Financial Statement Versions |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export and Financial Statement Versions |
 | Accounts | Journal vouchers | Create and edit | Enter, correct and reverse journal vouchers; run the SAP GL export |  |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Insurer Billing, Remittances, Approvals, Insurer Payments, Reconciliation, Exceptions, Held Policies, Settlement and Setup |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
@@ -177,7 +153,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
+| Reports | Reports | View | Run and download reports | All Reports and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |

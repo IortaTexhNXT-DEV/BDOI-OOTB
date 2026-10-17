@@ -7,8 +7,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Reports | All Reports | View |
-| Reports > Financial Reports | SOA/Premium Receivable | View |
-| Reports > Financial Reports | Collection Report | View |
 
 ## What you can view, change and approve {#ccd-pdu-post-dated-cheques-access}
 
@@ -18,7 +16,7 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Post-dated cheques | Create and edit | Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques |  |
-| Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
+| Reports | Reports | View | Run and download reports | All Reports |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 

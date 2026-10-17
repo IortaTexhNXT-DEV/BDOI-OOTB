@@ -27,17 +27,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Policy Servicing | Endorsements | Create and edit |
 | Policy Servicing | Policy Cancellation | Create and edit |
 | Policy Servicing > Renewals | Renewal Queue | Create and edit |
-| Policy Servicing > Renewals | Renewal Policy | Approve |
 | Policy Servicing > Renewals | Renewal Batch | Create and edit |
 | Policy Servicing > Renewals | Lock-in Review | View |
 | Policy Servicing > Renewals | Talkbot Calls | Create and edit |
 | Policy Servicing > Renewals | Negotiations | Approve |
 | Policy Servicing > Renewals | Lapse Management | Create and edit |
 | Policy Servicing | Claims | Approve |
-| Policy Servicing > Claims | Awaiting Documents | Create and edit |
-| Policy Servicing > Claims | Motor Repairs | Create and edit |
 | Accounts | Receipts | View |
-| Accounts | Policy Payments to Verify | Create and edit |
 | Accounts | Post-Dated Cheques | View |
 | Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
@@ -72,10 +68,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Payables | Suppliers | View |
 | Accounts > Payables | Supplier 2307 | View |
 | Accounts | Journal Voucher | View |
-| Accounts | Correction JV | View |
-| Accounts | Reversal JV | View |
 | Accounts | Open Entry Matching | View |
-| Accounts | Open Entry Unmatching | View |
 | Accounts | Accounting Query | View |
 | Accounts | All Clients Accounting | View |
 | Accounts | SAP GL Export | View |
@@ -92,28 +85,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Tax | Sales Invoices | View |
 | Accounts > Tax | CAS Books and Documents | View |
 | Reports | All Reports | View |
-| Reports > Operational Reports | Production | View |
-| Reports > Operational Reports | Claims | View |
-| Reports > Operational Reports | Renewal | View |
-| Reports > Operational Reports | Remittance | View |
-| Reports > Operational Reports | Broker Commission | View |
-| Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Pipeline | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
-| Reports > Operational Reports | CLI Generated Report | View |
-| Reports > Financial Reports | SOA/Premium Receivable | View |
-| Reports > Financial Reports | Collection Report | View |
-| Reports > Financial Reports | Payables | View |
-| Reports > Financial Reports | Journal | View |
-| Reports > Financial Reports | Trial Balance | View |
-| Reports > Financial Reports | Income Statement | View |
-| Reports > Financial Reports | Balance Sheet | View |
-| Reports > Financial Reports | Trial Balance Movement | View |
-| Reports > Financial Reports | General Ledger Detail | View |
-| Reports > Financial Reports | Aged Payables to Insurers | View |
-| Reports > Financial Reports | Month-End Close Status | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 | Master > Insurance | Distribution Channels | View |
@@ -164,12 +135,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Sales activities | Create and edit | Log, change and cancel calls, meetings, e-mails and visits |  |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Clients | Create and edit | Create and edit clients |  |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies, Cover Notes and Policy Payments to Verify |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policies and Cover Notes |
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Endorsements and Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Policy, Renewal Batch, Negotiations and Lapse Management |
+| Operations | Renewals | View | See renewals | Renewal Queue, Renewal Batch, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
 | Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
@@ -177,7 +148,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Lock-in review and TFS loan status | Approve | Approve or return Release, Not for renewal and lock-in changes (never one you requested) |  |
-| Operations | Claims | View | See claims | Claims, Awaiting Documents and Motor Repairs |
+| Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
@@ -194,7 +165,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
-| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, Correction JV, Reversal JV and SAP GL Export |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher and SAP GL Export |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Insurer Billing, Remittances, Approvals, Insurer Payments, Reconciliation, Exceptions, Held Policies and Settlement |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject an insurer billing statement raised or submitted by another user |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
@@ -208,7 +179,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Approve | Approve or return a commission rule submitted by another user |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | All Reports |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Product Configurator | Products | Approve | Approve or return product templates submitted for review (never one you submitted or last changed) |  |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |

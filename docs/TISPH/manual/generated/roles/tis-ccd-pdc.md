@@ -6,7 +6,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Accounts | Receipts | View |
-| Accounts | Policy Payments to Verify | View |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Accounts | Collections | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
@@ -21,8 +20,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Exceptions | View |
 | Accounts > Remittance | Held Policies | View |
 | Reports | All Reports | View |
-| Reports > Financial Reports | SOA/Premium Receivable | View |
-| Reports > Financial Reports | Collection Report | View |
 
 ## What you can view, change and approve {#ccd-pdc-ccd-ada-access}
 
@@ -37,7 +34,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held Policies |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
-| Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
+| Reports | Reports | View | Run and download reports | All Reports |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 
